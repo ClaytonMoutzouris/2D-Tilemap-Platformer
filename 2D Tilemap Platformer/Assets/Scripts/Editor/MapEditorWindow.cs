@@ -14,8 +14,6 @@ public class MapEditorWindow : EditorWindow
     int mapsizeY = 10;
     GameGrid gameGrid;
 
-    List<RoomData> rooms = new List<RoomData>();
-
     public void OnEnable()
     {
         gameGrid = GameObject.FindGameObjectWithTag("GameGrid").GetComponent<GameGrid>();
@@ -52,6 +50,7 @@ public class MapEditorWindow : EditorWindow
     //Clears the map
     public void NewMap()
     {
+        RoomDatabase.reload = true;
         gameGrid.ClearTiles();
         mapData = new MapData(mapsizeX, mapsizeY);
         gameGrid.mapSizeX = mapsizeX * GambleConstants.RoomSizeX;
@@ -64,37 +63,20 @@ public class MapEditorWindow : EditorWindow
     public void GenerateMap()
     {
         NewMap();
-        rooms = new List<RoomData>();
-        LoadRooms();
+        MapLayout layout = MapLayoutDatabase.GetRandomMapLayout();
+        mapsizeX = layout.mapSizeX;
+        mapsizeY = layout.mapSizeY;
 
-
+        Debug.Log("size X: " + mapsizeX + ", size y: " + mapsizeY);
         for (int x = 0; x < mapsizeX; x++)
         {
             for (int y = 0; y < mapsizeY; y++)
             {
-                mapData.SetRoom(RoomData.DeepCopy(rooms[Random.Range(0, rooms.Count)]), x, y);
+                mapData.SetRoom(RoomDatabase.GetRoom(layout.layout[x,y], layout.generalLayout[x,y]), x, y);
             }
         }
 
         gameGrid.SetMap(mapData);
     }
 
-    //Loads rooms into memory for parsing
-    public void LoadRooms()
-    {
-        foreach (string room in Directory.GetFiles(Path.Combine(Application.streamingAssetsPath, "GameData", "Rooms"), "*.room"))
-        {
-            if (File.Exists(room))
-            {
-                string loadJson = File.ReadAllText(room);
-
-                RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
-                rooms.Add(loadData);
-            }
-            else
-            {
-                Debug.LogError("Room file not found: " + room);
-            }
-        }
-    }
 }

@@ -5,8 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AttackData", menuName = "ScriptableObjects/Attacks/AttackData")]
 public class AttackData : ScriptableObject
 {
-    public Attack baseAttack;
+    //This essentially just holds a prefab in it, not sure what other info can be here.
+    public Attack attack;
 
-    public float attackSpeed;
-    public Color color;
 }

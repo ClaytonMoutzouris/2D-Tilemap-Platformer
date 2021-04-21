@@ -31,6 +31,8 @@ public class PhysicsBody2D : MonoBehaviour
         public bool canGrabLedge;
         public Vector3 ledgeGrabPosition;
         public Vector2[] rays = new Vector2[4];
+        public bool onLadder;
+        public Vector3 ladderOffset = Vector3.zero;
 
 		public bool hasCollision()
 		{
@@ -40,9 +42,11 @@ public class PhysicsBody2D : MonoBehaviour
 
 		public void reset()
 		{
-			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = false;
+			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = false;
 			slopeAngle = 0f;
             ledgeGrabPosition = Vector3.zero;
+            ladderOffset = Vector3.zero;
+
             Vector2[] rays = new Vector2[4];
 
     }
@@ -99,11 +103,13 @@ public class PhysicsBody2D : MonoBehaviour
 	/// </summary>
 	public LayerMask triggerMask = 0;
 
-	/// <summary>
-	/// mask with all layers that should act as one-way platforms. Note that one-way platforms should always be EdgeCollider2Ds. This is because it does not support being
-	/// updated anytime outside of the inspector for now.
-	/// </summary>
-	[SerializeField]
+    public LayerMask ladderMask = 0;
+
+    /// <summary>
+    /// mask with all layers that should act as one-way platforms. Note that one-way platforms should always be EdgeCollider2Ds. This is because it does not support being
+    /// updated anytime outside of the inspector for now.
+    /// </summary>
+    [SerializeField]
 	LayerMask oneWayPlatformMask = 0;
 
 	/// <summary>
@@ -210,21 +216,25 @@ public class PhysicsBody2D : MonoBehaviour
 	{
 		if( onTriggerEnterEvent != null )
 			onTriggerEnterEvent( col );
-	}
+
+    }
 
 
 	public void OnTriggerStay2D( Collider2D col )
 	{
 		if( onTriggerStayEvent != null )
 			onTriggerStayEvent( col );
-	}
 
 
-	public void OnTriggerExit2D( Collider2D col )
+    }
+
+
+    public void OnTriggerExit2D( Collider2D col )
 	{
 		if( onTriggerExitEvent != null )
 			onTriggerExitEvent( col );
-	}
+
+    }
 
 	#endregion
 
@@ -269,8 +279,10 @@ public class PhysicsBody2D : MonoBehaviour
 		if( deltaMovement.y != 0f )
 			moveVertically( ref deltaMovement );
 
-		// move then update our state
-		deltaMovement.z = 0;
+
+        checkLadder(deltaMovement);
+        // move then update our state
+        deltaMovement.z = 0;
 		transform.Translate( deltaMovement, Space.World );
 
 		// only calculate velocity if we have a non-zero deltaTime
@@ -384,7 +396,6 @@ public class PhysicsBody2D : MonoBehaviour
 
 			if( _raycastHit )
 			{
-
                 DrawRay(ray, rayDirection * (rayDistance+1), Color.red);
 
                 if (i == totalHorizontalRays-1)
@@ -395,11 +406,15 @@ public class PhysicsBody2D : MonoBehaviour
                 if (i == totalHorizontalRays-2)
                 {
 
-                    grabRayTwo = true;
                 //_raycastHit.point
                     Tilemap map = _raycastHit.collider.GetComponent<Tilemap>();
-                    //TileBase tile = map.GetTile(map.layoutGrid.WorldToCell(_raycastHit.point));
-                    collisionState.ledgeGrabPosition = map.layoutGrid.WorldToCell(_raycastHit.point);
+                    if(map != null)
+                    {
+                        grabRayTwo = true;
+                        //TileBase tile = map.GetTile(map.layoutGrid.WorldToCell(_raycastHit.point));
+                        collisionState.ledgeGrabPosition = map.layoutGrid.WorldToCell(_raycastHit.point);
+                    }
+
                 }
 
                 /*
@@ -447,7 +462,6 @@ public class PhysicsBody2D : MonoBehaviour
         if(!grabRayOne && grabRayTwo)
         {
                 collisionState.canGrabLedge = true;
-            Debug.Log("ledge grab position " + collisionState.ledgeGrabPosition);
         }
 	}
 
@@ -514,6 +528,33 @@ public class PhysicsBody2D : MonoBehaviour
 		return true;
 	}
 
+    void checkLadder(Vector3 deltaMovement )
+	{
+        //This probably has a bunch of unneccesary stuff, but its actually working for now so this is what im going with
+
+		var isGoingUp = deltaMovement.y < 0;
+		var rayDistance = Mathf.Abs( deltaMovement.y ) + _skinWidth;
+		var rayDirection = isGoingUp ? Vector2.up : -Vector2.up;
+		var initialRayOrigin = isGoingUp ? _raycastOrigins.topLeft : _raycastOrigins.bottomLeft;
+
+		initialRayOrigin.x += deltaMovement.x;
+
+		var ray = new Vector2( initialRayOrigin.x + _horizontalDistanceBetweenRays*totalVerticalRays/2, initialRayOrigin.y );
+
+		DrawRay( ray, rayDirection * rayDistance*10, Color.yellow );
+		_raycastHit = Physics2D.Raycast( ray, rayDirection, rayDistance, ladderMask );
+
+		if( _raycastHit )
+		{
+            Tilemap map = _raycastHit.collider.GetComponent<Tilemap>();
+            if (map != null)
+            {
+                //TileBase tile = map.GetTile(map.layoutGrid.WorldToCell(_raycastHit.point));
+                collisionState.ladderOffset = map.layoutGrid.WorldToCell(_raycastHit.point) + Vector3.right*0.5f;
+                collisionState.onLadder = true;
+            }
+        }
+	}
 
 	void moveVertically( ref Vector3 deltaMovement )
 	{

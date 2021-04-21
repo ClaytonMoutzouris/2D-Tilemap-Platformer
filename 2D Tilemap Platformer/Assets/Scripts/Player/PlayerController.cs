@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public enum PlayerMovementState { Idle, Walking, Jumping, Falling, GrabLedge };
+public enum PlayerMovementState { Idle, Walking, Jumping, Falling, GrabLedge, Charge, Attacking, ClimbingLadder };
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Entity
 {
 	// movement config
 	public float gravity = -25f;
@@ -12,26 +13,27 @@ public class PlayerController : MonoBehaviour
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
 
+    public Vector3 ladderClimbPosition;
     public Vector3 ledgeGrabPosition;
     public Vector3 ledgeGrabOffset = new Vector3(0.3f, 0.6f, 0);
+
+    public bool IgnoreGravity = false;
 
     public PlayerMovementState movementState = PlayerMovementState.Idle;
 
 	[HideInInspector]
 	private float normalizedHorizontalSpeed = 0;
+    private float normalizedVerticalSpeed = 0;
 
-	private PhysicsBody2D _controller;
-	public Animator _animator;
-	private RaycastHit2D _lastControllerColliderHit;
-	public Vector3 _velocity;
-    public AttackManager _attackManager;
+    private PhysicsBody2D _controller;
+    public Vector3 _velocity;
+    public PlayerAttackManager _attackManager;
 
-
-	void Awake()
+    protected override void Awake()
 	{
-		_animator = GetComponent<Animator>();
-		_controller = GetComponent<PhysicsBody2D>();
-        _attackManager = GetComponent<AttackManager>();
+        base.Awake();
+        _controller = GetComponent<PhysicsBody2D>();
+        _attackManager = GetComponent<PlayerAttackManager>();
 
         // listen to some events for illustration purposes
         _controller.onControllerCollidedEvent += onControllerCollider;
@@ -55,7 +57,8 @@ public class PlayerController : MonoBehaviour
 
 	void onTriggerEnterEvent( Collider2D col )
 	{
-		Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
+		//Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
+
 	}
 
 
@@ -69,7 +72,7 @@ public class PlayerController : MonoBehaviour
     void AttemptLedgeGrab()
     {
 
-        if(!_controller.isGrounded && !_attackManager.attacking && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
+        if(!_controller.isGrounded && !_attackManager.IsAttacking() && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
         {
             movementState = PlayerMovementState.GrabLedge;
             if(_controller.collisionState.right)
@@ -85,13 +88,29 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    void AttemptClimbLadder()
+    {
+        Debug.Log("Attempt Ladder");
+
+        if (!_attackManager.IsAttacking())
+        {
+            movementState = PlayerMovementState.ClimbingLadder;
+
+            ladderClimbPosition = _controller.collisionState.ladderOffset;
+
+            Debug.Log("Ladder Climb posititon " + ladderClimbPosition);
+        }
+
+    }
+
 
     // the Update loop contains a very simple example of moving the character around and controlling the animation
     void Update()
 	{
 
         normalizedHorizontalSpeed = 0;
-
+        normalizedVerticalSpeed = 0;
+        IgnoreGravity = false;
 
         switch (movementState)
         {
@@ -110,21 +129,37 @@ public class PlayerController : MonoBehaviour
             case PlayerMovementState.GrabLedge:
                 GrabLedge();
                 break;
+            case PlayerMovementState.ClimbingLadder:
+                Climbing();
+                break;
+            case PlayerMovementState.Charge:
+                Charge();
+                break;
+            case PlayerMovementState.Attacking:
+
+                break;
         }
 
-        if (Input.GetKey(KeyCode.Space) && movementState != PlayerMovementState.GrabLedge)
+        if (Input.GetKeyDown(KeyCode.S)) {
+            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
+
+            _attackManager.SwapWeaponUp();
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && movementState != PlayerMovementState.GrabLedge)
         {
-            int randomAttack = Random.Range(0, _attackManager.attacks.Count);
-            _attackManager.ActivateAttack(randomAttack);
+            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
+            
+            _attackManager.ActivateWeaponAttack();
 
         }
 
 
         //Set animator state
-        if (_attackManager.attacking)
+        if (_attackManager.IsAttacking())
         {
-            _animator.Play(Animator.StringToHash("DEFAULT_ATTACK"));
-            _animator.speed = _attackManager.activeAttack.attackData.attackSpeed;
+            //attacking overrides other things
         }
         else
         {
@@ -148,7 +183,9 @@ public class PlayerController : MonoBehaviour
                     break;
                 case PlayerMovementState.GrabLedge:
                     _animator.Play(Animator.StringToHash("Idle"));
-
+                    break;
+                case PlayerMovementState.ClimbingLadder:
+                    _animator.Play(Animator.StringToHash("Idle"));
                     break;
             }
         }
@@ -157,10 +194,14 @@ public class PlayerController : MonoBehaviour
 
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-		_velocity.x = Mathf.Lerp( _velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor );
+        if(movementState != PlayerMovementState.Charge && movementState != PlayerMovementState.Attacking)
+        {
+            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
+        }
 
-		// apply gravity before moving
-		_velocity.y += gravity * Time.deltaTime;
+        // apply gravity before moving
+        if(!IgnoreGravity)
+            _velocity.y += gravity * Time.deltaTime;
 
         if (movementState == PlayerMovementState.GrabLedge)
         {
@@ -172,6 +213,53 @@ public class PlayerController : MonoBehaviour
 		// grab our current _velocity to use as a base for all calculations
 		_velocity = _controller.velocity;
 	}
+
+    private void Climbing()
+    {
+        _controller.transform.position = new Vector2(ladderClimbPosition.x, _controller.transform.position.y);
+        IgnoreGravity = true;
+        
+        //_velocity = Vector3.zero;
+
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            normalizedVerticalSpeed = 1;
+
+        }
+        else if (Input.GetKey(KeyCode.DownArrow))
+        {
+            normalizedVerticalSpeed = -1;
+        }
+
+        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * runSpeed, Time.deltaTime * groundDamping);
+
+        if (Input.GetKeyDown(KeyCode.J) && Input.GetKey(KeyCode.DownArrow))
+        {
+            movementState = PlayerMovementState.Jumping;
+
+            return;
+        } else if (Input.GetKeyDown(KeyCode.J))
+        {
+            Jump();
+            return;
+        }
+
+
+
+        if (!_controller.collisionState.onLadder)
+        {
+            movementState = PlayerMovementState.Idle;
+        }
+
+
+
+    }
+
+    private void Charge()
+    {
+        //normalizedHorizontalSpeed = GetDirection()*2;
+        //_controller.
+    }
 
     //process the character movement when Idle
     void Idle()
@@ -205,12 +293,17 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        if (Input.GetKey(KeyCode.UpArrow) && _controller.collisionState.onLadder)
+        {
+            AttemptClimbLadder();
+            //return;
+        }
+
         // we can only jump whilst grounded or grabbing a ledge
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
-            movementState = PlayerMovementState.Jumping;
 
+                Jump();
 
         }
 
@@ -263,14 +356,16 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        if (Input.GetKey(KeyCode.UpArrow) && _controller.collisionState.onLadder)
+        {
+            AttemptClimbLadder();
+            //return;
+        }
 
         // we can only jump whilst grounded or grabbing a ledge
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
-            movementState = PlayerMovementState.Jumping;
-
-
+                Jump();
         }
 
         // if holding down bump up our movement amount and turn off one way platform detection for a frame.
@@ -286,11 +381,15 @@ public class PlayerController : MonoBehaviour
 
     void Jumping()
     {
-        if (_controller.isGrounded && !_controller.collisionState.wasGroundedLastFrame)
+        if (_controller.isGrounded && (!_controller.collisionState.wasGroundedLastFrame || _velocity.y <= 0))
             movementState = PlayerMovementState.Idle;
 
         //_animator.Play(Animator.StringToHash("Jump"));
 
+        if (!Input.GetKey(KeyCode.UpArrow) && _velocity.y > 0.0f)
+        {
+            _velocity.y = Mathf.Min(_velocity.y, Mathf.Sqrt(jumpHeight * -gravity));
+        }
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
@@ -309,6 +408,10 @@ public class PlayerController : MonoBehaviour
 
         AttemptLedgeGrab();
 
+        if(Input.GetKey(KeyCode.UpArrow) && _controller.collisionState.onLadder)
+        {
+            AttemptClimbLadder();
+        }
         /*
         // we can only jump whilst grounded or grabbing a ledge
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -346,8 +449,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
-            movementState = PlayerMovementState.Jumping;
+            Jump();
 
         }
 
@@ -357,5 +459,23 @@ public class PlayerController : MonoBehaviour
             movementState = PlayerMovementState.Jumping;
 
         }
+    }
+
+    public void Jump()
+    {
+        if(movementState == PlayerMovementState.Jumping)
+        {
+            //Can't jump while jumping or in the air
+            return;
+        }
+
+        _velocity.y = Mathf.Sqrt(2*jumpHeight * -gravity);
+        movementState = PlayerMovementState.Jumping;
+
+    }
+    
+    public int GetDirection()
+    {
+        return 1 * (int)Mathf.Sign(transform.localScale.x);
     }
 }

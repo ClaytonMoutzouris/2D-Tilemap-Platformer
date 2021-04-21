@@ -87,7 +87,6 @@ public class GameGrid : MonoBehaviour
             {
                 if (tileAsset[i].name == tile.TileID)
                 {
-                    Debug.Log("Setting Tile: " + tile.LocalPlace);
                     tilemaps[mapID].SetTile(tile.LocalPlace, tileAsset[i]);
                     i = tileAsset.Length;
                 }
@@ -110,7 +109,6 @@ public class GameGrid : MonoBehaviour
                 {
                     if (tileAsset[i].name == tile.TileID)
                     {
-                        Debug.Log("Setting Tile: " + tile.LocalPlace);
                         //Careful, these 10s should not be hardcoded
                         Vector3Int tileMapPos = new Vector3Int(tile.LocalPlace.x + GambleConstants.RoomSizeX * x, tile.LocalPlace.y + GambleConstants.RoomSizeY * y, tile.LocalPlace.z);
                         tilemaps[layerData.layerIndex].SetTile(tileMapPos, tileAsset[i]);

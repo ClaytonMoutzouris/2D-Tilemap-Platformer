@@ -9,11 +9,10 @@ public class TilemapParallax : MonoBehaviour
     [SerializeField] float scrollSpeed = 0.3f;
     [SerializeField] GameObject viewTarget;
 
-    Tilemap tilemap;
     // Start is called before the first frame update
     void Start()
     {
-        tilemap = GetComponent<Tilemap>();
+
     }
 
     // Update is called once per frame
@@ -22,7 +21,7 @@ public class TilemapParallax : MonoBehaviour
         float newXPos = viewTarget.transform.position.x * scrollSpeed;
         float newYPos = viewTarget.transform.position.y * scrollSpeed;
 
-        tilemap.transform.position = new Vector3(newXPos, newYPos, tilemap.transform.position.z);
+        transform.position = new Vector3(newXPos, newYPos, transform.position.z);
         
     }
 }

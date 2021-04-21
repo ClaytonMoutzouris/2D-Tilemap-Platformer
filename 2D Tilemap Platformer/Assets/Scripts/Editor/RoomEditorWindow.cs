@@ -8,11 +8,13 @@ public class RoomEditorWindow : EditorWindow
 {
     string roomName = "Room1";
     WorldType worldType = WorldType.Forest;
+    RoomGeneralType generalType = RoomGeneralType.Underground;
+
     RoomData roomData = new RoomData();
     bool OpenTop = false;
     bool OpenBottom = false;
-    bool OpenLeft = false;
-    bool OpenRight = false;
+    bool OpenEast = false;
+    bool OpenWest = false;
     GameGrid gameGrid;
 
     public void OnEnable()
@@ -32,14 +34,16 @@ public class RoomEditorWindow : EditorWindow
         GUILayout.Label("Base Settings", EditorStyles.boldLabel);
         roomName = EditorGUILayout.TextField("Room Name", roomName);
         string[] worldTypeOptions = System.Enum.GetNames(typeof(WorldType));
+        string[] roomTypeOptions = System.Enum.GetNames(typeof(RoomGeneralType));
 
         worldType = (WorldType)EditorGUILayout.Popup("World Type", (int)worldType, worldTypeOptions);
+        generalType = (RoomGeneralType)EditorGUILayout.Popup("World Type", (int)generalType, roomTypeOptions);
 
 
         OpenTop = EditorGUILayout.Toggle("Top Opening", OpenTop);
         OpenBottom = EditorGUILayout.Toggle("Bottom Opening", OpenBottom);
-        OpenLeft = EditorGUILayout.Toggle("Left Opening", OpenLeft);
-        OpenRight = EditorGUILayout.Toggle("Right Opening", OpenRight);
+        OpenEast = EditorGUILayout.Toggle("East Opening", OpenEast);
+        OpenWest = EditorGUILayout.Toggle("West Opening", OpenWest);
 
 
         if (GUILayout.Button("New Room"))
@@ -62,6 +66,7 @@ public class RoomEditorWindow : EditorWindow
             if (path.Length != 0)
             {
                 SaveRoom(path);
+                //RoomDatabase.reload = true;
             }
         }
 
@@ -78,10 +83,11 @@ public class RoomEditorWindow : EditorWindow
             layerData.layerIndex = i;
             layerData.tiles = gameGrid.GetWorldTiles(i);
             saveData.mapLayers.Add(layerData);
+            saveData.generalType = generalType;
             saveData.openings[0] = OpenTop;
             saveData.openings[1] = OpenBottom;
-            saveData.openings[2] = OpenLeft;
-            saveData.openings[3] = OpenRight;
+            saveData.openings[2] = OpenEast;
+            saveData.openings[3] = OpenWest;
         }
 
         if (File.Exists(path))
@@ -111,8 +117,10 @@ public class RoomEditorWindow : EditorWindow
 
             OpenTop = loadData.openings[0];
             OpenBottom = loadData.openings[1];
-            OpenLeft = loadData.openings[2];
-            OpenRight = loadData.openings[3];
+            OpenEast = loadData.openings[2];
+            OpenWest = loadData.openings[3];
+
+            generalType = loadData.generalType;
 
             roomName = Path.GetFileNameWithoutExtension(path);
         }

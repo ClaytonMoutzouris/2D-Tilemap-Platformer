@@ -106,7 +106,7 @@ public class PlayerAttackManager : MonoBehaviour
             return;
         }
 
-        Attack newAttack = Instantiate(equippedWeapon.attack, transform);
+        Attack newAttack = Instantiate(equippedWeapon.GetNextAttack(), transform);
         StartCoroutine(newAttack.Activate(player));
         activeAttack = newAttack;
         lastAttackTime = Time.time;

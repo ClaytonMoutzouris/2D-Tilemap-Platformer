@@ -2,13 +2,11 @@
 using System.Collections;
 using System;
 
-public enum PlayerMovementState { Idle, Walking, Jumping, Falling, GrabLedge, Charge, Attacking, ClimbingLadder };
+public enum MovementState { Idle, Walking, Jumping, Falling, GrabLedge, Charge, Attacking, ClimbingLadder };
 
 public class PlayerController : Entity
 {
 	// movement config
-	public float gravity = -25f;
-	public float runSpeed = 8f;
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
@@ -17,23 +15,18 @@ public class PlayerController : Entity
     public Vector3 ledgeGrabPosition;
     public Vector3 ledgeGrabOffset = new Vector3(0.3f, 0.6f, 0);
 
-    public bool IgnoreGravity = false;
-
-    public PlayerMovementState movementState = PlayerMovementState.Idle;
-
 	[HideInInspector]
 	private float normalizedHorizontalSpeed = 0;
     private float normalizedVerticalSpeed = 0;
 
     private PhysicsBody2D _controller;
-    public Vector3 _velocity;
-    public PlayerAttackManager _attackManager;
 
     protected override void Awake()
 	{
         base.Awake();
         _controller = GetComponent<PhysicsBody2D>();
-        _attackManager = GetComponent<PlayerAttackManager>();
+        _attackManager = GetComponent<AttackManager>();
+        _animator.runtimeAnimatorController = overrideController;
 
         // listen to some events for illustration purposes
         _controller.onControllerCollidedEvent += onControllerCollider;
@@ -74,7 +67,7 @@ public class PlayerController : Entity
 
         if(!_controller.isGrounded && !_attackManager.IsAttacking() && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
         {
-            movementState = PlayerMovementState.GrabLedge;
+            movementState = MovementState.GrabLedge;
             if(_controller.collisionState.right)
             {
                 ledgeGrabOffset.x = -0.3f;
@@ -94,7 +87,7 @@ public class PlayerController : Entity
 
         if (!_attackManager.IsAttacking())
         {
-            movementState = PlayerMovementState.ClimbingLadder;
+            movementState = MovementState.ClimbingLadder;
 
             ladderClimbPosition = _controller.collisionState.ladderOffset;
 
@@ -110,32 +103,34 @@ public class PlayerController : Entity
 
         normalizedHorizontalSpeed = 0;
         normalizedVerticalSpeed = 0;
-        IgnoreGravity = false;
+
+        ignoreGravity = false;
+
 
         switch (movementState)
         {
-            case PlayerMovementState.Idle:
+            case MovementState.Idle:
                 Idle();
                 break;
-            case PlayerMovementState.Walking:
+            case MovementState.Walking:
                 Walking();
                 break;
-            case PlayerMovementState.Jumping:
+            case MovementState.Jumping:
                 Jumping();
                 break;
-            case PlayerMovementState.Falling:
+            case MovementState.Falling:
 
                 break;
-            case PlayerMovementState.GrabLedge:
+            case MovementState.GrabLedge:
                 GrabLedge();
                 break;
-            case PlayerMovementState.ClimbingLadder:
+            case MovementState.ClimbingLadder:
                 Climbing();
                 break;
-            case PlayerMovementState.Charge:
+            case MovementState.Charge:
                 Charge();
                 break;
-            case PlayerMovementState.Attacking:
+            case MovementState.Attacking:
 
                 break;
         }
@@ -147,7 +142,7 @@ public class PlayerController : Entity
 
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && movementState != PlayerMovementState.GrabLedge)
+        if (Input.GetKeyDown(KeyCode.Space) && movementState != MovementState.GrabLedge)
         {
             //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
             
@@ -167,24 +162,24 @@ public class PlayerController : Entity
 
             switch (movementState)
             {
-                case PlayerMovementState.Falling:
+                case MovementState.Falling:
 
                     break;
-                case PlayerMovementState.Idle:
+                case MovementState.Idle:
                     _animator.Play(Animator.StringToHash("Idle"));
 
                     break;
-                case PlayerMovementState.Jumping:
+                case MovementState.Jumping:
                     _animator.Play(Animator.StringToHash("Jump"));
 
                     break;
-                case PlayerMovementState.Walking:
+                case MovementState.Walking:
                     _animator.Play(Animator.StringToHash("Run"));
                     break;
-                case PlayerMovementState.GrabLedge:
+                case MovementState.GrabLedge:
                     _animator.Play(Animator.StringToHash("Idle"));
                     break;
-                case PlayerMovementState.ClimbingLadder:
+                case MovementState.ClimbingLadder:
                     _animator.Play(Animator.StringToHash("Idle"));
                     break;
             }
@@ -194,19 +189,18 @@ public class PlayerController : Entity
 
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        if(movementState != PlayerMovementState.Charge && movementState != PlayerMovementState.Attacking)
+        if(movementState != MovementState.Charge && movementState != MovementState.Attacking)
         {
-            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
+            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * movementSpeed, Time.deltaTime * smoothedMovementFactor);
         }
 
-        // apply gravity before moving
-        if(!IgnoreGravity)
-            _velocity.y += gravity * Time.deltaTime;
-
-        if (movementState == PlayerMovementState.GrabLedge)
+        if (movementState == MovementState.GrabLedge)
         {
             _velocity = Vector3.zero;
         }
+
+        if (!ignoreGravity)
+            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
         _controller.move( _velocity * Time.deltaTime );
 
@@ -217,7 +211,7 @@ public class PlayerController : Entity
     private void Climbing()
     {
         _controller.transform.position = new Vector2(ladderClimbPosition.x, _controller.transform.position.y);
-        IgnoreGravity = true;
+        ignoreGravity = true;
         
         //_velocity = Vector3.zero;
 
@@ -231,11 +225,11 @@ public class PlayerController : Entity
             normalizedVerticalSpeed = -1;
         }
 
-        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * runSpeed, Time.deltaTime * groundDamping);
+        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * movementSpeed, Time.deltaTime * groundDamping);
 
         if (Input.GetKeyDown(KeyCode.J) && Input.GetKey(KeyCode.DownArrow))
         {
-            movementState = PlayerMovementState.Jumping;
+            movementState = MovementState.Jumping;
 
             return;
         } else if (Input.GetKeyDown(KeyCode.J))
@@ -248,7 +242,7 @@ public class PlayerController : Entity
 
         if (!_controller.collisionState.onLadder)
         {
-            movementState = PlayerMovementState.Idle;
+            movementState = MovementState.Idle;
         }
 
 
@@ -267,7 +261,7 @@ public class PlayerController : Entity
 
         if (!_controller.isGrounded)
         {
-            movementState = PlayerMovementState.Jumping;
+            movementState = MovementState.Jumping;
             return;
         }
 
@@ -280,7 +274,7 @@ public class PlayerController : Entity
             if (transform.localScale.x < 0f)
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
 
-            movementState = PlayerMovementState.Walking;
+            movementState = MovementState.Walking;
 
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
@@ -289,7 +283,7 @@ public class PlayerController : Entity
             if (transform.localScale.x > 0f)
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
 
-            movementState = PlayerMovementState.Walking;
+            movementState = MovementState.Walking;
 
         }
 
@@ -324,7 +318,7 @@ public class PlayerController : Entity
     {
         if (!_controller.isGrounded)
         {
-            movementState = PlayerMovementState.Jumping;
+            movementState = MovementState.Jumping;
             return;
         }
 
@@ -352,7 +346,7 @@ public class PlayerController : Entity
         {
             normalizedHorizontalSpeed = 0;
 
-            movementState = PlayerMovementState.Idle;
+            movementState = MovementState.Idle;
 
         }
 
@@ -382,13 +376,13 @@ public class PlayerController : Entity
     void Jumping()
     {
         if (_controller.isGrounded && (!_controller.collisionState.wasGroundedLastFrame || _velocity.y <= 0))
-            movementState = PlayerMovementState.Idle;
+            movementState = MovementState.Idle;
 
         //_animator.Play(Animator.StringToHash("Jump"));
 
         if (!Input.GetKey(KeyCode.UpArrow) && _velocity.y > 0.0f)
         {
-            _velocity.y = Mathf.Min(_velocity.y, Mathf.Sqrt(jumpHeight * -gravity));
+            _velocity.y = Mathf.Min(_velocity.y, Mathf.Sqrt(jumpHeight*-GambleConstants.GRAVITY));
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
@@ -456,26 +450,24 @@ public class PlayerController : Entity
         if (Input.GetKey(KeyCode.DownArrow))
         {
             _velocity.y -= 1f;
-            movementState = PlayerMovementState.Jumping;
+            movementState = MovementState.Jumping;
 
         }
     }
 
     public void Jump()
     {
-        if(movementState == PlayerMovementState.Jumping)
+        if(movementState == MovementState.Jumping)
         {
             //Can't jump while jumping or in the air
             return;
         }
 
-        _velocity.y = Mathf.Sqrt(2*jumpHeight * -gravity);
-        movementState = PlayerMovementState.Jumping;
+
+        _velocity.y = Mathf.Sqrt(2*jumpHeight*-GambleConstants.GRAVITY);
+        movementState = MovementState.Jumping;
 
     }
     
-    public int GetDirection()
-    {
-        return 1 * (int)Mathf.Sign(transform.localScale.x);
-    }
+
 }

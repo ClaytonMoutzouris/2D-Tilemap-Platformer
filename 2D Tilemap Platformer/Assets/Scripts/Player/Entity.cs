@@ -8,6 +8,14 @@ public class Entity : MonoBehaviour
     
     public Animator _animator;
     public AnimatorOverrideController overrideController;
+    public AttackManager _attackManager;
+    public Vector3 _velocity;
+
+    public float movementSpeed = 0.5f;
+
+    public bool ignoreGravity = false;
+
+    public MovementState movementState = MovementState.Idle;
 
     //Class for organizing entities, which we may or may not need.
 
@@ -20,7 +28,6 @@ public class Entity : MonoBehaviour
     protected virtual void Awake()
     {
         _animator = GetComponent<Animator>();
-        _animator.runtimeAnimatorController = overrideController;
 
     }
 
@@ -28,5 +35,10 @@ public class Entity : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public int GetDirection()
+    {
+        return 1 * (int)Mathf.Sign(transform.localScale.x);
     }
 }

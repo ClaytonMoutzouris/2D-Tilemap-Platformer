@@ -8,31 +8,26 @@ public class WeaponChargeAttack : WeaponAttack
     public float chargeDuration = 0.5f;
 
     //A basic attack.
-    public override IEnumerator Activate(PlayerController user)
+    public override IEnumerator Activate(Entity user)
     {
-        player = user;
+        entity = user;
         StartUp();
 
-        player.movementState = PlayerMovementState.Charge;
-        player._velocity.x = player.GetDirection() * chargeSpeed;
+        entity.movementState = MovementState.Charge;
+        entity._velocity.x = entity.GetDirection() * chargeSpeed;
 
-        player.overrideController["PlayerAttack1"] = ownerAnimation;
-        player._animator.Play(Animator.StringToHash("DEFAULT_ATTACK"));
-        player._animator.speed = attackSpeed;
+        //entity.overrideController["PlayerAttack1"] = ownerAnimation;
+        entity._animator.Play(ownerAnimation.name);
+        entity._animator.speed = attackSpeed;
 
-        player._attackManager.meleeWeapon.SetWeapon(player._attackManager.equippedWeapon.weaponObject);
-        AttackObject attackObject = player._attackManager.meleeWeapon.weapon.GetComponent<AttackObject>();
+        float waitTime = ownerAnimation.length * (1 / entity._animator.speed);
 
-        float waitTime = ownerAnimation.length * (1 / player._animator.speed);
-
-        attackObject.animator.speed = attackSpeed;
         //attackObject.ActivateObject();
-        attackObject.ActivateObject(waitTime);
 
         yield return new WaitForSeconds(waitTime);
-        player._animator.speed = 1;
-        player.movementState = PlayerMovementState.Idle;
-        player._animator.Play(Animator.StringToHash("Idle"));
+        entity._animator.speed = 1;
+        entity.movementState = MovementState.Idle;
+        entity._animator.Play(Animator.StringToHash("Idle"));
         CleanUp();
     }
 

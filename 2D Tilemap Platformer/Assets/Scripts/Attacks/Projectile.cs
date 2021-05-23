@@ -5,14 +5,17 @@ using UnityEngine;
 public class Projectile : AttackObject
 {
     public bool pierce = false;
-    private PhysicsBody2D _controller;
+    public bool boomerang = false;
+    public bool homing = false;
+    protected PhysicsBody2D _controller;
 
     public Vector2 direction;
 
     //Physics things
     public float projSpeed = 15;
     public bool IgnoreGravity = false;
-
+    public float startTime = 0;
+    public float elasticity = -0.5f;
 
     private void Awake()
     {
@@ -24,6 +27,11 @@ public class Projectile : AttackObject
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
         */
+    }
+
+    private void Start()
+    {
+        startTime = Time.time;
     }
 
     public void SetDirection(Vector2 dir)
@@ -40,10 +48,22 @@ public class Projectile : AttackObject
 
         Vector3 velocity = direction * projSpeed;
 
+        if (boomerang)
+        {
+            Boomerang(ref velocity);
+        }
 
         _controller.move(velocity * Time.deltaTime);
 
+        if(startTime + duration <= Time.time)
+        {
+            Destroy(gameObject);
+        }
+    }
 
+    public void Boomerang(ref Vector3 vel)
+    {
+        vel = vel - vel * elasticity * (Time.time - startTime);
     }
 
     public override void CollisionedWith(Collider2D collider)

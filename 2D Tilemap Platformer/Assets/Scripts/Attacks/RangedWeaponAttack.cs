@@ -12,32 +12,29 @@ public class RangedWeaponAttack : WeaponAttack
     }
 
     //A basic attack.
-    public override IEnumerator Activate(PlayerController user)
+    public override IEnumerator Activate(Entity user)
     {
-        player = user;
+        entity = user;
         StartUp();
 
         //WeaponObject attackObject = player._attackManager.meleeWeapon.SetWeapon(objectPrototypes[0]);
-        player._attackManager.meleeWeapon.SetWeapon(player._attackManager.equippedWeapon.weaponObject);
 
         Projectile proj = Instantiate(projectile, user.transform.position, Quaternion.identity);
-        proj.SetDirection(player.GetDirection()*Vector2.right);
+        proj.SetDirection(entity.GetDirection()*Vector2.right);
 
 
-        player.overrideController["PlayerAttack1"] = ownerAnimation;
-        player._animator.Play(Animator.StringToHash("DEFAULT_ATTACK"));
-        player._animator.speed = attackSpeed;
+        //entity.overrideController["PlayerAttack1"] = ownerAnimation;
+        entity._animator.Play(ownerAnimation.name);
+        entity._animator.speed = attackSpeed;
 
-        float waitTime = ownerAnimation.length * (1 / player._animator.speed);
+        float waitTime = ownerAnimation.length * (1 / entity._animator.speed);
         //attackObject.ActivateObject(waitTime);
 
         //attackObject.animator.speed = attackSpeed;
-        user._attackManager.StartCoroutine(proj.HandleAttack());
 
         yield return new WaitForSeconds(waitTime);
-        player._animator.speed = 1;
-        player._animator.Play(Animator.StringToHash("Idle"));
-        Destroy(player._attackManager.meleeWeapon.weapon.gameObject);
+        entity._animator.speed = 1;
+        entity._animator.Play(Animator.StringToHash("Idle"));
         CleanUp();
     }
 }

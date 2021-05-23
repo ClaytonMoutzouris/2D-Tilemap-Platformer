@@ -4,7 +4,6 @@ using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(Animator))]
 public class AttackObject : MonoBehaviour
 {
     public SpriteRenderer spriteRenderer;
@@ -23,31 +22,21 @@ public class AttackObject : MonoBehaviour
 
     public Color collidingColor;
 
-    public void ActivateObject()
+    public void Start()
     {
-        animator.Play("Attack");
-        StartCoroutine(HandleAttack());
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    public void SetDuration(float time)
+    public void OnDisable()
     {
-        duration = time;
+        Debug.Log("Object disabled");
+        ClearHits();
     }
 
-    public void ActivateObject(float time)
+    public void ClearHits()
     {
-        SetDuration(time);
-        ActivateObject();
+        hits.Clear();
     }
-
-    public virtual IEnumerator HandleAttack()
-    {
-
-        yield return new WaitForSeconds(duration);
-        if(this)
-            Destroy(gameObject);
-    }
-
 
     protected virtual void Update()
     {
@@ -93,7 +82,7 @@ public class AttackObject : MonoBehaviour
 
         Gizmos.matrix = Matrix4x4.TRS(transform.position + (Vector3)hitbox.offset, transform.rotation, transform.localScale);
 
-        Gizmos.DrawWireCube(Vector3.zero, new Vector3(hitbox.size.x*2 + hitbox.offset.x, hitbox.size.y*2 + hitbox.offset.x, 1)); // Because size is halfExtents
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(hitbox.size.x + hitbox.offset.x, hitbox.size.y + hitbox.offset.x, 1)); // Because size is halfExtents
 
     }
 

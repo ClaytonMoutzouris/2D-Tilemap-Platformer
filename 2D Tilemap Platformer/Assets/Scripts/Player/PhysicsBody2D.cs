@@ -77,7 +77,6 @@ public class PhysicsBody2D : MonoBehaviour
 	[SerializeField]
 	[Range( 0.001f, 0.3f )]
 	float _skinWidth = 0.02f;
-
 	/// <summary>
 	/// defines how far in from the edges of the collider rays are cast from. If cast with a 0 extent it will often result in ray hits that are
 	/// not desired (for example a foot collider casting horizontally from directly on the surface can result in a hit)
@@ -255,8 +254,9 @@ public class PhysicsBody2D : MonoBehaviour
 	/// <param name="deltaMovement">Delta movement.</param>
 	public void move( Vector3 deltaMovement )
 	{
-		// save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
-		collisionState.wasGroundedLastFrame = collisionState.below;
+
+        // save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
+        collisionState.wasGroundedLastFrame = collisionState.below;
 
 		// clear our state
 		collisionState.reset();

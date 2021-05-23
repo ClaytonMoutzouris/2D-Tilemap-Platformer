@@ -2,10 +2,9 @@
 using System.Collections;
 
 
-public class ObjectController : MonoBehaviour
+public class ObjectController : Entity
 {
     // movement config
-    public float gravity = -25f;
     public float runSpeed = 8f;
     public float groundDamping = 20f; // how fast do we change direction? higher means faster
     public float inAirDamping = 5f;
@@ -16,15 +15,12 @@ public class ObjectController : MonoBehaviour
     private float normalizedHorizontalSpeed = 0;
 
     private PhysicsBody2D _controller;
-    public Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
-    public Vector3 _velocity;
 
 
-    void Awake()
+    protected override void Awake()
     {
-        _animator = GetComponent<Animator>();
-        _controller = GetComponent<PhysicsBody2D>();
+        base.Awake();
 
         // listen to some events for illustration purposes
         _controller.onControllerCollidedEvent += onControllerCollider;
@@ -73,7 +69,8 @@ public class ObjectController : MonoBehaviour
         _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
 
         // apply gravity before moving
-        _velocity.y += gravity * Time.deltaTime;
+        if(!ignoreGravity)
+            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
         _controller.move(_velocity * Time.deltaTime);
 

@@ -7,7 +7,9 @@ public class EnemyEntity : Entity
     public float jumpHeight = 3f;
 
     public PhysicsBody2D _controller;
+    public Vector3 mOldPosition;
 
+    public Vector3 _velocity;
 
     public int normalizedHorizontalSpeed = 0;
 
@@ -27,6 +29,7 @@ public class EnemyEntity : Entity
         if (!ignoreGravity)
             _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
+        mOldPosition = transform.position;
         _controller.move(_velocity * Time.deltaTime);
 
         _velocity = _controller.velocity;

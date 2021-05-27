@@ -13,23 +13,24 @@ public class AttackObject : MonoBehaviour
     public ColliderState state = ColliderState.Open;
 
     public List<Collider2D> hits = new List<Collider2D>();
-    public float duration = 1;
 
+    //Information about the attack such as damage, abilities, etc
+    public AttackData attackData;
 
+    //These are mostly for testing purposes
     public Color inactiveColor;
-
     public Color collisionOpenColor;
-
     public Color collidingColor;
 
-    public void Start()
+    public virtual void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+
     }
 
     public void OnDisable()
     {
-        Debug.Log("Object disabled");
+        //This clears the tracked hits for the hitbox every time the object is disabled
         ClearHits();
     }
 

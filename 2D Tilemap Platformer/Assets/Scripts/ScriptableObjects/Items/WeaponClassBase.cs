@@ -9,7 +9,7 @@ public class WeaponClassBase : ScriptableObject
 {
     public WeaponClassType weaponClass;
     public WeaponObject weaponObjectPrototype;
-    public List<WeaponAttack> attacks;
+    public List<Attack> attacks;
 
 
     /*Other stuff*/

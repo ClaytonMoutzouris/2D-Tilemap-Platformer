@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.IO;
+using Algorithms;
 
 public enum TileMapLayersEnum { Ground, OneWay, Background, Foreground }
 public class GameGrid : MonoBehaviour
 {
+    public static GameGrid instance;
     public Grid grid;
     public Tilemap[] tilemaps;
     public int mapSizeX = 10;
     public int mapSizeY = 10;
+    public PathFinderFast mPathFinder;
+    public byte[,] mGrid;
+
+    public MapData currentMap;
 
     private void Start()
     {
-
-
+        instance = this;
+        InitPathFinder();
     }
 
     void OnDrawGizmos()
@@ -136,6 +142,9 @@ public class GameGrid : MonoBehaviour
                 SetWorldTiles(layerData.layerIndex, layerData.tiles, false);
             }
         }
+
+        currentMap = data;
+        InitPathFinder();
     }
 
     public void ClearTiles()
@@ -144,5 +153,110 @@ public class GameGrid : MonoBehaviour
         {
             tilemaps[i].ClearAllTiles();
         }
+    }
+
+    public bool IsGround(int x, int y)
+    {
+        return tilemaps[(int)TileMapLayersEnum.Ground].HasTile(new Vector3Int(x, y, 0));
+    }
+
+    public bool IsOneWayPlatform(int x, int y)
+    {
+        return tilemaps[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0));
+    }
+
+    public void InitPathFinder()
+    {
+        SetGrid();
+
+        mPathFinder = new PathFinderFast(mGrid, this);
+
+        mPathFinder.Formula = HeuristicFormula.Manhattan;
+        //if false then diagonal movement will be prohibited
+        mPathFinder.Diagonals = false;
+        //if true then diagonal movement will have higher cost
+        mPathFinder.HeavyDiagonals = false;
+        //estimate of path length
+        mPathFinder.HeuristicEstimate = 6;
+        mPathFinder.PunishChangeDirection = false;
+        mPathFinder.TieBreaker = false;
+        mPathFinder.SearchLimit = 10000;
+        mPathFinder.DebugProgress = false;
+        mPathFinder.DebugFoundPath = false;
+    }
+
+    public void SetGrid()
+    {
+        mGrid = new byte[Mathf.NextPowerOfTwo(mapSizeX * GambleConstants.RoomSizeX), Mathf.NextPowerOfTwo(mapSizeY * GambleConstants.RoomSizeY)];
+
+        for(int x = 0; x < mapSizeX*GambleConstants.RoomSizeX; x++)
+        {
+            for (int y = 0; y < mapSizeY * GambleConstants.RoomSizeY; y++)
+            {
+                mGrid[x, y] = (byte)(IsGround(x,y) ? 0 : 1);
+            }
+        }
+    }
+
+    public bool AnySolidBlockInRectangle(Vector2Int start, Vector2Int end)
+    {
+        int startX, startY, endX, endY;
+
+        if (start.x <= end.x)
+        {
+            startX = start.x;
+            endX = end.x;
+        }
+        else
+        {
+            startX = end.x;
+            endX = start.x;
+        }
+
+        if (start.y <= end.y)
+        {
+            startY = start.y;
+            endY = end.y;
+        }
+        else
+        {
+            startY = end.y;
+            endY = start.y;
+        }
+
+        for (int y = startY; y <= endY; ++y)
+        {
+            for (int x = startX; x <= endX; ++x)
+            {
+                if (IsGround(x,y))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool AnySolidBlockInStripe(int x, int y0, int y1)
+    {
+        int startY, endY;
+
+        if (y0 <= y1)
+        {
+            startY = y0;
+            endY = y1;
+        }
+        else
+        {
+            startY = y1;
+            endY = y0;
+        }
+
+        for (int y = startY; y <= endY; ++y)
+        {
+            if (IsGround(x, y))
+                return true;
+        }
+
+        return false;
     }
 }

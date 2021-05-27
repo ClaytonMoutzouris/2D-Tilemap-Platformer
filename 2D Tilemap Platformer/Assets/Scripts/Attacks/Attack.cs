@@ -6,24 +6,26 @@ public class Attack : MonoBehaviour
 {
 
     public bool isActive = false;
-    public List<AttackObject> objectPrototypes;
-    public AnimationClip ownerAnimation;
+    public AnimationClip attackAnimation;
     public float attackSpeed = 1;
-    public Entity entity;
-    //public List<AttackObject> activeObjects;
-
-    public void SetObject(AttackObject attackObject)
-    {
-        if (attackObject == null)
-            return;
-        //objectPrototypes[0] = attackObject;
-    }
+    public PlayerController entity;
 
     //A basic attack.
-    public virtual IEnumerator Activate(Entity user)
+    public virtual IEnumerator Activate(PlayerController user)
     {
+        entity = user;
+        StartUp();
+        //entity.overrideController["PlayerAttack1"] = ownerAnimation;
+        entity._animator.Play(attackAnimation.name);
+        entity._animator.speed = attackSpeed;
 
-        yield return null;
+        float waitTime = attackAnimation.length * (1 / entity._animator.speed);
+
+        //attackObject.ActivateObject();
+
+        yield return new WaitForSeconds(waitTime);
+        entity._animator.speed = 1;
+        CleanUp();
 
     }
 
@@ -35,6 +37,7 @@ public class Attack : MonoBehaviour
 
     public virtual void CleanUp()
     {
+        entity._animator.speed = 1;
         isActive = false;
         Destroy(gameObject);
 

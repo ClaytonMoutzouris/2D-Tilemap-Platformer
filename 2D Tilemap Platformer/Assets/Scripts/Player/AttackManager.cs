@@ -5,7 +5,7 @@ using UnityEngine;
 public class AttackManager : MonoBehaviour
 {
     //List of different player attack animations
-    public Entity entity;
+    public PlayerController entity;
     //public List<AttackData> attacks = new List<AttackData>();
     public Attack activeAttack;
 
@@ -24,7 +24,7 @@ public class AttackManager : MonoBehaviour
 
     private void Start()
     {
-        entity = GetComponent<Entity>();
+        entity = GetComponent<PlayerController>();
         List<Weapon> tempList = new List<Weapon>();
 
         foreach(Weapon weapon in weapons)
@@ -106,14 +106,14 @@ public class AttackManager : MonoBehaviour
     }
     */
 
-    public void ActivateWeaponAttack()
+    public void ActivateAttack()
     {
         if (activeAttack != null)
         {
             return;
         }
 
-        WeaponAttack newAttack = Instantiate(equippedWeapon.GetNextAttack(), transform);
+        Attack newAttack = Instantiate(equippedWeapon.GetNextAttack(), transform);
         StartCoroutine(newAttack.Activate(entity));
         activeAttack = newAttack;
         lastAttackTime = Time.time;

@@ -29,6 +29,7 @@ public class PhysicsBody2D : MonoBehaviour
 		public bool movingDownSlope;
 		public float slopeAngle;
         public bool canGrabLedge;
+        public bool onOneWayPlatform;
         public Vector3 ledgeGrabPosition;
         public Vector2[] rays = new Vector2[4];
         public bool onLadder;
@@ -42,7 +43,7 @@ public class PhysicsBody2D : MonoBehaviour
 
 		public void reset()
 		{
-			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = false;
+			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = onOneWayPlatform = false;
 			slopeAngle = 0f;
             ledgeGrabPosition = Vector3.zero;
             ladderOffset = Vector3.zero;
@@ -579,6 +580,7 @@ public class PhysicsBody2D : MonoBehaviour
 			_raycastHit = Physics2D.Raycast( ray, rayDirection, rayDistance, mask );
 			if( _raycastHit )
 			{
+
 				// set our new deltaMovement and recalculate the rayDistance taking it into account
 				deltaMovement.y = _raycastHit.point.y - ray.y;
 				rayDistance = Mathf.Abs( deltaMovement.y );
@@ -593,7 +595,12 @@ public class PhysicsBody2D : MonoBehaviour
 				{
 					deltaMovement.y += _skinWidth;
 					collisionState.below = true;
-				}
+                    if (_raycastHit.transform.gameObject.layer == LayerMask.NameToLayer("OneWayPlatform"))
+                    {
+                        collisionState.onOneWayPlatform = true;
+                    }
+
+                }
 
 				_raycastHitsThisFrame.Add( _raycastHit );
 

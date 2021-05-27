@@ -10,9 +10,9 @@ public class Weapon : ScriptableObject
 
     public int attackIndex = 0;
     
-    public WeaponAttack GetNextAttack()
+    public Attack GetNextAttack()
     {
-        WeaponAttack attack = weaponBase.attacks[attackIndex];
+        Attack attack = weaponBase.attacks[attackIndex];
         attackIndex++;
         if(attackIndex >= weaponBase.attacks.Count)
         {
@@ -22,12 +22,4 @@ public class Weapon : ScriptableObject
         return attack;
     }
 
-
-    public virtual void LoadWeaponClass()
-    {
-        weaponBase = Instantiate(weaponBase);
-        //weaponBase.weaponObjectPrototype.GetComponent<SpriteRenderer>().sprite = sprite;
-
-
-    }
 }

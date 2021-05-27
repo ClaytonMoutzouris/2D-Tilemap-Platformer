@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RangedWeaponAttack : WeaponAttack
+public class RangedAttack : Attack
 {
     public Projectile projectile;
 
@@ -12,7 +12,7 @@ public class RangedWeaponAttack : WeaponAttack
     }
 
     //A basic attack.
-    public override IEnumerator Activate(Entity user)
+    public override IEnumerator Activate(PlayerController user)
     {
         entity = user;
         StartUp();
@@ -24,10 +24,10 @@ public class RangedWeaponAttack : WeaponAttack
 
 
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;
-        entity._animator.Play(ownerAnimation.name);
+        entity._animator.Play(attackAnimation.name);
         entity._animator.speed = attackSpeed;
 
-        float waitTime = ownerAnimation.length * (1 / entity._animator.speed);
+        float waitTime = attackAnimation.length * (1 / entity._animator.speed);
         //attackObject.ActivateObject(waitTime);
 
         //attackObject.animator.speed = attackSpeed;

@@ -9,13 +9,10 @@ public class Entity : MonoBehaviour
     public Animator _animator;
     public AnimatorOverrideController overrideController;
     public AttackManager _attackManager;
-    public Vector3 _velocity;
 
     public float movementSpeed = 0.5f;
 
     public bool ignoreGravity = false;
-
-    public MovementState movementState = MovementState.Idle;
 
     //Class for organizing entities, which we may or may not need.
 

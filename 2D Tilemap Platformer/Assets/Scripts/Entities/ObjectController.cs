@@ -15,6 +15,8 @@ public class ObjectController : Entity
     private float normalizedHorizontalSpeed = 0;
 
     private PhysicsBody2D _controller;
+    public Vector3 _velocity;
+
     private RaycastHit2D _lastControllerColliderHit;
 
 

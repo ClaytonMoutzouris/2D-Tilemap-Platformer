@@ -2,24 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Projectile : AttackObject
+[RequireComponent(typeof(PhysicsBody2D))]
+[RequireComponent(typeof(AttackObject))]
+public class Projectile : MonoBehaviour
 {
     public bool pierce = false;
     public bool boomerang = false;
     public bool homing = false;
-    protected PhysicsBody2D _controller;
 
     public Vector2 direction;
+    public float lifeTime = 1;
+    public float startTime = 0;
+
+    public AttackObject _attackObject;
 
     //Physics things
-    public float projSpeed = 15;
-    public bool IgnoreGravity = false;
-    public float startTime = 0;
+    protected PhysicsBody2D _controller;
+    public float projSpeed = 5;
+    //Might want to create a seperate projectile class for "boomerangs", but modularity has its merits aswell
     public float elasticity = -0.5f;
 
-    private void Awake()
+    public void Awake()
     {
         _controller = GetComponent<PhysicsBody2D>();
+        _attackObject = GetComponent<AttackObject>();
 
         // Might need this later?
         /*
@@ -41,10 +47,8 @@ public class Projectile : AttackObject
         transform.eulerAngles = new Vector3(0, 0, -angle);
     }
 
-    protected override void Update()
+    protected void Update()
     {
-
-        base.Update();
 
         Vector3 velocity = direction * projSpeed;
 
@@ -55,32 +59,22 @@ public class Projectile : AttackObject
 
         _controller.move(velocity * Time.deltaTime);
 
-        if(startTime + duration <= Time.time)
+        if(startTime + lifeTime <= Time.time)
         {
             Destroy(gameObject);
         }
+
+        //Destroy the object when it makes a collision unless it has piercing
+        if(!pierce && _attackObject.hits.Count > 0)
+        {
+            Destroy(gameObject);
+        }
+
     }
 
     public void Boomerang(ref Vector3 vel)
     {
         vel = vel - vel * elasticity * (Time.time - startTime);
     }
-
-    public override void CollisionedWith(Collider2D collider)
-    {
-        if (hits.Contains(collider))
-        {
-            return;
-        }
-
-        base.CollisionedWith(collider);
-
-        //Little extra for projectiles
-        if(!pierce)
-        {
-            Destroy(gameObject);
-        }
-    }
-
 
 }

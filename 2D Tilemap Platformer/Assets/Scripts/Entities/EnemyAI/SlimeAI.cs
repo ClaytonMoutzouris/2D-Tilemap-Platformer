@@ -21,11 +21,15 @@ public class SlimeAI : MonoBehaviour
     public int mCurrentNodeId = -1;
     Vector2 mDestination;
     [SerializeField]
-    int mFramesOfJumping = 0;
+    float mFramesOfJumping = 0;
     [SerializeField]
     int mStuckFrames = 0;
     [SerializeField]
     int cMaxStuckFrames = 20;
+
+    public Vector2 currentDest;
+    public Vector2 prevDest;
+    public Vector2 nextDest;
 
     public float mWidth = 1;
     public float mHeight = 3;
@@ -64,12 +68,11 @@ public class SlimeAI : MonoBehaviour
     IEnumerator IDLE()
     {
         // ENTER THE IDLE STATE
+        entity.normalizedHorizontalSpeed = 0;
 
         // EXECUTE IDLE STATE
         while (states == SLIME_STATE.IDLE)
         {
-            entity.normalizedHorizontalSpeed = 0;
-
             //Check for target, using sight maybe?
 
             if (target != null)
@@ -110,7 +113,7 @@ public class SlimeAI : MonoBehaviour
 
             if (entity._controller.collisionState.left || entity._controller.collisionState.right || (target.transform.position.y - transform.position.y) > 2.5)
             {
-                Jump();
+                Jump(entity.maxJumpHeight);
 
             }
 
@@ -138,21 +141,24 @@ public class SlimeAI : MonoBehaviour
 
         while (states == SLIME_STATE.MOVETO)
         {
+
             int tileX, tileY;
             tileX = (int)transform.position.x;
             tileY = (int)transform.position.y;
 
-            Vector2 prevDest, currentDest, nextDest;
             bool destOnGround, reachedY, reachedX;
-            GetContext(out prevDest, out currentDest, out nextDest, out destOnGround, out reachedX, out reachedY);
+            GetContext(out destOnGround, out reachedX, out reachedY);
             Vector2 pathPosition = transform.position;
 
             if (pathPosition.y - currentDest.y > cBotMaxPositionError && entity._controller.collisionState.onOneWayPlatform)
             {
                 //drop down
+                Debug.Log("Drop down");
                 entity._controller.ignoreOneWayPlatformsThisFrame = true;
             }
-                //mInputs[(int)KeyInput.GoDown] = true;
+            //mInputs[(int)KeyInput.GoDown] = true;
+
+
 
             if (reachedX && reachedY)
             {
@@ -165,9 +171,6 @@ public class SlimeAI : MonoBehaviour
                     states = SLIME_STATE.IDLE;
                     break;
                 }
-
-                if (entity._controller.isGrounded)
-                    mFramesOfJumping = GetJumpFramesForNode(prevNodeId);
 
             }
             else if (!reachedX)
@@ -222,22 +225,40 @@ public class SlimeAI : MonoBehaviour
                 }
             }
 
-            if (mFramesOfJumping > 0 &&
-                (!entity._controller.isGrounded || (reachedX && !destOnGround) || (entity._controller.isGrounded && destOnGround)))
+            if (Vector3.Distance(target.transform.position, transform.position) < 1.5)
             {
-                Jump();
-                if (!entity._controller.isGrounded)
-                    --mFramesOfJumping;
+                mCurrentNodeId = -1;
+                states = SLIME_STATE.SLIMEATTACK1;
+                break;
             }
 
-            if (transform.position == entity.mOldPosition)
+            if (entity._controller.isGrounded)
+            {
+                //Change this to just tell us if we need to jump or not
+                mFramesOfJumping = GetJumpHeightForNode(mCurrentNodeId-1);
+
+                if (mFramesOfJumping > 0)
+                {
+                    Jump(mFramesOfJumping);
+
+                }
+                 
+            }
+
+            if (Vector2.Distance(transform.position, entity.mOldPosition) == 0)
             {
                 ++mStuckFrames;
                 if (mStuckFrames > cMaxStuckFrames)
+                {
+                    Debug.Log("Slime got stuck");
                     MoveTo(mPath[mPath.Count - 1]);
+
+                }
             }
             else
+            {
                 mStuckFrames = 0;
+            }
 
 
             MoveTo(target.transform.position);
@@ -256,11 +277,14 @@ public class SlimeAI : MonoBehaviour
     IEnumerator SLIMEATTACK1()
     {
         // ENTER THE ATTACK STATE
-        entity.normalizedHorizontalSpeed = 0;
+        entity.normalizedHorizontalSpeed = entity.GetDirection();
 
         //entity.normalizedHorizontalSpeed = entity.GetDirection();
-        //entity._velocity.y = Mathf.Sqrt(entity.jumpHeight / 2 * -GambleConstants.GRAVITY);
-        //entity._velocity.x = entity.GetDirection();
+
+        //entity._velocity.y = Mathf.Sqrt(entity.maxJumpHeight * -GambleConstants.GRAVITY);
+        //entity._velocity.x = entity.GetDirection()*entity.movementSpeed*2;
+        entity.movementSpeed *= 2;
+
 
         // EXECUTE ATTACK STATE
         while (states == SLIME_STATE.SLIMEATTACK1)
@@ -275,7 +299,7 @@ public class SlimeAI : MonoBehaviour
             {
                 yield return null;
             }
-
+            entity.movementSpeed /= 2;
             entity._animator.speed = 1;
             entity._animator.Play(Animator.StringToHash("Slime_Idle"));
 
@@ -335,15 +359,22 @@ public class SlimeAI : MonoBehaviour
 
     #endregion
 
-    public void Jump()
+    public void Jump(float jumpHeight)
     {
-        if (!entity._controller.collisionState.below)
+        if (!entity._controller.isGrounded)
         {
             //Can't jump while jumping or in the air
             return;
         }
 
-        entity._velocity.y = Mathf.Sqrt(2 * entity.jumpHeight * -GambleConstants.GRAVITY);
+        Debug.Log("Jumping at Height: " + jumpHeight);
+
+        if (jumpHeight > entity.maxJumpHeight)
+        {
+            jumpHeight = entity.maxJumpHeight;
+        }
+        //Basically just set the velocity to the jump speed
+        entity._velocity.y = Mathf.Sqrt(2 * (jumpHeight + 0.5f) * -GambleConstants.GRAVITY);
 
     }
 
@@ -359,7 +390,7 @@ public class SlimeAI : MonoBehaviour
         return (target.transform.position - transform.position).normalized;
     }
 
-    public void GetContext(out Vector2 prevDest, out Vector2 currentDest, out Vector2 nextDest, out bool destOnGround, out bool reachedX, out bool reachedY)
+    public void GetContext(out bool destOnGround, out bool reachedX, out bool reachedY)
     {
         prevDest = new Vector2(mPath[mCurrentNodeId - 1].x + 0.5f,
                                              mPath[mCurrentNodeId - 1].y + 0.5f);
@@ -387,16 +418,29 @@ public class SlimeAI : MonoBehaviour
 
         reachedX = ReachedNodeOnXAxis(pathPosition, prevDest, currentDest);
         reachedY = ReachedNodeOnYAxis(pathPosition, prevDest, currentDest);
+        
         /*
         //snap the character if it reached the goal but overshot it by more than cBotMaxPositionError
-        if (reachedX && Mathf.Abs(pathPosition.x - currentDest.x) > cBotMaxPositionError && Mathf.Abs(pathPosition.x - currentDest.x) < cBotMaxPositionError * 3.0f)
+        if (reachedX && Mathf.Abs(pathPosition.x - currentDest.x) > cBotMaxPositionError && Mathf.Abs(pathPosition.x - currentDest.x) < cBotMaxPositionError * 3.0f
+            && entity.normalizedHorizontalSpeed != -1 && entity.normalizedHorizontalSpeed != 1)
         {
             pathPosition.x = currentDest.x;
-            transform.position = Vector3.right*transform.position.y + Vector3.left * pathPosition.x;
+            transform.position = new Vector3(pathPosition.x, transform.position.y, transform.position.z);
         }
         */
+
         if (destOnGround && !entity._controller.isGrounded)
             reachedY = false;
+
+        if(reachedY)
+        {
+            //Debug.Log("Reach Y for " + currentDest);
+        }
+
+        if(reachedX)
+        {
+            //Debug.Log("Reached X for " + currentDest);
+        }
     }
 
     public bool ReachedNodeOnXAxis(Vector2 pathPosition, Vector2 prevDest, Vector2 currentDest)
@@ -427,7 +471,7 @@ public class SlimeAI : MonoBehaviour
                     destination,
                     Mathf.CeilToInt(mHeight),
                     Mathf.CeilToInt(mWidth),
-                    (short)entity.jumpHeight);
+                    (short)entity.maxJumpHeight);
 
         /*
         Debug.Log("Path");
@@ -451,7 +495,7 @@ public class SlimeAI : MonoBehaviour
 
             //ChangeAction(BotAction.MoveTo);
 
-            //mFramesOfJumping = GetJumpFramesForNode(0);
+            mFramesOfJumping = GetJumpHeightForNode(0);
         }
         else
         {
@@ -461,7 +505,7 @@ public class SlimeAI : MonoBehaviour
         }
     }
 
-    public int GetJumpFramesForNode(int prevNodeId)
+    public float GetJumpHeightForNode(int prevNodeId)
     {
         int currentNodeId = prevNodeId + 1;
 
@@ -472,7 +516,7 @@ public class SlimeAI : MonoBehaviour
             {
                 if (mPath[i].y - mPath[prevNodeId].y >= jumpHeight)
                     jumpHeight = mPath[i].y - mPath[prevNodeId].y;
-                if (mPath[i].y - mPath[prevNodeId].y < jumpHeight || GameGrid.instance.IsGround(mPath[i].x, mPath[i].y - 1))
+                if (mPath[i].y - mPath[prevNodeId].y < jumpHeight || GameGrid.instance.IsGround(mPath[i].x, mPath[i].y-1))
                     return GetJumpFrameCount(jumpHeight);
             }
         }
@@ -480,30 +524,9 @@ public class SlimeAI : MonoBehaviour
         return 0;
     }
 
-    int GetJumpFrameCount(int deltaY)
+    float GetJumpFrameCount(int deltaY)
     {
-        if (deltaY <= 0)
-            return 0;
-        else
-        {
-            switch (deltaY)
-            {
-                case 1:
-                    return 1;
-                case 2:
-                    return 2;
-                case 3:
-                    return 6;
-                case 4:
-                    return 9;
-                case 5:
-                    return 15;
-                case 6:
-                    return 21;
-                default:
-                    return 30;
-            }
-        }
+        return Mathf.Min((float)deltaY, entity.maxJumpHeight);
     }
 
     private void OnDrawGizmos()

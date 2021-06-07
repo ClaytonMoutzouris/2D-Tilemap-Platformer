@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EnemyEntity : Entity
 {
-    public float jumpHeight = 3f;
+    public float maxJumpHeight = 3f;
 
     public PhysicsBody2D _controller;
     public Vector3 mOldPosition;
@@ -19,6 +19,9 @@ public class EnemyEntity : Entity
         base.Awake();
 
         _controller = GetComponent<PhysicsBody2D>();
+        //_controller.onControllerCollidedEvent += onControllerCollider;
+        _controller.onTriggerEnterEvent += onTriggerEnterEvent;
+        _controller.onTriggerExitEvent += onTriggerExitEvent;
     }
 
     // Update is called once per frame
@@ -34,6 +37,20 @@ public class EnemyEntity : Entity
 
         _velocity = _controller.velocity;
 
+    }
+
+    void onTriggerEnterEvent(Collider2D col)
+    {
+        //Debug.Log("onTriggerEnterEvent: " + col.gameObject.name);
+    }
+
+
+    void onTriggerExitEvent(Collider2D col)
+    {
+        if(col.gameObject.layer == LayerMask.NameToLayer("OneWayPlatform"))
+        {
+            _controller.ignoreOneWayPlatformsThisFrame = false;
+        }
     }
 }
 

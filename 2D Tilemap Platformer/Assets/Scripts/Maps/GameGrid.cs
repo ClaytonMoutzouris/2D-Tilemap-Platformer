@@ -157,7 +157,7 @@ public class GameGrid : MonoBehaviour
 
     public bool IsGround(int x, int y)
     {
-        return tilemaps[(int)TileMapLayersEnum.Ground].HasTile(new Vector3Int(x, y, 0));
+        return tilemaps[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0)) || tilemaps[(int)TileMapLayersEnum.Ground].HasTile(new Vector3Int(x, y, 0));
     }
 
     public bool IsOneWayPlatform(int x, int y)

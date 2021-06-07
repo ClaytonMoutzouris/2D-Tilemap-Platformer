@@ -90,7 +90,7 @@ public class EnemyAI : MonoBehaviour
 
             if (entity._controller.collisionState.left || entity._controller.collisionState.right || (target.transform.position.y - transform.position.y) > 2.5)
             {
-                Jump();
+                Jump(entity.maxJumpHeight);
 
             }
 
@@ -114,7 +114,7 @@ public class EnemyAI : MonoBehaviour
     {
         // ENTER THE ATTACK STATE
         //entity.normalizedHorizontalSpeed = entity.GetDirection();
-        entity._velocity.y = Mathf.Sqrt(entity.jumpHeight/2 * -GambleConstants.GRAVITY);
+        entity._velocity.y = Mathf.Sqrt(entity.maxJumpHeight/2 * -GambleConstants.GRAVITY);
         //entity._velocity.x = entity.GetDirection();
 
         // EXECUTE ATTACK STATE
@@ -183,7 +183,7 @@ public class EnemyAI : MonoBehaviour
 
     #endregion
 
-    public void Jump()
+    public void Jump(float jumpHeight)
     {
         if (!entity._controller.collisionState.below)
         {
@@ -191,7 +191,12 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        entity._velocity.y = Mathf.Sqrt(2 * entity.jumpHeight * -GambleConstants.GRAVITY);
+        if(jumpHeight > entity.maxJumpHeight)
+        {
+            jumpHeight = entity.maxJumpHeight;
+        }
+
+        entity._velocity.y = Mathf.Sqrt(2 * jumpHeight * -GambleConstants.GRAVITY);
 
     }
 

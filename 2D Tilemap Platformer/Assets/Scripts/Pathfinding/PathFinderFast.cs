@@ -233,12 +233,14 @@ namespace Algorithms
                 while (touchedLocations.Count > 0)
                     nodes[touchedLocations.Pop()].Clear();
 				
+                
 				if (mGrid[end.x, end.y] == 0)
                 {
                     Debug.Log("Return 1");
-                    return null;
+                    return mClose;
 
                 }
+                
 
                 mFound              = false;
                 mStop               = false;
@@ -293,7 +295,7 @@ namespace Algorithms
                         mStopped = true;
                         Debug.Log("Return 2");
 
-                        return null;
+                        return mClose;
                     }
 
                     //Lets calculate each successors
@@ -476,7 +478,7 @@ namespace Algorithms
                 mStopped = true;
                 Debug.Log("Return 3");
 
-                return null;
+                return mClose;
             }
         }
         #endregion

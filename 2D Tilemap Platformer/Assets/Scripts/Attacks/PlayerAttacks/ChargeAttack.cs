@@ -13,7 +13,7 @@ public class ChargeAttack : Attack
         entity = user;
         StartUp();
 
-        entity.movementState = PlayerMovementState.Charge;
+        entity.movementState = PlayerMovementState.Attacking;
         entity._velocity.x = entity.GetDirection() * chargeSpeed;
 
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;

@@ -178,6 +178,7 @@ public class EnemyAI : MonoBehaviour
     public void FireProjectile(Projectile projectile)
     {
         Projectile proj = Instantiate(projectile, transform.position, Quaternion.identity);
+        proj._attackObject.SetOwner(entity);
         proj.SetDirection(entity.GetDirection() * Vector2.right);
     }
 

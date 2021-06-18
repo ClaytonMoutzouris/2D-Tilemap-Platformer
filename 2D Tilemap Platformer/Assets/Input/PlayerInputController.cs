@@ -1,0 +1,326 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+public enum PlayerInputState { Game, Inventory, Paused, NavigationMenu, GameOver, Shop };
+
+
+public class PlayerInputController : MonoBehaviour
+{
+    public NewGamepadInput mGamepadInput;
+    //Eventually, the playres will have this component. It will handle transitions between different input states and allow swapping between keyboard and gamepad and rebinding input
+    public PlayerInputState inputState = PlayerInputState.Game;
+    public float[] axisInput = new float[(int)AxisInput.Count];
+    public float[] previousAxisInput = new float[(int)AxisInput.Count];
+
+    public bool[] buttonInput = new bool[(int)ButtonInput.Count];
+    public bool[] previousButtonInput = new bool[(int)ButtonInput.Count];
+
+    public void Start()
+    {
+        axisInput = new float[(int)AxisInput.Count];
+        previousAxisInput = new float[(int)AxisInput.Count];
+
+        buttonInput = new bool[(int)ButtonInput.Count];
+        previousButtonInput = new bool[(int)ButtonInput.Count];
+}
+
+    public void SetGamepadInput(NewGamepadInput gamepad)
+    {
+        mGamepadInput = gamepad;
+    }
+
+    void UpdatePreviousInputs()
+    {
+        var axisCount = (byte)AxisInput.Count;
+
+        for (byte i = 0; i < axisCount; ++i)
+        {
+            previousAxisInput[i] = axisInput[i];
+        }
+
+        var buttonCount = (byte)ButtonInput.Count;
+
+        for (byte i = 0; i < buttonCount; ++i)
+        {
+            previousButtonInput[i] = buttonInput[i];
+        }
+    }
+
+    public bool GetButtonDown(ButtonInput button)
+    {
+        return (buttonInput[(int)button] && !previousButtonInput[(int)button]);
+    }
+
+    public bool GetButton(ButtonInput button)
+    {
+        return buttonInput[(int)button];
+    }
+
+    public float GetAxisValue(AxisInput axis)
+    {
+        return axisInput[(int)axis];
+    }
+
+    public bool GetLeftStickTapUp()
+    {
+        return (axisInput[(int)AxisInput.LeftStickY] > 0.5f && previousAxisInput[(int)AxisInput.LeftStickY] < 0.5f);
+    }
+
+    public bool GetLeftStickTapDown()
+    {
+        return (axisInput[(int)AxisInput.LeftStickY] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickY] > -0.5f);
+    }
+
+    public bool GetLeftStickTapRight()
+    {
+        return (axisInput[(int)AxisInput.LeftStickX] > 0.5f && previousAxisInput[(int)AxisInput.LeftStickX] < 0.5f);
+    }
+
+    public bool GetLeftStickTapLeft()
+    {
+        return (axisInput[(int)AxisInput.LeftStickX] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickX] > -0.5f);
+    }
+
+    public bool GetRightStickTapUp()
+    {
+        return (axisInput[(int)AxisInput.RightStickY] > 0.5f && previousAxisInput[(int)AxisInput.RightStickY] < 0.5f);
+    }
+
+    public bool GetRightStickTapDown()
+    {
+        return (axisInput[(int)AxisInput.RightStickY] < -0.5f && previousAxisInput[(int)AxisInput.RightStickY] > -0.5f);
+    }
+
+    public bool GetRightStickTapRight()
+    {
+        return (axisInput[(int)AxisInput.RightStickX] > 0.5f && previousAxisInput[(int)AxisInput.RightStickX] < 0.5f);
+    }
+
+    public bool GetRightStickTapLeft()
+    {
+        return (axisInput[(int)AxisInput.RightStickX] < -0.5f && previousAxisInput[(int)AxisInput.RightStickX] > -0.5f);
+    }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //Delete all these states and just make more buttons...
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public void Update()
+    {
+        if(!mGamepadInput)
+        {
+            return;
+        }
+        UpdatePreviousInputs();
+        //Debug.Log("Player input " + player.mPlayerIndex + " in " + inputState.ToString());
+        switch (inputState)
+        {
+            case PlayerInputState.Game:
+                //Update the axis inputs
+                axisInput[(int)AxisInput.LeftStickX] = mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickX];
+                axisInput[(int)AxisInput.LeftStickY] = mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickY];
+                axisInput[(int)AxisInput.RightStickX] = mGamepadInput.axisInputs[(int)GamepadAxis.RightStickX];
+                axisInput[(int)AxisInput.RightStickY] = mGamepadInput.axisInputs[(int)GamepadAxis.RightStickY];
+
+                //Update the button inputs
+                //These are for reading in "taps" of the stick buttons
+                buttonInput[(int)ButtonInput.DPad_Left] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadLeft];
+                buttonInput[(int)ButtonInput.DPad_Right] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadRight];
+                buttonInput[(int)ButtonInput.Interact] = mGamepadInput.buttonInputs[(int)GamepadButtons.WestButton];
+                buttonInput[(int)ButtonInput.DPad_Up] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];
+
+                buttonInput[(int)ButtonInput.Jump] = mGamepadInput.buttonInputs[(int)GamepadButtons.SouthButton];
+                buttonInput[(int)ButtonInput.MeleeAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.QuickHeal] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
+                buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
+                buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
+                buttonInput[(int)ButtonInput.Minimap] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];
+                buttonInput[(int)ButtonInput.Gadget1] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftBumper];
+                buttonInput[(int)ButtonInput.Fire] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightTrigger];
+                buttonInput[(int)ButtonInput.BeamUp] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadDown];
+                buttonInput[(int)ButtonInput.Gadget2] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
+                buttonInput[(int)ButtonInput.InventoryDrop] = false;
+                buttonInput[(int)ButtonInput.InventoryMove] = false;
+                buttonInput[(int)ButtonInput.InventorySort] = false;
+                buttonInput[(int)ButtonInput.ChangeTabLeft] = false;
+                buttonInput[(int)ButtonInput.ChangeTabRight] = false;
+                buttonInput[(int)ButtonInput.Menu_Back] = false;
+                buttonInput[(int)ButtonInput.FireMode] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightStickPress];
+                buttonInput[(int)ButtonInput.Roll] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftTrigger];
+                buttonInput[(int)ButtonInput.CycleQuickUseLeft] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadLeft];
+                buttonInput[(int)ButtonInput.CycleQuickUseRight] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadRight];
+
+                break;
+
+            case PlayerInputState.Inventory:
+                //Update the axis inputs
+                axisInput[(int)AxisInput.LeftStickX] = 0;
+                axisInput[(int)AxisInput.LeftStickY] = 0;
+                axisInput[(int)AxisInput.RightStickX] = 0;
+                axisInput[(int)AxisInput.RightStickY] = 0;
+
+                //Update the button inputs
+                //These are for reading in "taps" of the stick buttons
+                buttonInput[(int)ButtonInput.LeftStick_Left] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Right] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Down] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Up] = false;
+                buttonInput[(int)ButtonInput.DPad_Left] = false;
+                buttonInput[(int)ButtonInput.DPad_Right] = false;
+                buttonInput[(int)ButtonInput.Interact] = false;
+                buttonInput[(int)ButtonInput.DPad_Up] = false;
+
+                buttonInput[(int)ButtonInput.Jump] = false;
+                buttonInput[(int)ButtonInput.MeleeAttack] = false;
+                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
+                buttonInput[(int)ButtonInput.Pause] = false;
+                buttonInput[(int)ButtonInput.Minimap] = false;
+                buttonInput[(int)ButtonInput.SkipLevel] = false;
+                buttonInput[(int)ButtonInput.Gadget1] = false;
+                buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.BeamUp] = false;
+
+                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.InventoryDrop] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.InventoryMove] = mGamepadInput.buttonInputs[(int)GamepadButtons.WestButton];
+                buttonInput[(int)ButtonInput.InventorySort] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
+                buttonInput[(int)ButtonInput.CycleQuickUseLeft] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseRight] = false;
+                buttonInput[(int)ButtonInput.ChangeTabLeft] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftBumper];
+                buttonInput[(int)ButtonInput.ChangeTabRight] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
+                buttonInput[(int)ButtonInput.Menu_Back] = false;
+                buttonInput[(int)ButtonInput.FireMode] = false;
+                buttonInput[(int)ButtonInput.Roll] = false;
+
+                break;
+
+            case PlayerInputState.NavigationMenu:
+                //Update the axis inputs
+                axisInput[(int)AxisInput.LeftStickX] = 0;
+                axisInput[(int)AxisInput.LeftStickY] = 0;
+                axisInput[(int)AxisInput.RightStickX] = 0;
+                axisInput[(int)AxisInput.RightStickY] = 0;
+
+                //Update the button inputs
+                //These are for reading in "taps" of the stick buttons
+                buttonInput[(int)ButtonInput.LeftStick_Left] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Right] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Down] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Up] = false;
+                buttonInput[(int)ButtonInput.DPad_Left] = false;
+                buttonInput[(int)ButtonInput.DPad_Right] = false;
+                buttonInput[(int)ButtonInput.Interact] = false;
+                buttonInput[(int)ButtonInput.DPad_Up] = false;
+                buttonInput[(int)ButtonInput.BeamUp] = false;
+
+                buttonInput[(int)ButtonInput.Jump] = false;
+                buttonInput[(int)ButtonInput.MeleeAttack] = false;
+                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.PlayerMenu] = false;
+                buttonInput[(int)ButtonInput.Pause] = false;
+                buttonInput[(int)ButtonInput.Minimap] = false;
+                buttonInput[(int)ButtonInput.SkipLevel] = false;
+                buttonInput[(int)ButtonInput.Gadget1] = false;
+                buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.InventoryDrop] = false;
+                buttonInput[(int)ButtonInput.InventoryMove] = false;
+                buttonInput[(int)ButtonInput.InventorySort] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseLeft] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseRight] = false;
+                buttonInput[(int)ButtonInput.ChangeTabLeft] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftBumper];
+                buttonInput[(int)ButtonInput.ChangeTabRight] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
+                buttonInput[(int)ButtonInput.Menu_Back] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.FireMode] = false;
+                buttonInput[(int)ButtonInput.Roll] = false;
+
+                break;
+            case PlayerInputState.Shop:
+                //Update the axis inputs
+                axisInput[(int)AxisInput.LeftStickX] = 0;
+                axisInput[(int)AxisInput.LeftStickY] = 0;
+                axisInput[(int)AxisInput.RightStickX] = 0;
+                axisInput[(int)AxisInput.RightStickY] = 0;
+
+                //Update the button inputs
+                //These are for reading in "taps" of the stick buttons
+                buttonInput[(int)ButtonInput.LeftStick_Left] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Right] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Down] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Up] = false;
+                buttonInput[(int)ButtonInput.DPad_Left] = false;
+                buttonInput[(int)ButtonInput.DPad_Right] = false;
+                buttonInput[(int)ButtonInput.Interact] = false;
+                buttonInput[(int)ButtonInput.DPad_Up] = false;
+                buttonInput[(int)ButtonInput.BeamUp] = false;
+
+                buttonInput[(int)ButtonInput.Jump] = false;
+                buttonInput[(int)ButtonInput.MeleeAttack] = false;
+                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.PlayerMenu] = false;
+                buttonInput[(int)ButtonInput.Pause] = false;
+                buttonInput[(int)ButtonInput.Minimap] = false;
+                buttonInput[(int)ButtonInput.SkipLevel] = false;
+                buttonInput[(int)ButtonInput.Gadget1] = false;
+                buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.InventoryDrop] = false;
+                buttonInput[(int)ButtonInput.InventoryMove] = false;
+                buttonInput[(int)ButtonInput.InventorySort] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseLeft] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseRight] = false;
+                buttonInput[(int)ButtonInput.ChangeTabLeft] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftBumper];
+                buttonInput[(int)ButtonInput.ChangeTabRight] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
+                buttonInput[(int)ButtonInput.Menu_Back] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.FireMode] = false;
+                buttonInput[(int)ButtonInput.Roll] = false;
+
+                break;
+
+            case PlayerInputState.Paused:
+               //Update the axis inputs
+                axisInput[(int)AxisInput.LeftStickX] = 0;
+                axisInput[(int)AxisInput.LeftStickY] = 0;
+                axisInput[(int)AxisInput.RightStickX] = 0;
+                axisInput[(int)AxisInput.RightStickY] = 0;
+
+                //Update the button inputs
+                //These are for reading in "taps" of the stick buttons
+                buttonInput[(int)ButtonInput.LeftStick_Left] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Right] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Down] = false;
+                buttonInput[(int)ButtonInput.LeftStick_Up] = false;
+                buttonInput[(int)ButtonInput.DPad_Left] = false;
+                buttonInput[(int)ButtonInput.DPad_Right] = false;
+                buttonInput[(int)ButtonInput.Interact] = false;
+                buttonInput[(int)ButtonInput.DPad_Up] = false;
+                buttonInput[(int)ButtonInput.BeamUp] = false;
+
+                buttonInput[(int)ButtonInput.Jump] = false;
+                buttonInput[(int)ButtonInput.MeleeAttack] = false;
+                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.PlayerMenu] = false;
+                buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
+                buttonInput[(int)ButtonInput.Minimap] = false;
+                buttonInput[(int)ButtonInput.SkipLevel] = false;
+                buttonInput[(int)ButtonInput.Gadget1] = false;
+                buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.InventoryDrop] = false;
+                buttonInput[(int)ButtonInput.InventoryMove] = false;
+                buttonInput[(int)ButtonInput.InventorySort] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseLeft] = false;
+                buttonInput[(int)ButtonInput.CycleQuickUseRight] = false;
+                buttonInput[(int)ButtonInput.ChangeTabLeft] = false;
+                buttonInput[(int)ButtonInput.ChangeTabRight] = false;
+                buttonInput[(int)ButtonInput.Menu_Back] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.FireMode] = false;
+                buttonInput[(int)ButtonInput.Roll] = false;
+
+                break;
+        }
+        
+    }
+}

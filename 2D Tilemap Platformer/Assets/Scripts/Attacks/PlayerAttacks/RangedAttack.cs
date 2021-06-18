@@ -19,8 +19,7 @@ public class RangedAttack : Attack
 
         //WeaponObject attackObject = player._attackManager.meleeWeapon.SetWeapon(objectPrototypes[0]);
 
-        Projectile proj = Instantiate(projectile, user.transform.position, Quaternion.identity);
-        proj.SetDirection(entity.GetDirection()*Vector2.right);
+
 
 
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;

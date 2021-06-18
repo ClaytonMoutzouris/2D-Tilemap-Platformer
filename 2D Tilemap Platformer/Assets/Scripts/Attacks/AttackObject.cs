@@ -16,6 +16,9 @@ public class AttackObject : MonoBehaviour
 
     //Information about the attack such as damage, abilities, etc
     public AttackData attackData;
+    public int damage = 5;
+
+    public Entity owner;
 
     //These are mostly for testing purposes
     public Color inactiveColor;
@@ -37,6 +40,11 @@ public class AttackObject : MonoBehaviour
     public void ClearHits()
     {
         hits.Clear();
+    }
+
+    public void SetOwner(Entity entity)
+    {
+        owner = entity;
     }
 
     protected virtual void Update()
@@ -70,10 +78,14 @@ public class AttackObject : MonoBehaviour
             return;
         }
 
-        hits.Add(collider);
         Hurtbox hurtbox = collider.GetComponent<Hurtbox>();
 
-        hurtbox?.GetHit(this);
+        if(hurtbox != null && hurtbox.entity != owner)
+        {
+            hurtbox?.GetHit(this);
+            hits.Add(collider);
+        }
+
     }
 
     private void OnDrawGizmos()

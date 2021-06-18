@@ -216,6 +216,7 @@ public class SlimeAI : MonoBehaviour
     public void FireProjectile(Projectile projectile)
     {
         Projectile proj = Instantiate(projectile, transform.position, Quaternion.identity);
+        proj._attackObject.SetOwner(entity);
         proj.SetDirection(GetAim());
     }
 
@@ -223,6 +224,7 @@ public class SlimeAI : MonoBehaviour
     public void FireProjectile(Projectile projectile, float angle)
     {
         Projectile proj = Instantiate(projectile, transform.position, Quaternion.identity);
+        proj._attackObject.SetOwner(entity);
         proj.SetDirection(MathUtilities.DegreeToVector2(angle));
     }
 

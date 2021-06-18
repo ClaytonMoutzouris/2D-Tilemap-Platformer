@@ -4,6 +4,7 @@ using System.Collections;
 
 public class SmoothFollow : MonoBehaviour
 {
+    public static SmoothFollow instance;
 	public Transform target;
 	public float smoothDampTime = 0.2f;
 	[HideInInspector]
@@ -17,9 +18,22 @@ public class SmoothFollow : MonoBehaviour
 	
 	void Awake()
 	{
-		transform = gameObject.transform;
+        instance = this;
+
+        transform = gameObject.transform;
+
+        if (!target)
+        {
+            return;
+        }
 		_playerController = target.GetComponent<PhysicsBody2D>();
 	}
+
+    public void SetPlayer(PlayerController player)
+    {
+        _playerController = player._controller;
+        target = _playerController.transform;
+    }
 	
 	
 	void LateUpdate()
@@ -38,6 +52,11 @@ public class SmoothFollow : MonoBehaviour
 
 	void updateCameraPosition()
 	{
+        if(!target)
+        {
+            return;
+        }
+
 		if( _playerController == null )
 		{
 			transform.position = Vector3.SmoothDamp( transform.position, target.position - cameraOffset, ref _smoothDampVelocity, smoothDampTime );

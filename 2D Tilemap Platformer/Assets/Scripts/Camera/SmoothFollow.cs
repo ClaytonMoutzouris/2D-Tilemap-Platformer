@@ -1,18 +1,16 @@
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 public class SmoothFollow : MonoBehaviour
 {
     public static SmoothFollow instance;
-	public Transform target;
 	public float smoothDampTime = 0.2f;
 	[HideInInspector]
-	public new Transform transform;
 	public Vector3 cameraOffset;
 	public bool useFixedUpdate = false;
 	
-	private PhysicsBody2D _playerController;
+	private List<PlayerController> players;
 	private Vector3 _smoothDampVelocity;
 	
 	
@@ -20,23 +18,22 @@ public class SmoothFollow : MonoBehaviour
 	{
         instance = this;
 
-        transform = gameObject.transform;
-
-        if (!target)
-        {
-            return;
-        }
-		_playerController = target.GetComponent<PhysicsBody2D>();
+        players = new List<PlayerController>();
 	}
 
-    public void SetPlayer(PlayerController player)
+    public void AddPlayer(PlayerController player)
     {
-        _playerController = player._controller;
-        target = _playerController.transform;
+        players.Add(player);
     }
-	
-	
-	void LateUpdate()
+
+    public void RemovePlayer(PlayerController player)
+    {
+        players.Remove(player);
+
+    }
+
+
+    void LateUpdate()
 	{
 		if( !useFixedUpdate )
 			updateCameraPosition();
@@ -52,27 +49,24 @@ public class SmoothFollow : MonoBehaviour
 
 	void updateCameraPosition()
 	{
-        if(!target)
+        if(players == null || players.Count <= 0)
         {
             return;
         }
 
-		if( _playerController == null )
-		{
-			transform.position = Vector3.SmoothDamp( transform.position, target.position - cameraOffset, ref _smoothDampVelocity, smoothDampTime );
-			return;
-		}
-		
-		if( _playerController.velocity.x > 0 )
-		{
-			transform.position = Vector3.SmoothDamp( transform.position, target.position - cameraOffset, ref _smoothDampVelocity, smoothDampTime );
-		}
-		else
-		{
-			var leftOffset = cameraOffset;
-			leftOffset.x *= -1;
-			transform.position = Vector3.SmoothDamp( transform.position, target.position - leftOffset, ref _smoothDampVelocity, smoothDampTime );
-		}
+        Vector3 averageVector = Vector3.zero;
+
+        foreach(PlayerController player in players)
+        {
+            averageVector += player.transform.position;
+        }
+
+        averageVector /= players.Count;
+
+
+
+		transform.position = Vector3.SmoothDamp( transform.position, averageVector - cameraOffset, ref _smoothDampVelocity, smoothDampTime );
+
 	}
 	
 }

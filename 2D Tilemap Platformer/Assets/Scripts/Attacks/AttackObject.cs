@@ -88,6 +88,7 @@ public class AttackObject : MonoBehaviour
 
     }
 
+    /*
     private void OnDrawGizmos()
     {
 
@@ -98,6 +99,7 @@ public class AttackObject : MonoBehaviour
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(hitbox.size.x + hitbox.offset.x, hitbox.size.y + hitbox.offset.x, 1)); // Because size is halfExtents
 
     }
+    */
 
     private void checkGizmoColor()
     {

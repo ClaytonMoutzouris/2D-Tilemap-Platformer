@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Knockedback, Dead };
+public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Knockedback, Dead, Roll };
 
 public class PlayerController : Entity
 {
@@ -21,6 +21,9 @@ public class PlayerController : Entity
 
     public PhysicsBody2D _controller;
     public PlayerInputController _input;
+
+    public float rollSpeed = 2;
+    public LayerMask rollMask;
 
     //Why not just use the controllers velocity?
     public Vector3 _velocity;
@@ -112,8 +115,10 @@ public class PlayerController : Entity
     // the Update loop contains a very simple example of moving the character around and controlling the animation
     void Update()
 	{
-
-        normalizedHorizontalSpeed = 0;
+        if(movementState != PlayerMovementState.Roll)
+        {
+            normalizedHorizontalSpeed = 0;
+        }
         normalizedVerticalSpeed = 0;
 
         ignoreGravity = false;
@@ -160,12 +165,19 @@ public class PlayerController : Entity
 
         }
 
-        if (_input.GetButtonDown(ButtonInput.MeleeAttack) && movementState != PlayerMovementState.GrabLedge && movementState != PlayerMovementState.Knockedback)
+        if (_input.GetButtonDown(ButtonInput.MeleeAttack) && movementState != PlayerMovementState.GrabLedge
+            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Knockedback)
         {
             //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
             
             _attackManager.ActivateAttack();
 
+        }
+
+        if(_input.GetButtonDown(ButtonInput.Roll) && movementState != PlayerMovementState.GrabLedge
+            && movementState != PlayerMovementState.Attacking && movementState != PlayerMovementState.Knockedback)
+        {
+            StartCoroutine(Rolling());
         }
 
 
@@ -276,6 +288,8 @@ public class PlayerController : Entity
     //process the character movement when Idle
     void Idle()
     {
+        normalizedHorizontalSpeed = 0;
+
         if (!_controller.isGrounded)
         {
             movementState = PlayerMovementState.Jump;
@@ -333,6 +347,8 @@ public class PlayerController : Entity
     //process the character movement when walking
     void Walking()
     {
+        normalizedHorizontalSpeed = 0;
+
         if (!_controller.isGrounded)
         {
             movementState = PlayerMovementState.Jump;
@@ -392,6 +408,8 @@ public class PlayerController : Entity
 
     void Jumping()
     {
+        normalizedHorizontalSpeed = 0;
+
         if (_controller.isGrounded && (!_controller.collisionState.wasGroundedLastFrame || _velocity.y <= 0))
         {
             movementState = PlayerMovementState.Idle;
@@ -516,7 +534,6 @@ public class PlayerController : Entity
 
         if (health.currentHealth <= 0)
         {
-            Debug.Log("Player died");
             movementState = PlayerMovementState.Dead;
         }
     }
@@ -533,27 +550,27 @@ public class PlayerController : Entity
     public IEnumerator Ressurect()
     {
         float resTimestamp = Time.time;
-        int resCounter = 0;
+        int resCounter = 1;
         int resCountFull = 4;
+        ShowFloatingText(resCounter + "", Color.blue);
 
-        while(movementState == PlayerMovementState.Dead)
+        while (movementState == PlayerMovementState.Dead)
         {
             if (!_input.GetButton(ButtonInput.Jump)) {
                 yield break;
             }
 
-            if (Time.time >= resTimestamp + (resCounter + 1))
+            if (Time.time >= resTimestamp + resCounter)
             {
                 resCounter++;
                 if (resCounter >= resCountFull)
                 {
                     movementState = PlayerMovementState.Idle;
                     health.SetHealth(20);
-                    Debug.Log("Player revived");
                     break;
                 }
 
-                ShowFloatingText(resCounter + "", Color.green);
+                ShowFloatingText(resCounter + "", Color.blue);
             }
 
 
@@ -562,5 +579,46 @@ public class PlayerController : Entity
         }
 
     }
+
+    public IEnumerator Rolling()
+    {
+        movementState = PlayerMovementState.Roll;
+        float rollTimestamp = Time.time;
+        float speedMod = rollSpeed;
+        movementSpeed *= speedMod;
+        int rollDirection = GetDirection();
+        hurtbox.colliderState = ColliderState.Closed;
+        _controller.platformMask ^= rollMask;
+
+        while (movementState == PlayerMovementState.Roll)
+        {
+            _animator.Play(Animator.StringToHash("Roll"));
+            _animator.speed = speedMod;
+
+            if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Roll"))
+            {
+                yield return null;
+            }
+
+            //This checks if the animation has completed one cycle, and won't progress until it has
+            //This allows for the animator speed to be adjusted by the "attack speed"
+            while (_animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
+            {
+                normalizedHorizontalSpeed = rollDirection;
+                yield return null;
+            }
+
+            movementSpeed /= speedMod;
+            _animator.speed = 1;
+            hurtbox.colliderState = ColliderState.Open;
+            _controller.platformMask |= rollMask;
+
+            movementState = PlayerMovementState.Idle;
+            yield return null;
+        }
+
+
+    }
+
 
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Hurtbox : MonoBehaviour
 {
-    private ColliderState colliderState = ColliderState.Open;
+    public ColliderState colliderState = ColliderState.Open;
     public BoxCollider2D boxCollider;
     //The entity this hurtbox belongs to
     public Entity entity;
@@ -12,6 +12,11 @@ public class Hurtbox : MonoBehaviour
     //public Entity 
     public void GetHit(AttackObject attack)
     {
+        if(colliderState == ColliderState.Closed)
+        {
+            return;
+        }
+
         entity.GetHit(attack);
     }
 

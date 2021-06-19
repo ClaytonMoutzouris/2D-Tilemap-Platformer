@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Rename this to dash attack so i can make a charge up attack aswell
 public class ChargeAttack : Attack
 {
     public float chargeSpeed = 16;

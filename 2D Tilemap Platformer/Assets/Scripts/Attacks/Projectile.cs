@@ -9,6 +9,7 @@ public class Projectile : MonoBehaviour
     public bool pierce = false;
     public bool boomerang = false;
     public bool homing = false;
+    public bool ignoreGround = false;
 
     public Vector2 direction;
     public float lifeTime = 1;
@@ -59,7 +60,12 @@ public class Projectile : MonoBehaviour
 
         _controller.move(velocity * Time.deltaTime);
 
-        if(startTime + lifeTime <= Time.time)
+        if(_controller.collisionState.hasCollision() && !ignoreGround)
+        {
+            Destroy(gameObject);
+        }
+
+        if (startTime + lifeTime <= Time.time)
         {
             Destroy(gameObject);
         }

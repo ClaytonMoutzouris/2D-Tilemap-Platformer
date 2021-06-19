@@ -14,12 +14,14 @@ public class Entity : MonoBehaviour
 
     public bool ignoreGravity = false;
     public Health health;
+    public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
 
     // Start is called before the first frame update
     void Start()
     {
         health = GetComponent<Health>();
+        hurtbox = GetComponentInChildren<Hurtbox>();
     }
 
     protected virtual void Awake()

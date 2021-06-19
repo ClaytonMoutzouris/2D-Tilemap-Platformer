@@ -22,7 +22,7 @@ public class NewGamepadInput : MonoBehaviour
         PlayerController newPlayer = Instantiate(GamepadInputManager.instance.playerPrefab);
         newPlayer.transform.position = (Vector2)Camera.main.transform.position;
         newPlayer._input.SetGamepadInput(this);
-        SmoothFollow.instance.SetPlayer(newPlayer);
+        SmoothFollow.instance.AddPlayer(newPlayer);
         //CreationPanelsUI.instance.creationPanels[input.playerIndex].NewCharacter(this);
 
         for (int buttons = 0; buttons < (int)GamepadButtons.Count; buttons++)

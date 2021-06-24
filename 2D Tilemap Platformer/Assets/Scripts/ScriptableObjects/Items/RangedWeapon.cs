@@ -5,6 +5,5 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "RangedWeapon", menuName = "ScriptableObjects/Items/Weapon/RangedWeapon")]
 public class RangedWeapon : Weapon
 {
-    public Projectile projectile;
 
 }

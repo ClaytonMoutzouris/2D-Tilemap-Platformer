@@ -81,12 +81,6 @@ public class AttackManager : MonoBehaviour
 
         SetWeapon(weapons[index]);
 
-        //wepRenderer.SetWeapon(equippedWeapon);
-        /*
-        AttackObject attackObject = equippedWeapon.weaponObject.GetComponent<AttackObject>();
-        if (attackObject)
-            equippedWeapon.attacks[0].SetObject(attackObject);
-        */
     }
 
     public bool IsAttacking()
@@ -122,22 +116,46 @@ public class AttackManager : MonoBehaviour
             return;
         }
 
-        Attack newAttack = Instantiate(equippedWeapon.GetNextAttack(), transform);
+        Attack newAttack = equippedWeapon.GetNextAttack();
+        if (newAttack == null)
+        {
+            return;
+        }
         StartCoroutine(newAttack.Activate(entity));
         activeAttack = newAttack;
-        lastAttackTime = Time.time;
 
     }
 
+    public void ActivateHeavyAttack()
+    {
+        if (activeAttack != null)
+        {
+            return;
+        }
+
+        Attack newAttack = equippedWeapon.GetHeavyAttack();
+        if(newAttack == null)
+        {
+            return;
+        }
+        StartCoroutine(newAttack.Activate(entity));
+        activeAttack = newAttack;
+    }
 
     public void FireProjectile()
     {
-        if(equippedWeapon is RangedWeapon ranged)
+        Projectile proj = equippedWeapon.projectile;
+
+        if(proj != null)
         {
-            Projectile proj = Instantiate(ranged.projectile, entity.transform.position, Quaternion.identity);
+            proj = Instantiate(proj, entity.transform.position, Quaternion.identity);
             proj._attackObject.SetOwner(entity);
+            proj._attackObject.damage = equippedWeapon.damage;
+            proj._attackObject.knockbackPower = equippedWeapon.knockbackPower;
             proj.SetDirection(entity.GetDirection() * Vector2.right);
         }
 
+
     }
+
 }

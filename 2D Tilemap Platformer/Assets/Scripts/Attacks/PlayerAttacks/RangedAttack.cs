@@ -2,14 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "RangedAttack", menuName = "ScriptableObjects/Attacks/RangedAttack")]
 public class RangedAttack : Attack
 {
-    public Projectile projectile;
-
-    public void SetProjectile(Projectile projectile)
-    {
-        this.projectile = projectile;
-    }
 
     //A basic attack.
     public override IEnumerator Activate(PlayerController user)

@@ -16,6 +16,8 @@ public class Entity : MonoBehaviour
     public Health health;
     public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
+    public List<ParticleSystem> effects = new List<ParticleSystem>();
+    public SpriteRenderer spriteRenderer;
 
     // Start is called before the first frame update
     void Start()
@@ -27,6 +29,7 @@ public class Entity : MonoBehaviour
     protected virtual void Awake()
     {
         _animator = GetComponent<Animator>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
     }
 
@@ -36,6 +39,19 @@ public class Entity : MonoBehaviour
         
     }
 
+    public ParticleSystem AddEffect(ParticleSystem effectPrefab)
+    {
+        ParticleSystem newEffect = Instantiate(effectPrefab, transform);
+        effects.Add(newEffect);
+        return newEffect;
+    }
+
+    public void RemoveEffect(ParticleSystem effect)
+    {
+        effects.Remove(effect);
+        Destroy(effect.gameObject);
+    }
+
     public int GetDirection()
     {
         return 1 * (int)Mathf.Sign(transform.localScale.x);
@@ -43,7 +59,6 @@ public class Entity : MonoBehaviour
 
     public virtual void GetHit(AttackObject attack)
     {
-        Debug.Log("Hit for " + attack.damage);
         health.LoseHealth(attack.damage);
         //health -= attack.damage;
 

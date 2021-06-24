@@ -22,6 +22,7 @@ public class Projectile : MonoBehaviour
     public float projSpeed = 5;
     //Might want to create a seperate projectile class for "boomerangs", but modularity has its merits aswell
     public float elasticity = -0.5f;
+    bool returning = false;
 
     public void Awake()
     {
@@ -80,7 +81,14 @@ public class Projectile : MonoBehaviour
 
     public void Boomerang(ref Vector3 vel)
     {
-        vel = vel - vel * elasticity * (Time.time - startTime);
+        float returnSpeed = elasticity * (Time.time - startTime);
+        vel = vel - vel * returnSpeed;
+
+        if(!returning && returnSpeed >= 1)
+        {
+            returning = true;
+            _attackObject.ClearHits();
+        }
     }
 
 }

@@ -28,7 +28,10 @@ public class SmoothFollow : MonoBehaviour
 
     public void RemovePlayer(PlayerController player)
     {
-        players.Remove(player);
+        if (players.Contains(player))
+        {
+            players.Remove(player);
+        }
 
     }
 

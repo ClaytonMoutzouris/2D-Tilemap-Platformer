@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Attack : MonoBehaviour
+[CreateAssetMenu(fileName = "Attack", menuName = "ScriptableObjects/Attacks/Attack")]
+public class Attack : ScriptableObject
 {
 
-    public bool isActive = false;
     public AnimationClip attackAnimation;
+    public AnimationClip attackAnimation2;
+
     public float attackSpeed = 1;
     public PlayerController entity;
 
@@ -31,16 +33,13 @@ public class Attack : MonoBehaviour
 
     public virtual void StartUp()
     {
-        isActive = true;
 
     }
 
     public virtual void CleanUp()
     {
         entity._animator.speed = 1;
-        isActive = false;
-        Destroy(gameObject);
-
+        entity._attackManager.activeAttack = null;
     }
 
 }

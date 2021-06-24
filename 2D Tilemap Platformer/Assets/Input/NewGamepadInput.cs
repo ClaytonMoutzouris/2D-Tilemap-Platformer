@@ -12,6 +12,7 @@ public class NewGamepadInput : MonoBehaviour
     public PlayerInput input;
     public float[] axisInputs = new float[(int)GamepadAxis.Count];
     public bool[] buttonInputs = new bool[(int)GamepadButtons.Count];
+    public PlayerController player;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,10 +21,41 @@ public class NewGamepadInput : MonoBehaviour
         transform.parent = GamepadInputManager.instance.transform;
 
         PlayerController newPlayer = Instantiate(GamepadInputManager.instance.playerPrefab);
+        newPlayer.playerIndex = input.playerIndex;
         newPlayer.transform.position = (Vector2)Camera.main.transform.position;
         newPlayer._input.SetGamepadInput(this);
-        SmoothFollow.instance.AddPlayer(newPlayer);
+
+        switch(input.playerIndex)
+        {
+            case 0:
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodPrimary, Color.blue);
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodSecondary, new Color(0.0f, 0.0f, 0.5f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.ShirtPrimary, new Color(0.25f, 0.25f, 0.85f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.Pants, new Color(0.35f, 0.35f, 0.35f, 1));
+                break;
+            case 1:
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodPrimary, Color.red);
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodSecondary, new Color(0.5f, 0.0f, 0.0f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.ShirtPrimary, new Color(0.85f, 0.25f, 0.25f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.Pants, new Color(0.35f, 0.35f, 0.35f, 1));
+                break;
+            case 2:
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodPrimary, Color.green);
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodSecondary, new Color(0.0f, 0.5f, 0.0f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.ShirtPrimary, new Color(0.25f, 0.85f, 0.25f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.Pants, new Color(0.35f, 0.35f, 0.35f, 1));
+                break;
+            case 3:
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodPrimary, Color.yellow);
+                newPlayer.colorSwap.SwapColor(SwapIndex.HoodSecondary, new Color(0.7f, 0.7f, 0.0f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.ShirtPrimary, new Color(0.85f, 0.85f, 0.25f, 1));
+                newPlayer.colorSwap.SwapColor(SwapIndex.Pants, new Color(0.35f, 0.35f, 0.35f, 1));
+                break;
+        }
+
+        GameCamera.instance.AddPlayer(newPlayer);
         //CreationPanelsUI.instance.creationPanels[input.playerIndex].NewCharacter(this);
+        player = newPlayer;
 
         for (int buttons = 0; buttons < (int)GamepadButtons.Count; buttons++)
         {

@@ -15,7 +15,8 @@ public class WeaponObject : AttackObject
         hitbox.size = weapon.weaponBase.weaponObjectPrototype.hitbox.size;
         hitbox.offset = weapon.weaponBase.weaponObjectPrototype.hitbox.offset;
         //gameObject.SetActive(false);
-
+        damage = weapon.damage;
+        knockbackPower = weapon.knockbackPower;
         //Add and set the animator
         if (animator == null)
         {

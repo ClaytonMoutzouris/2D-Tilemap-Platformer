@@ -19,6 +19,7 @@ public class AttackObject : MonoBehaviour
     public int damage = 5;
 
     public Entity owner;
+    public float knockbackPower = 5;
 
     //These are mostly for testing purposes
     public Color inactiveColor;

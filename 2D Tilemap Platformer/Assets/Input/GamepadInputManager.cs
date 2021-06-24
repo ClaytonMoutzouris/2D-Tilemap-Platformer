@@ -12,6 +12,8 @@ public class GamepadInputManager : MonoBehaviour
     public NewGamepadInput[] gamepadInputs = new NewGamepadInput[4];
     public PlayerController playerPrefab;
     public PlayerController[] players;
+    public int numActivePlayers = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +31,8 @@ public class GamepadInputManager : MonoBehaviour
 
     private void OnPlayerJoined(PlayerInput playerInput)
     {
+        numActivePlayers++;
+
         Debug.Log("Player " + playerInput.playerIndex+1 + " joined!");
         //input = playerInput;
 
@@ -37,12 +41,20 @@ public class GamepadInputManager : MonoBehaviour
 
     private void OnPlayerLeft(PlayerInput playerInput)
     {
+        numActivePlayers--;
         Debug.Log("Player " + inputManager.playerCount+1 + " left!");
 
     }
 
     public void RemovePlayerAtIndex(int index)
     {
+        if(gamepadInputs[index] == null)
+        {
+            return;
+        }
+        GameCamera.instance.RemovePlayer(gamepadInputs[index].player);
+        //Destroy(gamepadInputs[index].player._input);
+        gamepadInputs[index].player._input.SetGamepadInput(null);
         Destroy(gamepadInputs[index].gameObject);
     }
 

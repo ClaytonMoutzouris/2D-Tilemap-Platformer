@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
-public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Knockedback, Dead, Roll };
+public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Knockedback, Dead, Roll, Crouch };
 
 public class PlayerController : Entity
 {
@@ -15,9 +16,8 @@ public class PlayerController : Entity
     public Vector3 ledgeGrabPosition;
     public Vector3 ledgeGrabOffset = new Vector3(0.3f, 0.6f, 0);
 
-	[HideInInspector]
-	private float normalizedHorizontalSpeed = 0;
-    private float normalizedVerticalSpeed = 0;
+	public float normalizedHorizontalSpeed = 0;
+    public float normalizedVerticalSpeed = 0;
 
     public PhysicsBody2D _controller;
     public PlayerInputController _input;
@@ -31,15 +31,22 @@ public class PlayerController : Entity
     public float knockbackTimestamp;
     public float knockbackDuration = 0;
 
-    public PlayerMovementState movementState = PlayerMovementState.Idle;
+    public int playerIndex = 0;
 
+    public PlayerMovementState movementState = PlayerMovementState.Idle;
+    public Light playerLight;
+
+    //Combine these
+    public ColorSwap colorSwap;
+    public ColorSwapper colorSwapper;
+    public ParticleSystem deathEffect;
 
     protected override void Awake()
 	{
         base.Awake();
         _controller = GetComponent<PhysicsBody2D>();
         _attackManager = GetComponent<AttackManager>();
-                _input = GetComponent<PlayerInputController>();
+        _input = GetComponent<PlayerInputController>();
 
         _animator.runtimeAnimatorController = overrideController;
 
@@ -47,7 +54,10 @@ public class PlayerController : Entity
         _controller.onControllerCollidedEvent += onControllerCollider;
 		_controller.onTriggerEnterEvent += onTriggerEnterEvent;
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
-	}
+        colorSwap = new ColorSwap(spriteRenderer.material);
+        colorSwapper = new ColorSwapper(spriteRenderer.material);
+
+    }
 
 
 	#region Event Listeners
@@ -96,7 +106,7 @@ public class PlayerController : Entity
 
     }
 
-    void AttemptClimbLadder()
+    bool AttemptClimbLadder()
     {
         Debug.Log("Attempt Ladder");
 
@@ -105,10 +115,13 @@ public class PlayerController : Entity
             movementState = PlayerMovementState.ClimbingLadder;
 
             ladderClimbPosition = _controller.collisionState.ladderOffset;
+            _controller.ignoreOneWayPlatformsThisFrame = true;
 
             Debug.Log("Ladder Climb posititon " + ladderClimbPosition);
+            return true;
         }
 
+        return false;
     }
 
 
@@ -128,6 +141,9 @@ public class PlayerController : Entity
         {
             case PlayerMovementState.Idle:
                 Idle();
+                break;
+            case PlayerMovementState.Crouch:
+                Crouch();
                 break;
             case PlayerMovementState.Run:
                 Walking();
@@ -165,7 +181,7 @@ public class PlayerController : Entity
 
         }
 
-        if (_input.GetButtonDown(ButtonInput.MeleeAttack) && movementState != PlayerMovementState.GrabLedge
+        if (_input.GetButtonDown(ButtonInput.LightAttack) && movementState != PlayerMovementState.GrabLedge
             && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Knockedback)
         {
             //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
@@ -174,8 +190,18 @@ public class PlayerController : Entity
 
         }
 
-        if(_input.GetButtonDown(ButtonInput.Roll) && movementState != PlayerMovementState.GrabLedge
-            && movementState != PlayerMovementState.Attacking && movementState != PlayerMovementState.Knockedback)
+        if (_input.GetButtonDown(ButtonInput.HeavyAttack) && movementState != PlayerMovementState.GrabLedge
+            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Knockedback)
+        {
+            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
+
+            _attackManager.ActivateHeavyAttack();
+
+        }
+
+        if (_input.GetButtonDown(ButtonInput.Roll) && movementState != PlayerMovementState.GrabLedge
+            && movementState != PlayerMovementState.Attacking && movementState != PlayerMovementState.Knockedback
+            && movementState != PlayerMovementState.Roll)
         {
             StartCoroutine(Rolling());
         }
@@ -199,6 +225,10 @@ public class PlayerController : Entity
                     _animator.Play(Animator.StringToHash("Idle"));
 
                     break;
+                case PlayerMovementState.Crouch:
+                    _animator.Play(Animator.StringToHash("Crouch"));
+
+                    break;
                 case PlayerMovementState.Jump:
                     _animator.Play(Animator.StringToHash("Jump"));
 
@@ -210,10 +240,16 @@ public class PlayerController : Entity
                     _animator.Play(Animator.StringToHash("Idle"));
                     break;
                 case PlayerMovementState.ClimbingLadder:
-                    _animator.Play(Animator.StringToHash("Idle"));
+                    if(normalizedVerticalSpeed != 0)
+                    {
+                        _animator.Play(Animator.StringToHash("ClimbingLadder"));
+                    } else
+                    {
+                        _animator.Play(Animator.StringToHash("ClimbingLadderIdle"));
+                    }
                     break;
                 case PlayerMovementState.Dead:
-                    _animator.Play(Animator.StringToHash("Dead"));
+                    //_animator.Play(Animator.StringToHash("Dead"));
                     break;
                     //case PlayerMovementState.Knockedback:
 
@@ -246,6 +282,12 @@ public class PlayerController : Entity
 
     private void Climbing()
     {
+        if (_controller.isGrounded && (!_controller.collisionState.wasGroundedLastFrame || _velocity.y <= 0))
+        {
+            movementState = PlayerMovementState.Idle;
+            return;
+        }
+
         _controller.transform.position = new Vector2(ladderClimbPosition.x, _controller.transform.position.y);
         ignoreGravity = true;
         
@@ -318,9 +360,12 @@ public class PlayerController : Entity
 
         }
 
-        if (_input.GetButton(ButtonInput.Jump) && _controller.collisionState.onLadder)
-        { 
-            AttemptClimbLadder();
+        if (_input.GetAxisValue(AxisInput.LeftStickY) != 0 && _controller.collisionState.onLadder)
+        {
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
             //return;
         }
 
@@ -329,6 +374,79 @@ public class PlayerController : Entity
         {
 
                 Jump();
+
+        }
+
+        // if holding down bump up our movement amount and turn off one way platform detection for a frame.
+        // this lets us jump down through one way platforms
+        if (_input.GetLeftStickTapDown())
+        {
+            _velocity.y -= 2f;
+            _controller.ignoreOneWayPlatformsThisFrame = true;
+
+            //movementState = PlayerMovementState.Jumping;
+
+        }
+
+        if(_input.GetLeftStickHoldDown())
+        {
+            movementState = PlayerMovementState.Crouch;
+
+        }
+    }
+
+    //process the character movement when Idle
+    void Crouch()
+    {
+        normalizedHorizontalSpeed = 0;
+
+        if (!_controller.isGrounded)
+        {
+            movementState = PlayerMovementState.Jump;
+            return;
+        }
+
+        if(_input.GetAxisValue(AxisInput.LeftStickY) >= 0)
+        {
+            movementState = PlayerMovementState.Idle;
+            return;
+        }
+
+        _velocity.y = 0;
+
+
+        if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
+        {
+            normalizedHorizontalSpeed = 1;
+            if (transform.localScale.x < 0f)
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+
+            movementState = PlayerMovementState.Run;
+
+        }
+        else if (_input.GetAxisValue(AxisInput.LeftStickX) < -0.5f)
+        {
+            normalizedHorizontalSpeed = -1;
+            if (transform.localScale.x > 0f)
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+
+            movementState = PlayerMovementState.Run;
+
+        }
+
+        if (_input.GetButton(ButtonInput.Jump) && _controller.collisionState.onLadder)
+        {
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
+        }
+
+        // we can only jump whilst grounded or grabbing a ledge
+        if (_input.GetButtonDown(ButtonInput.Jump))
+        {
+
+            Jump();
 
         }
 
@@ -385,8 +503,10 @@ public class PlayerController : Entity
 
         if (_input.GetAxisValue(AxisInput.LeftStickY) != 0 && _controller.collisionState.onLadder)
         {
-            AttemptClimbLadder();
-            //return;
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
         }
 
         // we can only jump whilst grounded or grabbing a ledge
@@ -440,9 +560,12 @@ public class PlayerController : Entity
 
         AttemptLedgeGrab();
 
-        if(_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f && _controller.collisionState.onLadder)
+        if((_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f || _input.GetAxisValue(AxisInput.LeftStickY) < -0.5f) && _controller.collisionState.onLadder)
         {
-            AttemptClimbLadder();
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
         }
         /*
         // we can only jump whilst grounded or grabbing a ledge
@@ -524,26 +647,69 @@ public class PlayerController : Entity
         }
 
 
-        _velocity = difference * 5 + Vector2.up*Mathf.Sqrt(-GambleConstants.GRAVITY);
+        _velocity = difference * attack.knockbackPower + Vector2.up*Mathf.Sqrt(-GambleConstants.GRAVITY)*Mathf.Clamp01(attack.knockbackPower);
+        Debug.Log("knockback " + attack.knockbackPower);
+
+        Debug.Log("knockback clamp " + Mathf.Clamp01(attack.knockbackPower));
+        Debug.Log("knockback Vector " + difference * attack.knockbackPower);
 
 
-        movementState = PlayerMovementState.Knockedback;
+        Debug.Log("New Velocity " + _velocity);
+
 
         knockbackTimestamp = Time.time;
-        knockbackDuration = 0.3f;
+        knockbackDuration = attack.knockbackPower*0.1f;
 
-        if (health.currentHealth <= 0)
+        if (health.currentHealth <= 0 && movementState != PlayerMovementState.Dead)
         {
-            movementState = PlayerMovementState.Dead;
+            Debug.Log("Movement State when died " + movementState);
+
+            StartCoroutine(Die());
+            
+        } else if(movementState != PlayerMovementState.Dead)
+        {
+            movementState = PlayerMovementState.Knockedback;
+
         }
     }
 
     private void Knockedback()
     {
-        if(Time.time >= knockbackTimestamp + knockbackDuration)
+        if(Time.time >= knockbackTimestamp + knockbackDuration || _controller.collisionState.becameGroundedThisFrame)
         {
             movementState = PlayerMovementState.Idle;
             knockbackDuration = 0;
+        }
+    }
+
+    public IEnumerator Die()
+    {
+        if(movementState == PlayerMovementState.Dead)
+        {
+            yield return 0;
+        }
+
+        Instantiate(deathEffect, transform.position, Quaternion.identity);
+
+        playerLight.gameObject.SetActive(false);
+
+        movementState = PlayerMovementState.Dead;
+
+        _animator.Play(Animator.StringToHash("Dead"));
+
+        if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Dead"))
+        {
+            yield return null;
+        }
+
+        while (_animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
+        {
+            yield return null;
+        }
+
+        if(_input != null)
+        {
+            _input.Remove();
         }
     }
 
@@ -567,6 +733,8 @@ public class PlayerController : Entity
                 {
                     movementState = PlayerMovementState.Idle;
                     health.SetHealth(20);
+                    playerLight.gameObject.SetActive(true);
+
                     break;
                 }
 
@@ -589,6 +757,7 @@ public class PlayerController : Entity
         int rollDirection = GetDirection();
         hurtbox.colliderState = ColliderState.Closed;
         _controller.platformMask ^= rollMask;
+        bool followUpAttack = false;
 
         while (movementState == PlayerMovementState.Roll)
         {
@@ -602,9 +771,13 @@ public class PlayerController : Entity
 
             //This checks if the animation has completed one cycle, and won't progress until it has
             //This allows for the animator speed to be adjusted by the "attack speed"
-            while (_animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
+            while (_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1)
             {
                 normalizedHorizontalSpeed = rollDirection;
+                if(_input.GetButtonDown(ButtonInput.LightAttack))
+                {
+                    followUpAttack = true;
+                }
                 yield return null;
             }
 
@@ -614,10 +787,18 @@ public class PlayerController : Entity
             _controller.platformMask |= rollMask;
 
             movementState = PlayerMovementState.Idle;
+
+
             yield return null;
         }
 
+        if (followUpAttack)
+        {
+            //_attackManager.ActivateAttack();
+            _input.buttonInput[(int)ButtonInput.LightAttack] = true;
+            _input.previousButtonInput[(int)ButtonInput.LightAttack] = false;
 
+        }
     }
 
 

@@ -16,6 +16,7 @@ public class PlayerInputController : MonoBehaviour
 
     public bool[] buttonInput = new bool[(int)ButtonInput.Count];
     public bool[] previousButtonInput = new bool[(int)ButtonInput.Count];
+    public PlayerController player;
 
     public void Start()
     {
@@ -24,7 +25,18 @@ public class PlayerInputController : MonoBehaviour
 
         buttonInput = new bool[(int)ButtonInput.Count];
         previousButtonInput = new bool[(int)ButtonInput.Count];
-}
+        player = GetComponent<PlayerController>();
+        //SmoothFollow.instance.AddPlayer(GetComponent<PlayerController>());
+
+    }
+
+    public void Remove()
+    {
+        if(mGamepadInput != null)
+            GamepadInputManager.instance.RemovePlayerAtIndex(mGamepadInput.input.playerIndex);
+
+
+    }
 
     public void SetGamepadInput(NewGamepadInput gamepad)
     {
@@ -103,6 +115,11 @@ public class PlayerInputController : MonoBehaviour
         return (axisInput[(int)AxisInput.RightStickX] < -0.5f && previousAxisInput[(int)AxisInput.RightStickX] > -0.5f);
     }
 
+    public bool GetLeftStickHoldDown()
+    {
+        return (axisInput[(int)AxisInput.LeftStickY] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickY] < -0.5f);
+    }
+
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //Delete all these states and just make more buttons...
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -131,8 +148,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.DPad_Up] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];
 
                 buttonInput[(int)ButtonInput.Jump] = mGamepadInput.buttonInputs[(int)GamepadButtons.SouthButton];
-                buttonInput[(int)ButtonInput.MeleeAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
-                buttonInput[(int)ButtonInput.QuickHeal] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
+                buttonInput[(int)ButtonInput.LightAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+                buttonInput[(int)ButtonInput.HeavyAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
                 buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
                 buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
                 buttonInput[(int)ButtonInput.Minimap] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];
@@ -172,8 +189,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.DPad_Up] = false;
 
                 buttonInput[(int)ButtonInput.Jump] = false;
-                buttonInput[(int)ButtonInput.MeleeAttack] = false;
-                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.LightAttack] = false;
+                buttonInput[(int)ButtonInput.HeavyAttack] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -216,8 +233,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.BeamUp] = false;
 
                 buttonInput[(int)ButtonInput.Jump] = false;
-                buttonInput[(int)ButtonInput.MeleeAttack] = false;
-                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.LightAttack] = false;
+                buttonInput[(int)ButtonInput.HeavyAttack] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -257,8 +274,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.BeamUp] = false;
 
                 buttonInput[(int)ButtonInput.Jump] = false;
-                buttonInput[(int)ButtonInput.MeleeAttack] = false;
-                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.LightAttack] = false;
+                buttonInput[(int)ButtonInput.HeavyAttack] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -299,8 +316,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.BeamUp] = false;
 
                 buttonInput[(int)ButtonInput.Jump] = false;
-                buttonInput[(int)ButtonInput.MeleeAttack] = false;
-                buttonInput[(int)ButtonInput.QuickHeal] = false;
+                buttonInput[(int)ButtonInput.LightAttack] = false;
+                buttonInput[(int)ButtonInput.HeavyAttack] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
                 buttonInput[(int)ButtonInput.Minimap] = false;

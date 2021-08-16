@@ -10,14 +10,5 @@ public class Hurtbox : MonoBehaviour
     public Entity entity;
 
     //public Entity 
-    public void GetHit(AttackObject attack)
-    {
-        if(colliderState == ColliderState.Closed)
-        {
-            return;
-        }
-
-        entity.GetHit(attack);
-    }
 
 }

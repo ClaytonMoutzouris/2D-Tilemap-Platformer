@@ -8,8 +8,9 @@ public class EnemyEntity : Entity
 
     public PhysicsBody2D _controller;
     public Vector3 mOldPosition;
+    public Entity target;
+    public Sightbox sight;
 
-    public Vector3 _velocity;
 
     public int normalizedHorizontalSpeed = 0;
 
@@ -19,6 +20,8 @@ public class EnemyEntity : Entity
         base.Awake();
 
         _controller = GetComponent<PhysicsBody2D>();
+        sight = GetComponentInChildren<Sightbox>();
+
         //_controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
@@ -27,7 +30,16 @@ public class EnemyEntity : Entity
     // Update is called once per frame
     void Update()
     {
-        _velocity.x = normalizedHorizontalSpeed * movementSpeed;
+
+        if (target!= null && target.health.IsDead())
+        {
+            target = null;
+        }
+
+        if (!knockedBack)
+        {
+            _velocity.x = normalizedHorizontalSpeed * movementSpeed;
+        }
 
         if (!ignoreGravity)
             _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
@@ -39,33 +51,23 @@ public class EnemyEntity : Entity
 
     }
 
-    public override void GetHit(AttackObject attack)
+    public override void Die()
     {
-        //Debug.Log(name + " was hit by attack " + attack + " for " + attack.attackData.Damage);
-        base.GetHit(attack);
-
-        Projectile proj = attack.GetComponent<Projectile>();
-        Vector2 difference;
-
-        if (proj)
-        {
-            difference = (transform.position - attack.transform.position).normalized;
-        }
-        else
-        {
-            difference = (transform.position - attack.owner.transform.position).normalized;
-        }
-
-
-        _velocity = difference * 5 + Vector2.up * Mathf.Sqrt(-GambleConstants.GRAVITY);
-
-
-        if (health.currentHealth <= 0)
-        {
-            Debug.Log("Enemy died");
-            Destroy(gameObject);
+        base.Die();
+            Destroy(gameObject, 0.5f);
             //movementState = PlayerMovementState.Dead;
+    }
+
+    public void SearchForTarget()
+    {
+
+        if (sight == null || sight.inSight.Count == 0)
+        {
+            return;
         }
+
+        target = sight.inSight[Random.Range(0, sight.inSight.Count)];
+
     }
 
     void onTriggerEnterEvent(Collider2D col)

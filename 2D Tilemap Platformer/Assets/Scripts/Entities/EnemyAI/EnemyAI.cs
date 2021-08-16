@@ -9,8 +9,6 @@ public class EnemyAI : MonoBehaviour
     public ENEMY_STATE states;
     //public Attack 
     public EnemyEntity entity;
-    public Entity target;
-
     public float attackSpeed = 1;
 
     #endregion
@@ -51,8 +49,9 @@ public class EnemyAI : MonoBehaviour
             entity.normalizedHorizontalSpeed = 0;
 
             //Check for target, using sight maybe?
+            entity.SearchForTarget();
 
-            if (target != null)
+            if (entity.target != null)
             {
                 states = ENEMY_STATE.CHASE;
             }
@@ -73,14 +72,14 @@ public class EnemyAI : MonoBehaviour
 
             entity.normalizedHorizontalSpeed = 0;
 
-            if (target.transform.position.x - transform.position.x > 0)
+            if (entity.target.transform.position.x - transform.position.x > 0)
             {
                 entity.normalizedHorizontalSpeed = 1;
 
                 if (transform.localScale.x < 0f)
                     transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-            else if (target.transform.position.x - transform.position.x < 0)
+            else if (entity.target.transform.position.x - transform.position.x < 0)
             {
                 entity.normalizedHorizontalSpeed = -1;
                 if (transform.localScale.x > 0f)
@@ -88,17 +87,17 @@ public class EnemyAI : MonoBehaviour
             }
 
 
-            if (entity._controller.collisionState.left || entity._controller.collisionState.right || (target.transform.position.y - transform.position.y) > 2.5)
+            if (entity._controller.collisionState.left || entity._controller.collisionState.right || (entity.target.transform.position.y - transform.position.y) > 2.5)
             {
                 Jump(entity.maxJumpHeight);
 
             }
 
-            if(Vector3.Distance(target.transform.position, transform.position) < 1.5)
+            if(Vector3.Distance(entity.target.transform.position, transform.position) < 1.5)
             {
                 states = ENEMY_STATE.SLIMEATTACK1;
             }
-            else if (Vector3.Distance(target.transform.position, transform.position) > 4 && Vector3.Distance(target.transform.position, transform.position) < 6)
+            else if (Vector3.Distance(entity.target.transform.position, transform.position) > 4 && Vector3.Distance(entity.target.transform.position, transform.position) < 6)
             {
                 states = ENEMY_STATE.SLIMEATTACK2;
             }

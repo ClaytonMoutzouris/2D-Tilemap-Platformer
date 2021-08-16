@@ -17,9 +17,7 @@ public class AttackManager : MonoBehaviour
     public float followUpThreshold = 1f;
     public float lastAttackTime = 0;
 
-    public List<Weapon> weapons;
-    public int weaponIndex = 0;
-    public Weapon equippedWeapon;
+    public Projectile thrownWeaponBase;
 
 
     private void Start()
@@ -27,25 +25,9 @@ public class AttackManager : MonoBehaviour
         entity = GetComponent<PlayerController>();
         List<Weapon> tempList = new List<Weapon>();
 
-        //I Set these in the inspector for now
-        /*
-        rangedWeaponObject.SetOwner(entity);
-        meleeWeaponObject.SetOwner(entity);
-        */
-
-        foreach (Weapon weapon in weapons)
-        {
-            Weapon temp = Instantiate(weapon);
-            tempList.Add(temp);
-        }
-
-
-
-        weapons = tempList;
-        SwapWeapon(weaponIndex);
     }
 
-    public void SetWeapon(Weapon wep)
+    public void SetWeaponObject(Weapon wep)
     {
         if(wep is RangedWeapon)
         {
@@ -53,34 +35,7 @@ public class AttackManager : MonoBehaviour
         } else
         {
             meleeWeaponObject.SetWeapon(wep);
-
         }
-
-        equippedWeapon = wep;
-    }
-
-    public void SwapWeaponUp()
-    {
-        weaponIndex++;
-
-        if(weaponIndex >= weapons.Count)
-        {
-            weaponIndex = 0;
-        }
-
-        SwapWeapon(weaponIndex);
-    }
-
-    public void SwapWeapon(int index)
-    {
-        if(index > weapons.Count)
-        {
-            return;
-        }
-        weaponIndex = index;
-
-        SetWeapon(weapons[index]);
-
     }
 
     public bool IsAttacking()
@@ -109,51 +64,62 @@ public class AttackManager : MonoBehaviour
     }
     */
 
-    public void ActivateAttack()
+    public void ActivateAttack(ButtonInput button = ButtonInput.LightAttack)
     {
-        if (activeAttack != null)
+        if (activeAttack != null || entity._equipmentManager.equippedWeapon == null)
         {
             return;
         }
 
-        Attack newAttack = equippedWeapon.GetNextAttack();
+        Attack newAttack = entity._equipmentManager.equippedWeapon.GetNextAttack();
         if (newAttack == null)
         {
             return;
         }
-        StartCoroutine(newAttack.Activate(entity));
+        StartCoroutine(newAttack.Activate(entity, button));
         activeAttack = newAttack;
 
     }
 
-    public void ActivateHeavyAttack()
+    public void ActivateHeavyAttack(ButtonInput button = ButtonInput.HeavyAttack)
     {
-        if (activeAttack != null)
+        Debug.Log("ActivateHeavyAttack");
+        if (activeAttack != null || entity._equipmentManager.equippedWeapon == null)
         {
             return;
         }
 
-        Attack newAttack = equippedWeapon.GetHeavyAttack();
+        Attack newAttack = entity._equipmentManager.equippedWeapon.GetHeavyAttack();
         if(newAttack == null)
         {
             return;
         }
-        StartCoroutine(newAttack.Activate(entity));
+        StartCoroutine(newAttack.Activate(entity, button));
         activeAttack = newAttack;
     }
 
-    public void FireProjectile()
+    //This method fires a projectile at a certain angle (default to straight ahead
+    public void FireProjectile(int angle = 90)
     {
-        Projectile proj = equippedWeapon.projectile;
+        entity._equipmentManager.equippedWeapon.FireProjectile(angle);
+    }
 
-        if(proj != null)
-        {
-            proj = Instantiate(proj, entity.transform.position, Quaternion.identity);
-            proj._attackObject.SetOwner(entity);
-            proj._attackObject.damage = equippedWeapon.damage;
-            proj._attackObject.knockbackPower = equippedWeapon.knockbackPower;
-            proj.SetDirection(entity.GetDirection() * Vector2.right);
-        }
+    //This method gets the players aim input
+    public void FireAimedProjectile()
+    {
+
+        entity._equipmentManager.equippedWeapon.FireAimedProjectile();
+
+    }
+
+    public void FireRangedWeapon()
+    {
+
+    }
+
+    public void ThrowWeapon()
+    {
+        entity._equipmentManager.equippedWeapon.ThrowWeapon();
 
 
     }

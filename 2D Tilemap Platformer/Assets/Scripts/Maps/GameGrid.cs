@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.IO;
 using Algorithms;
+using Newtonsoft.Json;
 
 public enum TileMapLayersEnum { Ground, OneWay, Background, Foreground }
 public class GameGrid : MonoBehaviour
@@ -258,5 +259,26 @@ public class GameGrid : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void LoadMap(string path)
+    {
+
+        if (File.Exists(path))
+        {
+            string loadJson = File.ReadAllText(path);
+
+            RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
+
+            foreach (TilemapLayerSaveData layerData in loadData.mapLayers)
+            {
+                SetWorldTiles(layerData.layerIndex, layerData.tiles, true);
+            }
+
+        }
+        else
+        {
+            Debug.LogError("Map not found.");
+        }
     }
 }

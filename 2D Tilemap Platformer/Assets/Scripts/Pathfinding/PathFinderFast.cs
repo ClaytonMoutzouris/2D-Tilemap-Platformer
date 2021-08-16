@@ -236,7 +236,7 @@ namespace Algorithms
                 
 				if (mGrid[end.x, end.y] == 0)
                 {
-                    Debug.Log("Return 1");
+                    //Debug.Log("Return 1");
                     return mClose;
 
                 }
@@ -293,7 +293,7 @@ namespace Algorithms
                     if (mCloseNodeCounter > mSearchLimit)
                     {
                         mStopped = true;
-                        Debug.Log("Return 2");
+                        //Debug.Log("Return 2");
 
                         return mClose;
                     }
@@ -476,7 +476,7 @@ namespace Algorithms
                     return mClose;
                 }
                 mStopped = true;
-                Debug.Log("Return 3");
+                //Debug.Log("Return 3");
 
                 return mClose;
             }

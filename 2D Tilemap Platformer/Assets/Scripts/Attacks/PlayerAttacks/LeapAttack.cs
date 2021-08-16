@@ -10,7 +10,7 @@ public class LeapAttack : Attack
     //public List<AttackObject> activeObjects;
 
     //A basic attack.
-    public override IEnumerator Activate(PlayerController user)
+    public override IEnumerator Activate(PlayerController user, ButtonInput button = ButtonInput.LightAttack)
     {
         entity = user;
         StartUp();
@@ -24,7 +24,7 @@ public class LeapAttack : Attack
 
         while(Time.time <= leapTimestamp+leapDuration)
         {
-            entity._velocity.x = entity.GetDirection() * entity.movementSpeed;
+            entity._velocity.x = entity.GetDirection() * entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue();
             yield return null;
         }
 
@@ -42,7 +42,10 @@ public class LeapAttack : Attack
         //Wait for a bit to recover from the impact
         yield return new WaitForSeconds(0.2f);
 
-        entity.movementState = PlayerMovementState.Idle;
+        if(entity.movementState != PlayerMovementState.Dead)
+        {
+            entity.movementState = PlayerMovementState.Idle;
+        }
         CleanUp();
 
 

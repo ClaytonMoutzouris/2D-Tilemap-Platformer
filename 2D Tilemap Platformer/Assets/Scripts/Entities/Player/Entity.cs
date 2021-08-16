@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum EntityDirection { Left = -1, Right = 1 };
+
 [RequireComponent(typeof(Animator))]
 public class Entity : MonoBehaviour
 {
@@ -10,20 +12,39 @@ public class Entity : MonoBehaviour
     public AnimatorOverrideController overrideController;
     public AttackManager _attackManager;
 
+    //Only used by enemy now, need to remove
     public float movementSpeed = 0.5f;
 
+    //Entity Flags
     public bool ignoreGravity = false;
+    public bool knockedBack = false;
+
     public Health health;
     public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
-    public List<ParticleSystem> effects = new List<ParticleSystem>();
+    public List<ParticleSystem> particleEffects = new List<ParticleSystem>();
     public SpriteRenderer spriteRenderer;
+    public Vector3 _velocity;
+    public List<Ability> abilities = new List<Ability>();
+    public List<Effect> statusEffects = new List<Effect>();
+
+    public Stats stats;
+    public bool isDead = false;
+
 
     // Start is called before the first frame update
     void Start()
     {
         health = GetComponent<Health>();
+        health.entity = this;
         hurtbox = GetComponentInChildren<Hurtbox>();
+        stats = GetComponent<Stats>();
+        if(stats != null)
+        {
+            stats.Initialize();
+        }
+        health.UpdateHealth();
+
     }
 
     protected virtual void Awake()
@@ -42,14 +63,17 @@ public class Entity : MonoBehaviour
     public ParticleSystem AddEffect(ParticleSystem effectPrefab)
     {
         ParticleSystem newEffect = Instantiate(effectPrefab, transform);
-        effects.Add(newEffect);
+        particleEffects.Add(newEffect);
         return newEffect;
     }
 
     public void RemoveEffect(ParticleSystem effect)
     {
-        effects.Remove(effect);
-        Destroy(effect.gameObject);
+        particleEffects.Remove(effect);
+        if(effect != null)
+        {
+            Destroy(effect.gameObject);
+        }
     }
 
     public int GetDirection()
@@ -57,12 +81,17 @@ public class Entity : MonoBehaviour
         return 1 * (int)Mathf.Sign(transform.localScale.x);
     }
 
-    public virtual void GetHit(AttackObject attack)
+    public virtual void SetDirection(EntityDirection dir)
     {
-        health.LoseHealth(attack.damage);
-        //health -= attack.damage;
+        if (transform.localScale.x < 0f && dir == EntityDirection.Right || transform.localScale.x > 0f && dir == EntityDirection.Left)
+        {
+            transform.localScale = new Vector3((int)dir * transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        }
+    }
 
-         
+    public virtual void Die()
+    {
+        isDead = true;
     }
 
     public virtual void ShowFloatingText(string text, Color color, float dTime = 1, float sSpeed = 1, float sizeMult = 1.0f)
@@ -75,5 +104,8 @@ public class Entity : MonoBehaviour
         floatingText.GetComponent<TextMesh>().text = "" + text;
         floatingText.GetComponent<TextMesh>().color = color;
     }
+
+
+
 
 }

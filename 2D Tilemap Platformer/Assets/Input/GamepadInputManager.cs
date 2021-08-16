@@ -11,16 +11,24 @@ public class GamepadInputManager : MonoBehaviour
     PlayerInputManager inputManager;
     public NewGamepadInput[] gamepadInputs = new NewGamepadInput[4];
     public PlayerController playerPrefab;
-    public PlayerController[] players;
     public int numActivePlayers = 0;
 
     // Start is called before the first frame update
     void Start()
     {
-        instance = this;
+        if(instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        } else
+        {
+            instance = this;
+        }
+
+        DontDestroyOnLoad(gameObject);
+
         inputManager = GetComponent<PlayerInputManager>();
         gamepadInputs = new NewGamepadInput[inputManager.maxPlayerCount];
-        players = new PlayerController[inputManager.maxPlayerCount];
     }
 
     // Update is called once per frame
@@ -33,8 +41,17 @@ public class GamepadInputManager : MonoBehaviour
     {
         numActivePlayers++;
 
-        Debug.Log("Player " + playerInput.playerIndex+1 + " joined!");
+        Debug.Log("Player " + (playerInput.playerIndex+1) + " joined!");
         //input = playerInput;
+        //playerInput.GetComponent<EventSystem>().SetSelectedGameObject(MainMenu.instance.anchorObject);
+        gamepadInputs[playerInput.playerIndex] = playerInput.GetComponent<NewGamepadInput>();
+
+        //Only do this if we're in the main menu, otherwise we'll need to do something else
+        if (MainMenu.instance != null)
+        {
+            MainMenu.instance.NewPlayerJoined(playerInput);
+        }
+
 
         //CreationPanelsUI.instance.creationPanels[inputManager.playerCount-1].NewCharacter(playerInput);
     }
@@ -46,6 +63,20 @@ public class GamepadInputManager : MonoBehaviour
 
     }
 
+    /**
+     * This is for dropping an active player input
+     */
+    public void DropPlayer(int index)
+    {
+        if (gamepadInputs[index] == null)
+        {
+            return;
+        }
+
+        Destroy(gamepadInputs[index].gameObject);
+    }
+
+    /*
     public void RemovePlayerAtIndex(int index)
     {
         if(gamepadInputs[index] == null)
@@ -57,5 +88,6 @@ public class GamepadInputManager : MonoBehaviour
         gamepadInputs[index].player._input.SetGamepadInput(null);
         Destroy(gamepadInputs[index].gameObject);
     }
+    */
 
 }

@@ -166,8 +166,6 @@ public class EnemyPathfinding : MonoBehaviour
             return;
         }
 
-        Debug.Log("Jumping at Height: " + jumpHeight);
-
         if (jumpHeight > entity.maxJumpHeight)
         {
             jumpHeight = entity.maxJumpHeight;

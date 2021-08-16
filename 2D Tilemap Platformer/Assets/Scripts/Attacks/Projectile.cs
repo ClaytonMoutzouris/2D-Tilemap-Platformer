@@ -10,6 +10,9 @@ public class Projectile : MonoBehaviour
     public bool boomerang = false;
     public bool homing = false;
     public bool ignoreGround = false;
+    public bool ignoreGravity = true;
+    public bool isAngled = false;
+
 
     public Vector2 direction;
     public float lifeTime = 1;
@@ -24,10 +27,18 @@ public class Projectile : MonoBehaviour
     public float elasticity = -0.5f;
     bool returning = false;
 
+    public SpriteRenderer spriteRenderer;
+    public Animator animator;
+    public Vector3 _velocity;
+
+
+
     public void Awake()
     {
         _controller = GetComponent<PhysicsBody2D>();
         _attackObject = GetComponent<AttackObject>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
 
         // Might need this later?
         /*
@@ -47,21 +58,40 @@ public class Projectile : MonoBehaviour
         direction = dir;
         float angle = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
         transform.eulerAngles = new Vector3(0, 0, -angle);
+        if(!ignoreGravity)
+        {
+            _velocity.y = Mathf.Sqrt(projSpeed*direction.y * -GambleConstants.GRAVITY);
+        }
     }
 
     protected void Update()
     {
 
-        Vector3 velocity = direction * projSpeed;
+        _velocity.x = direction.x * projSpeed;
 
-        if (boomerang)
+        if (!ignoreGravity)
         {
-            Boomerang(ref velocity);
+            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
         }
 
-        _controller.move(velocity * Time.deltaTime);
+        
+        if (boomerang)
+        {
+            Boomerang(ref _velocity);
+        }
+        
+        if(isAngled)
+        {
+            Vector2 dir = _velocity.normalized;
+            float angle = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
+            transform.eulerAngles = new Vector3(0, 0, -angle);
+        }
 
-        if(_controller.collisionState.hasCollision() && !ignoreGround)
+        _controller.move(_velocity * Time.deltaTime);
+
+        _velocity = _controller.velocity;
+
+        if (_controller.collisionState.hasCollision() && !ignoreGround)
         {
             Destroy(gameObject);
         }
@@ -88,7 +118,17 @@ public class Projectile : MonoBehaviour
         {
             returning = true;
             _attackObject.ClearHits();
+
         }
     }
 
+    public virtual void SetFromWeapon(Weapon wep)
+    {
+        _attackObject.SetOwner(wep.owner);
+
+        _attackObject.attackData = wep.GetAttackData();
+
+        projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
+
+    }
 }

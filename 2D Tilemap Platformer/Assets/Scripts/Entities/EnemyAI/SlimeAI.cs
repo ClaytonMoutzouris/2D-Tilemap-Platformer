@@ -11,7 +11,6 @@ public class SlimeAI : MonoBehaviour
     //public Attack 
     public EnemyEntity entity;
     public EnemyPathfinding movementController;
-    public Entity target;
 
     public float attackSpeed = 1;
     #endregion
@@ -57,8 +56,9 @@ public class SlimeAI : MonoBehaviour
         while (states == SLIME_STATE.IDLE)
         {
             //Check for target, using sight maybe?
+            entity.SearchForTarget();
 
-            if (target != null)
+            if (entity.target != null)
             {
                 states = SLIME_STATE.MOVETO;
             }
@@ -90,13 +90,13 @@ public class SlimeAI : MonoBehaviour
     IEnumerator MOVETO()
     {
 
-        movementController.MoveToTarget(target);
+        movementController.MoveToTarget(entity.target);
 
 
         while (states == SLIME_STATE.MOVETO)
         {
 
-            if (target == null || movementController.mCurrentNodeId == -1)
+            if (entity.target == null || movementController.mCurrentNodeId == -1)
             {
                 movementController.mCurrentNodeId = -1;
                 states = SLIME_STATE.IDLE;
@@ -105,7 +105,7 @@ public class SlimeAI : MonoBehaviour
             movementController.JumperPathFollow();
 
             //If we caught up with the path
-            if (movementController.mCurrentNodeId >= movementController.mPath.Count)
+            if (movementController.mCurrentNodeId >= movementController.mPath.Count && !entity.knockedBack)
             {
 
                 movementController.mCurrentNodeId = -1;
@@ -114,7 +114,7 @@ public class SlimeAI : MonoBehaviour
             }
 
             //If we are in range of target
-            if (Vector3.Distance(target.transform.position, transform.position) < 1.5)
+            if (Vector3.Distance(entity.target.transform.position, transform.position) < 1.5 && !entity.knockedBack)
             {
                 movementController.mCurrentNodeId = -1;
                 states = SLIME_STATE.SLIMEATTACK1;
@@ -233,13 +233,13 @@ public class SlimeAI : MonoBehaviour
     public Vector2 GetAim()
     {
         //If for some reason the slime attacks without a target, just shoot forward
-        if(target == null)
+        if(entity.target == null)
         {
             return entity.GetDirection() * Vector2.right;
         }
 
         //Otherwise, aim at target
-        return (target.transform.position - transform.position).normalized;
+        return (entity.target.transform.position - transform.position).normalized;
     }
 
 }

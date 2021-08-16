@@ -555,7 +555,7 @@ public class PhysicsBody2D : MonoBehaviour
 
 		var ray = new Vector2( initialRayOrigin.x + _horizontalDistanceBetweenRays*totalVerticalRays/2, initialRayOrigin.y );
 
-		DrawRay( ray, rayDirection * rayDistance*10, Color.yellow );
+		DrawRay( ray, rayDirection * 0.1f, Color.yellow );
 		RaycastHit2D ladderHit = Physics2D.Raycast( ray, rayDirection, rayDistance, ladderMask );
 
         if (ladderHit)
@@ -591,7 +591,7 @@ public class PhysicsBody2D : MonoBehaviour
 		{
 			var ray = new Vector2( initialRayOrigin.x + i * _horizontalDistanceBetweenRays, initialRayOrigin.y );
 
-			DrawRay( ray, rayDirection * rayDistance, Color.red );
+			DrawRay( ray, rayDirection *0.1f, Color.red );
 
 
 			hits = Physics2D.RaycastAll( ray, rayDirection, rayDistance, mask );

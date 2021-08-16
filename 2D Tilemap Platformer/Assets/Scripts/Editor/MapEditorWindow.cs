@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class MapEditorWindow : EditorWindow
 {
     string mapName = "Map1";
+
     //WorldType worldType = WorldType.Forest;
     MapData mapData = new MapData();
     //In number of rooms
@@ -44,6 +45,25 @@ public class MapEditorWindow : EditorWindow
             GenerateMap();
         }
 
+        if (GUILayout.Button("Load Map"))
+        {
+            string path = EditorUtility.OpenFilePanel("Open Map File", Path.Combine(Application.streamingAssetsPath, "GameData", "Maps"), "map");
+            if (path.Length != 0)
+            {
+                LoadMap(path);
+            }
+        }
+
+        if (GUILayout.Button("Save Map"))
+        {
+            string path = EditorUtility.SaveFilePanel("Save Map to File", Path.Combine(Application.streamingAssetsPath, "GameData", "Maps"), mapName, "map");
+            if (path.Length != 0)
+            {
+                SaveMap(path);
+                //RoomDatabase.reload = true;
+            }
+        }
+
     }
 
 
@@ -79,4 +99,49 @@ public class MapEditorWindow : EditorWindow
         gameGrid.SetMap(mapData);
     }
 
+
+    public void SaveMap(string path)
+    {
+        RoomData saveData = new RoomData();
+
+        for (int i = 0; i < gameGrid.tilemaps.Length; i++)
+        {
+            TilemapLayerSaveData layerData = new TilemapLayerSaveData();
+            layerData.layerIndex = i;
+            layerData.tiles = gameGrid.GetWorldTiles(i);
+            saveData.mapLayers.Add(layerData);
+
+        }
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+
+        string saveJson = JsonConvert.SerializeObject(saveData);
+
+        File.WriteAllText(path, saveJson);
+    }
+
+    public void LoadMap(string path)
+    {
+
+        if (File.Exists(path))
+        {
+            string loadJson = File.ReadAllText(path);
+
+            RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
+
+            foreach (TilemapLayerSaveData layerData in loadData.mapLayers)
+            {
+                gameGrid.SetWorldTiles(layerData.layerIndex, layerData.tiles, true);
+
+            }
+
+        }
+        else
+        {
+            Debug.LogError("Save file not found.");
+        }
+    }
 }

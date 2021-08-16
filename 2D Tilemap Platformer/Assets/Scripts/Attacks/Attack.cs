@@ -8,24 +8,35 @@ public class Attack : ScriptableObject
 
     public AnimationClip attackAnimation;
     public AnimationClip attackAnimation2;
+    public AnimationClip startupAnimation;
+    public AnimationClip recoveryAnimation;
 
     public float attackSpeed = 1;
     public PlayerController entity;
 
     //A basic attack.
-    public virtual IEnumerator Activate(PlayerController user)
+    public virtual IEnumerator Activate(PlayerController user, ButtonInput button = ButtonInput.LightAttack)
     {
         entity = user;
         StartUp();
-        //entity.overrideController["PlayerAttack1"] = ownerAnimation;
+
         entity._animator.Play(attackAnimation.name);
         entity._animator.speed = attackSpeed;
 
-        float waitTime = attackAnimation.length * (1 / entity._animator.speed);
+        if (!entity._animator.GetCurrentAnimatorStateInfo(0).IsName(attackAnimation.name))
+        {
+            yield return null;
+        }
 
-        //attackObject.ActivateObject();
+        //This checks if the animation has completed one cycle, and won't progress until it has
+        //This allows for the animator speed to be adjusted by the "attack speed"
+        while (entity._animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
+        {
+            yield return null;
+        }
 
-        yield return new WaitForSeconds(waitTime);
+        //float waitTime = attackAnimation.length * (1 / entity._animator.speed);
+        //yield return new WaitForSeconds(waitTime);
         entity._animator.speed = 1;
         CleanUp();
 

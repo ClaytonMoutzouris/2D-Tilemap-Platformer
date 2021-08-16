@@ -14,12 +14,9 @@ public class AttackObject : MonoBehaviour
 
     public List<Collider2D> hits = new List<Collider2D>();
 
-    //Information about the attack such as damage, abilities, etc
     public AttackData attackData;
-    public int damage = 5;
-
+    //Information about the attack such as damage, abilities, etc
     public Entity owner;
-    public float knockbackPower = 5;
 
     //These are mostly for testing purposes
     public Color inactiveColor;
@@ -29,6 +26,7 @@ public class AttackObject : MonoBehaviour
     public virtual void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
 
     }
 
@@ -41,6 +39,11 @@ public class AttackObject : MonoBehaviour
     public void ClearHits()
     {
         hits.Clear();
+    }
+
+    public void Despawn()
+    {
+        Destroy(gameObject);
     }
 
     public void SetOwner(Entity entity)
@@ -81,12 +84,58 @@ public class AttackObject : MonoBehaviour
 
         Hurtbox hurtbox = collider.GetComponent<Hurtbox>();
 
-        if(hurtbox != null && hurtbox.entity != owner)
+        if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && hurtbox.entity != owner)
         {
-            hurtbox?.GetHit(this);
+            HitEnemy(hurtbox.entity);
+
             hits.Add(collider);
         }
 
+    }
+
+    public virtual void HitEnemy(Entity entity)
+    {
+        AttackData attackData = GetAttackData();
+        int fullDamage = attackData.damage;
+        bool crit = false;
+        int r = Random.Range(0, 100);
+        //since the 0 is inclusive, we exclude the ceiling (crit chance)
+        if (r < attackData.critChance)
+        {
+            crit = true;
+        }
+
+        if(crit)
+        {
+            fullDamage *= 2;
+        }
+
+        entity.health.LoseHealth(fullDamage, owner, crit);
+
+
+        entity.StartCoroutine(StatusEffects.Knockback(entity, this));
+
+
+        foreach (Ability ability in owner.abilities)
+        {
+            if (ability is EffectOnHit onHit)
+            {
+                onHit.OnHit(entity);
+            }
+        }
+
+
+    }
+
+    public virtual AttackData GetAttackData()
+    {
+        return attackData;
+    }
+
+    public void UpdateHitbox(Vector2 size, Vector2 offset)
+    {
+        hitbox.size = size;
+        hitbox.offset = offset;
     }
 
     /*

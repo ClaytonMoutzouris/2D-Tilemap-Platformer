@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,4 +14,13 @@ public static class MathUtilities
     {
         return RadianToVector2(degree * Mathf.Deg2Rad);
     }
+
+    public static float Vector2Degree(Vector2 vector)
+    {
+        float value = (float)((Mathf.Atan2(vector.x, vector.y) / Math.PI) * 180f);
+        if (value < 0) value += 360f;
+
+        return value;
+    }
+
 }

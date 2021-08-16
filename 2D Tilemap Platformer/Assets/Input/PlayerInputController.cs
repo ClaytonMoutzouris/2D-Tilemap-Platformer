@@ -30,6 +30,7 @@ public class PlayerInputController : MonoBehaviour
 
     }
 
+    /*
     public void Remove()
     {
         if(mGamepadInput != null)
@@ -37,10 +38,22 @@ public class PlayerInputController : MonoBehaviour
 
 
     }
+    */
 
     public void SetGamepadInput(NewGamepadInput gamepad)
     {
-        mGamepadInput = gamepad;
+        if(gamepad == null)
+        {
+            mGamepadInput.player = null;
+            mGamepadInput = gamepad;
+        }
+        else
+        {
+            mGamepadInput = gamepad;
+            mGamepadInput.player = player;
+        }
+
+
     }
 
     void UpdatePreviousInputs()
@@ -77,47 +90,57 @@ public class PlayerInputController : MonoBehaviour
 
     public bool GetLeftStickTapUp()
     {
-        return (axisInput[(int)AxisInput.LeftStickY] > 0.5f && previousAxisInput[(int)AxisInput.LeftStickY] < 0.5f);
+        return (axisInput[(int)AxisInput.LeftStickY] >= 0.5f && previousAxisInput[(int)AxisInput.LeftStickY] <= 0.5f);
     }
 
     public bool GetLeftStickTapDown()
     {
-        return (axisInput[(int)AxisInput.LeftStickY] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickY] > -0.5f);
+        return (axisInput[(int)AxisInput.LeftStickY] <= -0.5f && previousAxisInput[(int)AxisInput.LeftStickY] >= -0.5f);
     }
 
     public bool GetLeftStickTapRight()
     {
-        return (axisInput[(int)AxisInput.LeftStickX] > 0.5f && previousAxisInput[(int)AxisInput.LeftStickX] < 0.5f);
+        return (axisInput[(int)AxisInput.LeftStickX] >= 0.5f && previousAxisInput[(int)AxisInput.LeftStickX] <= 0.5f);
     }
 
     public bool GetLeftStickTapLeft()
     {
-        return (axisInput[(int)AxisInput.LeftStickX] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickX] > -0.5f);
+        return (axisInput[(int)AxisInput.LeftStickX] <= -0.5f && previousAxisInput[(int)AxisInput.LeftStickX] >= -0.5f);
     }
 
     public bool GetRightStickTapUp()
     {
-        return (axisInput[(int)AxisInput.RightStickY] > 0.5f && previousAxisInput[(int)AxisInput.RightStickY] < 0.5f);
+        return (axisInput[(int)AxisInput.RightStickY] >= 0.5f && previousAxisInput[(int)AxisInput.RightStickY] <= 0.5f);
     }
 
     public bool GetRightStickTapDown()
     {
-        return (axisInput[(int)AxisInput.RightStickY] < -0.5f && previousAxisInput[(int)AxisInput.RightStickY] > -0.5f);
+        return (axisInput[(int)AxisInput.RightStickY] <= -0.5f && previousAxisInput[(int)AxisInput.RightStickY] >= -0.5f);
     }
 
     public bool GetRightStickTapRight()
     {
-        return (axisInput[(int)AxisInput.RightStickX] > 0.5f && previousAxisInput[(int)AxisInput.RightStickX] < 0.5f);
+        return (axisInput[(int)AxisInput.RightStickX] >= 0.5f && previousAxisInput[(int)AxisInput.RightStickX] <= 0.5f);
     }
 
     public bool GetRightStickTapLeft()
     {
-        return (axisInput[(int)AxisInput.RightStickX] < -0.5f && previousAxisInput[(int)AxisInput.RightStickX] > -0.5f);
+        return (axisInput[(int)AxisInput.RightStickX] <= -0.5f && previousAxisInput[(int)AxisInput.RightStickX] >= -0.5f);
     }
 
     public bool GetLeftStickHoldDown()
     {
-        return (axisInput[(int)AxisInput.LeftStickY] < -0.5f && previousAxisInput[(int)AxisInput.LeftStickY] < -0.5f);
+        return (axisInput[(int)AxisInput.LeftStickY] <= -0.75f && previousAxisInput[(int)AxisInput.LeftStickY] <= -0.75f);
+    }
+
+    public Vector2 GetLeftStickAim()
+    {
+        return new Vector2(GetAxisValue(AxisInput.LeftStickX), GetAxisValue(AxisInput.LeftStickY));
+    }
+
+    public Vector2 GetRightStickAim()
+    {
+        return new Vector2(GetAxisValue(AxisInput.RightStickX), GetAxisValue(AxisInput.RightStickY));
     }
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

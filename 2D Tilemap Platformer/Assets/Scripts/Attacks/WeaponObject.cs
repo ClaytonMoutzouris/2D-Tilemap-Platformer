@@ -4,27 +4,44 @@ using UnityEngine;
 
 public class WeaponObject : AttackObject
 {
+    public Weapon weapon;
 
-    public void SetWeapon(Weapon weapon)
+    public void SetWeapon(Weapon newWeapon)
     {
-        //gameObject.SetActive(true);
-        Debug.Log("Sprite " + weapon.sprite.ToString());
+        weapon = newWeapon;
         spriteRenderer.sprite = weapon.sprite;
-        Debug.Log("Sprite Renderer " + spriteRenderer.sprite.ToString());
+        spriteRenderer.color = weapon.color;
 
-        hitbox.size = weapon.weaponBase.weaponObjectPrototype.hitbox.size;
-        hitbox.offset = weapon.weaponBase.weaponObjectPrototype.hitbox.offset;
-        //gameObject.SetActive(false);
-        damage = weapon.damage;
-        knockbackPower = weapon.knockbackPower;
+        UpdateHitbox();
+
+        animator = GetComponent<Animator>();
         //Add and set the animator
         if (animator == null)
         {
             animator = gameObject.AddComponent<Animator>();
+
         }
 
-        animator.runtimeAnimatorController = weapon.weaponBase.weaponObjectPrototype.animator.runtimeAnimatorController;
+        animator.runtimeAnimatorController = weapon.weaponBase.animator.runtimeAnimatorController;
 
+    }
+
+    public override AttackData GetAttackData()
+    {
+        return weapon.GetAttackData();
+    }
+
+    public void UpdateHitbox()
+    {
+        if(weapon == null)
+        {
+            return;
+        }
+
+        Vector2 size = weapon.weaponBase.hitbox.size + Vector2.up * weapon.GetStatValue(WeaponAttributesType.WeaponReach);
+        Vector2 offset = weapon.weaponBase.hitbox.offset + Vector2.up * weapon.GetStatValue(WeaponAttributesType.WeaponReach) / 2;
+        hitbox.size = size;
+        hitbox.offset = offset;
     }
 
 }

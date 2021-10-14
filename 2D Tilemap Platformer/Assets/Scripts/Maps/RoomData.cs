@@ -13,6 +13,9 @@ public class RoomData
     //How do i handle the layers? this is one layer of tiles.
     public List<TilemapLayerSaveData> mapLayers = new List<TilemapLayerSaveData>();
 
+    public List<WorldTile> tiles = new List<WorldTile>();
+
+
     //This array tells us which sides of this room are open.
     // 0 - North
     // 1 - South
@@ -32,10 +35,16 @@ public class RoomData
     {
         RoomData data = new RoomData();
         data.mapLayers = new List<TilemapLayerSaveData>();
+        data.tiles = new List<WorldTile>();
 
         foreach (TilemapLayerSaveData layer in original.mapLayers)
         {
             data.mapLayers.Add(TilemapLayerSaveData.DeepCopy(layer));
+        }
+
+        foreach (WorldTile tile in original.tiles)
+        {
+            data.tiles.Add(WorldTile.DeepCopy(tile));
         }
 
         data.openings = original.openings;

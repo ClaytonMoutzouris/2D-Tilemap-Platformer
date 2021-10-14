@@ -12,8 +12,10 @@ public class Health : MonoBehaviour
     public int currentHealth = 20;
     public Entity entity;
 
+    public HealthBarUI healthbar = null;
+
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         entity = GetComponent<Entity>();    
     }
@@ -23,6 +25,16 @@ public class Health : MonoBehaviour
         return currentHealth <= 0;
     }
 
+    public void SetHealthBar(HealthBarUI hBar)
+    {
+        healthbar = hBar;
+
+        if(healthbar != null)
+        {
+            healthbar.SetHealth(currentHealth, maxHealth);
+        }
+    }
+
     public virtual void SetBaseHealth()
     {
 
@@ -30,7 +42,11 @@ public class Health : MonoBehaviour
 
     public void UpdateHealth()
     {
-        if(entity.stats == null)
+        if(entity == null)
+        {
+            entity = GetComponent<Entity>();
+        }
+        if (entity.stats == null)
         {
             return;
         }
@@ -54,6 +70,11 @@ public class Health : MonoBehaviour
         currentHealth += difference;
 
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        if(healthbar != null)
+        {
+            healthbar.SetHealth(currentHealth, maxHealth);
+        }
     }
 
     //Returns true if it kills the enemy
@@ -80,9 +101,9 @@ public class Health : MonoBehaviour
             entity.ShowFloatingText(Damage.ToString(), textColor);
         }
 
-        currentHealth -= Damage;    
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-        if(attacker != null)
+        SetHealth(currentHealth - Damage);
+
+        if (attacker != null)
         {
             foreach (Ability ability in entity.abilities)
             {
@@ -125,9 +146,7 @@ public class Health : MonoBehaviour
 
         entity.ShowFloatingText(Heals.ToString(), Color.green);
 
-        currentHealth += Heals;
-
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        SetHealth(currentHealth + Heals);
 
     }
 

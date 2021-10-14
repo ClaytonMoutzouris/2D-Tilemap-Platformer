@@ -26,7 +26,7 @@ public class Hitbox : MonoBehaviour
     public BoxCollider2D boxCollider;
 
 
-    private ColliderState _state;
+    public ColliderState _state;
 
 
     /*

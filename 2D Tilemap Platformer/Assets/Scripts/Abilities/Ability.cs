@@ -25,14 +25,15 @@ public class Ability : ScriptableObject
         owner.abilities.Add(this);
     }
 
-    public void GainAbility(Entity entity)
+    public virtual void GainAbility(Entity entity)
     {
         SetOwner(entity);
         owner.stats.AddPrimaryBonuses(bonusStats);
         owner.stats.AddSecondaryBonuses(secondaryBonusStats);
         owner.health.UpdateHealth();
 
-        if (owner is PlayerController player)
+        //This means talent cant be learned without a weapon... will have to update when weapon is equipped aswell
+        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
         {
             player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
             player._attackManager.meleeWeaponObject.UpdateHitbox();
@@ -40,7 +41,7 @@ public class Ability : ScriptableObject
 
     }
 
-    public void LoseAbility(Entity entity)
+    public virtual void LoseAbility(Entity entity)
     {
         owner.abilities.Remove(this);
         owner.stats.RemovePrimaryBonuses(bonusStats);
@@ -57,4 +58,13 @@ public class Ability : ScriptableObject
 
     }
 
+
+    public string GetTooltip()
+    {
+        string tooltip = "";
+
+        tooltip += name.Replace("(Clone)", "");
+
+        return tooltip;
+    }
 }

@@ -7,8 +7,9 @@ using UnityEngine.UI;
 public class MenuSelectorNodeUI : MonoBehaviour, ISelectHandler
 {
     public Button button;
-    public MenuOptionSelectorUI parent;
+    public MenuOptionSelector parent;
     public Text text;
+    public AudioClip selectClip;
 
     public void Start()
     {
@@ -22,6 +23,7 @@ public class MenuSelectorNodeUI : MonoBehaviour, ISelectHandler
 
     public void SelectOption()
     {
+        SoundManager.instance.PlaySingle(selectClip);
         parent.SelectNode(this);
     }
 

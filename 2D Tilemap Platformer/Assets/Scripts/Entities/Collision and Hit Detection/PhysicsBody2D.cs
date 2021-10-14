@@ -34,6 +34,7 @@ public class PhysicsBody2D : MonoBehaviour
         public Vector2[] rays = new Vector2[4];
         public bool onLadder;
         public Vector3 ladderOffset = Vector3.zero;
+        public bool spiked = false;
 
 		public bool hasCollision()
 		{
@@ -43,7 +44,7 @@ public class PhysicsBody2D : MonoBehaviour
 
 		public void reset()
 		{
-			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = onOneWayPlatform = false;
+			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = onOneWayPlatform = spiked = false;
 			slopeAngle = 0f;
             ledgeGrabPosition = Vector3.zero;
             ladderOffset = Vector3.zero;
@@ -111,12 +112,14 @@ public class PhysicsBody2D : MonoBehaviour
     /// </summary>
     [SerializeField]
 	LayerMask oneWayPlatformMask = 0;
+    [SerializeField]
+    LayerMask spikeMask = 0;
 
-	/// <summary>
-	/// the max slope angle that the CC2D can climb
-	/// </summary>
-	/// <value>The slope limit.</value>
-	[Range( 0f, 90f )]
+    /// <summary>
+    /// the max slope angle that the CC2D can climb
+    /// </summary>
+    /// <value>The slope limit.</value>
+    [Range( 0f, 90f )]
 	public float slopeLimit = 30f;
 
 	/// <summary>
@@ -575,7 +578,8 @@ public class PhysicsBody2D : MonoBehaviour
 	void moveVertically( ref Vector3 deltaMovement )
 	{
 		var isGoingUp = deltaMovement.y > 0;
-		var rayDistance = Mathf.Abs( deltaMovement.y ) + _skinWidth;
+        var isGoingDown = deltaMovement.y < 0;
+        var rayDistance = Mathf.Abs( deltaMovement.y ) + _skinWidth;
 		var rayDirection = isGoingUp ? Vector2.up : -Vector2.up;
 		var initialRayOrigin = isGoingUp ? _raycastOrigins.topLeft : _raycastOrigins.bottomLeft;
 
@@ -594,7 +598,8 @@ public class PhysicsBody2D : MonoBehaviour
 			DrawRay( ray, rayDirection *0.1f, Color.red );
 
 
-			hits = Physics2D.RaycastAll( ray, rayDirection, rayDistance, mask );
+            hits = Physics2D.RaycastAll( ray, rayDirection, rayDistance, mask );
+
 
             for (int h = 0; h < hits.Length; h++)
             {
@@ -643,8 +648,18 @@ public class PhysicsBody2D : MonoBehaviour
                 }
             }
 
+            if (isGoingDown && !collisionState.below)
+            {
+                RaycastHit2D[] spikes = Physics2D.RaycastAll(ray, rayDirection, rayDistance, spikeMask);
 
-		}
+                if (spikes.Length > 0)
+                {
+                    collisionState.spiked = true;
+                    
+                }
+            }
+
+        }
 	}
 
 	#endregion

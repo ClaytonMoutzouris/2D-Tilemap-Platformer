@@ -21,7 +21,6 @@ public class StatusEffect : Effect
             {
                 if (effect is StatusEffect statusEffect && statusEffect.name.Equals(name))
                 {
-                    Debug.Log("Prevented stacking");
                     statusEffect.timeStamp = Time.time;
                     return;
                 }

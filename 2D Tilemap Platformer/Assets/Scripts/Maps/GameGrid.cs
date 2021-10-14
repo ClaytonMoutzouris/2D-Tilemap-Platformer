@@ -6,12 +6,12 @@ using System.IO;
 using Algorithms;
 using Newtonsoft.Json;
 
-public enum TileMapLayersEnum { Ground, OneWay, Background, Foreground }
+public enum TileMapLayersEnum { Ground, OneWay, Background, Foreground, Ladders, Spikes, Objects }
 public class GameGrid : MonoBehaviour
 {
     public static GameGrid instance;
     public Grid grid;
-    public Tilemap[] tilemaps;
+    public Tilemap[] tilemapLayers;
     public int mapSizeX = 10;
     public int mapSizeY = 10;
     public PathFinderFast mPathFinder;
@@ -28,17 +28,17 @@ public class GameGrid : MonoBehaviour
     void OnDrawGizmos()
     {
         // Green
-        if(tilemaps[0] != null)
+        if(tilemapLayers[0] != null)
         {
             Gizmos.color = new Color(0.0f, 1.0f, 0.0f);
-            Gizmos.DrawWireCube(tilemaps[0].origin+ tilemaps[0].size/2, tilemaps[0].size);
+            Gizmos.DrawWireCube(tilemapLayers[0].origin+ tilemapLayers[0].size/2, tilemapLayers[0].size);
         }
 
     }
 
     public void ResizeMaps()
     {
-        foreach (Tilemap tilemap in tilemaps)
+        foreach (Tilemap tilemap in tilemapLayers)
         {
             if (tilemap == null)
                 continue;
@@ -50,26 +50,42 @@ public class GameGrid : MonoBehaviour
         }
     }
 
-    public List<WorldTile> GetWorldTiles(int mapID)
+    public List<WorldTile> GetWorldTiles(int layerID)
     {
         List<WorldTile> tiles = new List<WorldTile>();
 
 
 
-        foreach (Vector3Int pos in tilemaps[mapID].cellBounds.allPositionsWithin)
+        foreach (Vector3Int pos in tilemapLayers[layerID].cellBounds.allPositionsWithin)
         {
             var lPos = new Vector3Int(pos.x, pos.y, pos.z);
 
-            if (!tilemaps[mapID].HasTile(lPos))
+            if (!tilemapLayers[layerID].HasTile(lPos))
             {
                 continue;
             }
 
-            WorldTile _tile = new WorldTile()
+            TileBase tilebase = tilemapLayers[layerID].GetTile(lPos);
+            WorldTile _tile;
+
+
+            _tile = new WorldTile()
             {
                 LocalPlace = lPos,
-                TileID = tilemaps[mapID].GetTile(lPos).name,
+                TileID = tilebase.name,
+                LayerID = (TileMapLayersEnum)layerID,
+                SpawnObject = null,
+
             };
+
+            if(tilebase is GambleObjectTileBase gTile)
+            {
+                if(gTile.spawnObject != null)
+                {
+                    _tile.SpawnObject = gTile.spawnObject.name;
+
+                }
+            }
 
             tiles.Add(_tile);
 
@@ -78,28 +94,121 @@ public class GameGrid : MonoBehaviour
         return tiles;
     }
 
-    public void SetWorldTiles(int mapID, List<WorldTile> tiles, bool clearMap = true)
+    public List<WorldTile> GetWorldTiles()
+    {
+        List<WorldTile> tiles = new List<WorldTile>();
+
+        for (int i = 0; i < tilemapLayers.Length; i++)
+        {
+            foreach (Vector3Int pos in tilemapLayers[i].cellBounds.allPositionsWithin)
+            {
+                var lPos = new Vector3Int(pos.x, pos.y, pos.z);
+
+                if (!tilemapLayers[i].HasTile(lPos))
+                {
+                    continue;
+                }
+
+                TileBase tilebase = tilemapLayers[i].GetTile(lPos);
+
+
+                WorldTile _tile = new WorldTile()
+                {
+                    LocalPlace = lPos,
+                    TileID = tilebase.name,
+                    LayerID = (TileMapLayersEnum)i,
+                    SpawnObject = null,
+
+                };
+
+                //if its not what is it then?
+                if (tilebase is GambleObjectTileBase gTile)
+                {
+                    if(gTile.spawnObject != null)
+                    {
+                        Debug.Log("Found an object tile");
+                        _tile.SpawnObject = gTile.spawnObject.name;
+                    }
+                }
+
+                tiles.Add(_tile);
+
+            }
+        }
+
+        return tiles;
+    }
+
+    public void SetWorldTiles(int mapID, List<WorldTile> tiles, bool clearMap = true, bool editor = false)
     {
         if (clearMap)
         {
-            tilemaps[mapID].ClearAllTiles();
+            tilemapLayers[mapID].ClearAllTiles();
         }
 
         Tile[] tileAsset = Resources.LoadAll<Tile>("Tiles");
 
         foreach (WorldTile tile in tiles)
         {
-
             for (int i = 0; i < tileAsset.Length; i++)
             {
                 if (tileAsset[i].name == tile.TileID)
                 {
-                    tilemaps[mapID].SetTile(tile.LocalPlace, tileAsset[i]);
+                    if (tile.SpawnObject != null && !editor)
+                    {
+                        GameObject temp = Instantiate(Resources.Load("Prefabs/Entities/" + tile.SpawnObject) as GameObject, new Vector3(tile.LocalPlace.x, tile.LocalPlace.y, 0), Quaternion.identity);
+                    } else
+                    {
+                        tilemapLayers[mapID].SetTile(tile.LocalPlace, tileAsset[i]);
+                    }
+
                     i = tileAsset.Length;
                 }
             }
         }
         Resources.UnloadUnusedAssets();
+    }
+
+    public void SetWorldTiles(List<WorldTile> tiles, bool clearMap = true, bool editor = false)
+    {
+        if (clearMap)
+        {
+            ClearMap();
+        }
+
+        Tile[] tileAsset = Resources.LoadAll<Tile>("Tiles");
+
+        foreach (WorldTile tile in tiles)
+        {
+            for (int i = 0; i < tileAsset.Length; i++)
+            {
+                if (tileAsset[i].name == tile.TileID)
+                {
+                    Debug.Log("Spawn object for tile " + tile.SpawnObject);
+
+                    if (tile.SpawnObject != null && !editor)
+                    {
+                        Debug.Log("Spawn object loaded");
+                        GameObject temp = Instantiate(Resources.Load("Prefabs/Entities/" + tile.SpawnObject) as GameObject, new Vector3(tile.LocalPlace.x+ 0.5f, tile.LocalPlace.y + 0.5f, 0), Quaternion.identity);
+                    }
+                    else
+                    {
+                        tilemapLayers[(int)tile.LayerID].SetTile(tile.LocalPlace, tileAsset[i]);
+                    }
+
+                    i = tileAsset.Length;
+                }
+            }
+        }
+        Resources.UnloadUnusedAssets();
+    }
+
+    public void ClearMap()
+    {
+        foreach(Tilemap tilemap in tilemapLayers)
+        {
+            tilemap.ClearAllTiles();
+        }
     }
 
     //This method is not currently being used.
@@ -118,7 +227,7 @@ public class GameGrid : MonoBehaviour
                     {
                         //Careful, these 10s should not be hardcoded
                         Vector3Int tileMapPos = new Vector3Int(tile.LocalPlace.x + GambleConstants.RoomSizeX * x, tile.LocalPlace.y + GambleConstants.RoomSizeY * y, tile.LocalPlace.z);
-                        tilemaps[layerData.layerIndex].SetTile(tileMapPos, tileAsset[i]);
+                        tilemapLayers[layerData.layerIndex].SetTile(tileMapPos, tileAsset[i]);
                         i = tileAsset.Length;
                     }
                 }
@@ -150,20 +259,20 @@ public class GameGrid : MonoBehaviour
 
     public void ClearTiles()
     {
-        for (int i = 0; i < tilemaps.Length; i++)
+        for (int i = 0; i < tilemapLayers.Length; i++)
         {
-            tilemaps[i].ClearAllTiles();
+            tilemapLayers[i].ClearAllTiles();
         }
     }
 
     public bool IsGround(int x, int y)
     {
-        return tilemaps[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0)) || tilemaps[(int)TileMapLayersEnum.Ground].HasTile(new Vector3Int(x, y, 0));
+        return tilemapLayers[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0)) || tilemapLayers[(int)TileMapLayersEnum.Ground].HasTile(new Vector3Int(x, y, 0));
     }
 
     public bool IsOneWayPlatform(int x, int y)
     {
-        return tilemaps[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0));
+        return tilemapLayers[(int)TileMapLayersEnum.OneWay].HasTile(new Vector3Int(x, y, 0));
     }
 
     public void InitPathFinder()
@@ -270,10 +379,8 @@ public class GameGrid : MonoBehaviour
 
             RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
 
-            foreach (TilemapLayerSaveData layerData in loadData.mapLayers)
-            {
-                SetWorldTiles(layerData.layerIndex, layerData.tiles, true);
-            }
+            SetWorldTiles(loadData.tiles, true);
+
 
         }
         else

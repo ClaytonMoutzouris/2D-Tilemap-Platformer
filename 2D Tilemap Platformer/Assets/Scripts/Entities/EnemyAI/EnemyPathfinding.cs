@@ -309,6 +309,11 @@ public class EnemyPathfinding : MonoBehaviour
 
     public float GetJumpHeightForPreviousNode()
     {
+        if(mCurrentNodeId == 0)
+        {
+            return 0;
+        }
+
         int prevNodeId = mCurrentNodeId - 1;
 
         if (mPath[mCurrentNodeId].y - mPath[prevNodeId].y > 0 && entity._controller.isGrounded)

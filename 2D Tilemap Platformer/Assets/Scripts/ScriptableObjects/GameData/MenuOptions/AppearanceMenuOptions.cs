@@ -14,8 +14,8 @@ public class AppearanceMenuOptions : ScriptableObject
     public List<Color> hoodSecondaryColors;
     public List<Color> shirtPrimaryColors;
     public List<Color> shirtSecondaryColors;
-    public List<Color> pantsColors;
     public List<Color> shoesColors;
+    public List<Color> pantsColors;
 
 
 

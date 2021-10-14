@@ -14,14 +14,20 @@ public class Weapon : Equipment
     [Header("Attacks")]
     public List<Attack> attacks;
     public Attack heavyAttack;
-    public Projectile projectile;
+    public ProjectileData projectile;
+
+
 
     [Header("Stats")]
-
+    [HideInInspector]
+    public List<ProjectileFlagBonus> projectileBonuses = new List<ProjectileFlagBonus>();
     //This is the actual object
     [HideInInspector]
     public WeaponAttributes weaponAttributes;
+    [HideInInspector]
+    //public List<ProjectileFlagBonus> projectileEffects = new List<ProjectileFlagBonus>();
     private bool baseStatsLoaded = false;
+
 
     [Header("Base Stats")]
     public int damage;
@@ -39,8 +45,10 @@ public class Weapon : Equipment
     public float reloadTime;
 
     int attackIndex = 0;
+    float lastFiredTimestamp = 0;
     private WeaponObject weaponObj;
 
+    //This is basically an INIT method
     public void SetBaseStats()
     {
         weaponAttributes = new WeaponAttributes();
@@ -59,6 +67,7 @@ public class Weapon : Equipment
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.AmmoCapacity, ammoCapacity));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.ReloadTime, reloadTime));
 
+        baseStatsLoaded = true;
     }
 
     public void SetObject(WeaponObject obj)
@@ -91,6 +100,19 @@ public class Weapon : Equipment
         foreach (Ability ability in owner.abilities)
         {
             weaponAttributes.AddBonuses(ability.weaponBonuses);
+
+            //TODO: This needs to be changed, but is more about how abilities work than how this works
+            if (ability is WeaponAbility weaponAbility)
+            {
+
+                weaponAbility.OnWeaponEquipped();
+
+            }
+        }
+
+        foreach(Talent talent in owner.learnedTalents)
+        {
+            weaponAttributes.AddBonuses(talent.weaponBonuses);
         }
 
         base.OnEquipped(entity);
@@ -106,6 +128,18 @@ public class Weapon : Equipment
         foreach (Ability ability in entity.abilities)
         {
             weaponAttributes.RemoveBonuses(ability.weaponBonuses);
+
+            //TODO: This needs to be changed
+            if (ability is WeaponAbility weaponAbility)
+            {
+                weaponAbility.OnWeaponUnequipped();
+
+            }
+        }
+
+        foreach (Talent talent in owner.learnedTalents)
+        {
+            weaponAttributes.RemoveBonuses(talent.weaponBonuses);
         }
 
         base.OnUnequipped(entity);
@@ -152,19 +186,40 @@ public class Weapon : Equipment
 
     public void FireProjectile(int angle = 0)
     {
-        Projectile proj = projectile;
+        if(projectile == null)
+        {
+            return;
+        }
 
-        if (proj != null)
+        Vector2 dir = (Vector2)(Quaternion.Euler(0, 0, angle) * Vector2.right);
+
+        if (weaponObj != null)
+        {
+            owner._attackManager.rangedWeaponObject.AimWeapon(dir);
+        }
+
+
+        if (Time.time > lastFiredTimestamp + (1 / GetStatValue(WeaponAttributesType.FireRate)))
         {
 
-            proj = Instantiate(proj, owner.transform.position, Quaternion.identity);
-            proj.SetFromWeapon(this);
+            lastFiredTimestamp = Time.time;
 
-            Vector2 dir = (Vector2)(Quaternion.Euler(0, 0, angle) * Vector2.right);
-            dir.x *= owner.GetDirection();
+            Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
 
-            proj.SetDirection(dir);
+            if (proj != null)
+            {
+                proj.SetData(projectile);
+                proj.SetFromWeapon(this);
+
+                dir.x *= owner.GetDirection();
+
+                proj.SetDirection(dir);
+            }
         }
+
+
+
+
 
 
     }
@@ -172,60 +227,87 @@ public class Weapon : Equipment
     public void FireAimedProjectile()
     {
 
-        Projectile proj = projectile;
-
-        if (proj != null)
+        if (projectile == null)
         {
-            proj = Instantiate(proj, owner.transform.position, Quaternion.identity);
-            proj.SetFromWeapon(this);
+            return;
+        }
 
-            Vector2 dir = owner._input.GetRightStickAim().normalized;
+        Vector2 dir = owner._input.GetRightStickAim().normalized;
 
-            //If there is no input, default the direction to forward
+        //If there is no input, default the direction to forward
+
+        if (Time.time > lastFiredTimestamp + (1 / GetStatValue(WeaponAttributesType.FireRate)))
+        {
+            lastFiredTimestamp = Time.time;
+
+            Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
+
+
+            if (proj != null)
+            {
+                proj.SetData(projectile);
+                proj.SetFromWeapon(this);
+
+                if (dir == Vector2.zero)
+                {
+                    if (!proj.projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
+                    {
+                        dir = owner.GetDirection() * Vector2.right + Vector2.up / 2;
+
+                    } else
+                    {
+                        dir = owner.GetDirection() * Vector2.right;
+
+                    }
+
+
+                }
+
+                
+                
+                Debug.Log("Aim Direction " + dir);
+                proj.SetDirection(dir);
+            }
+        }
+
+
+        if (weaponObj != null)
+        {
             if (dir == Vector2.zero)
             {
-                if (proj.ignoreGravity)
-                {
-                    dir = owner.GetDirection() * Vector2.right;
 
-                }
-                else
-                {
-                    dir = owner.GetDirection() * Vector2.right + Vector2.up/2;
+                dir = owner.GetDirection() * Vector2.right;
 
-                }
             }
-
-            proj.SetDirection(dir);
+            owner._attackManager.rangedWeaponObject.AimWeapon(dir);
         }
     }
 
     //Only works for melee weapons with the default thrown object set
     public void ThrowWeapon()
     {
-        Projectile proj = projectile;
+        Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
 
         if (proj != null)
         {
-            proj = Instantiate(proj, owner.transform.position, Quaternion.identity);
+            proj.SetData(projectile);
             proj.SetFromWeapon(this);
             proj._attackObject.UpdateHitbox(weaponBase.hitbox.size, weaponBase.hitbox.offset);
             proj.spriteRenderer.sprite = sprite;
-            Vector2 dir = owner._input.GetRightStickAim().normalized;
+            Vector2 dir;
 
             //If there is no input, default the direction to forward
-            if (dir == Vector2.zero)
+
+            if(proj.projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
             {
-                if(proj.ignoreGravity)
-                {
-                    dir = owner.GetDirection() * Vector2.right;
+                dir = owner.GetDirection() * Vector2.right;
 
-                } else
-                {
-                    dir = owner.GetDirection() * Vector2.right + Vector2.up/2;
+            } else
+            {
+                dir = owner.GetDirection() * Vector2.right + Vector2.up/2;
 
-                }
             }
+            
 
             proj.SetDirection(dir);
         }

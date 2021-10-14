@@ -16,7 +16,6 @@ public class DashAttack : Attack
 
         entity.movementState = PlayerMovementState.Attacking;
         dashSpeed = entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue() * 2;
-        entity._velocity.x = entity.GetDirection() * dashSpeed;
 
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;
         entity._animator.Play(attackAnimation.name);
@@ -31,6 +30,7 @@ public class DashAttack : Attack
         //This allows for the animator speed to be adjusted by the "attack speed"
         while (entity._animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
         {
+            entity._velocity.x = entity.GetDirection() * dashSpeed;
             yield return null;
         }
 

@@ -17,7 +17,6 @@ public class AttackManager : MonoBehaviour
     public float followUpThreshold = 1f;
     public float lastAttackTime = 0;
 
-    public Projectile thrownWeaponBase;
 
 
     private void Start()
@@ -76,8 +75,12 @@ public class AttackManager : MonoBehaviour
         {
             return;
         }
-        StartCoroutine(newAttack.Activate(entity, button));
+
         activeAttack = newAttack;
+
+        StartCoroutine(newAttack.Activate(entity, button));
+
+        
 
     }
 
@@ -94,8 +97,9 @@ public class AttackManager : MonoBehaviour
         {
             return;
         }
-        StartCoroutine(newAttack.Activate(entity, button));
         activeAttack = newAttack;
+
+        StartCoroutine(newAttack.Activate(entity, button));
     }
 
     //This method fires a projectile at a certain angle (default to straight ahead

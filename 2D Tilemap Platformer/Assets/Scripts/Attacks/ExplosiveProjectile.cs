@@ -6,18 +6,21 @@ using UnityEngine;
 [RequireComponent(typeof(AttackObject))]
 public class ExplosiveProjectile : Projectile
 {
-    public Projectile explosion;
+    //This doesnt have to be an explosion, could be like little missiles or something
+    public ProjectileData explosion;
     int damage;
     float knockbackPower;
 
-    public void OnDestroy()
+    public override void DestroyProjectile()
     {
-        Projectile projectile = Instantiate(explosion, transform.position, Quaternion.identity);
+        Projectile projectile = Instantiate(explosion.projectileBase, transform.position, Quaternion.identity);
+        projectile.SetData(explosion);
         projectile._attackObject.SetOwner(_attackObject.owner);
 
         projectile._attackObject.attackData.damage = damage;
         projectile._attackObject.attackData.knockbackPower = knockbackPower;
 
+        base.DestroyProjectile();
     }
 
     public override void SetFromWeapon(Weapon wep)
@@ -31,7 +34,10 @@ public class ExplosiveProjectile : Projectile
         _attackObject.attackData.damage = 0;
         _attackObject.attackData.knockbackPower = 0;
 
-        projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
+        projectileData.projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
+        projectileData.projectileFlags.AddBonuses(wep.projectileBonuses);
+
+
 
     }
 

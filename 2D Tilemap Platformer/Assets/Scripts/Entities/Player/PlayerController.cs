@@ -11,6 +11,8 @@ public class PlayerController : Entity
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
 
+    public PlayerVersusUI playerVersusUI;
+
     public Vector3 ladderClimbPosition;
     public Vector3 ledgeGrabPosition;
     public Vector3 ledgeGrabOffset = new Vector3(0.2f, 0.6f, 0);
@@ -21,6 +23,8 @@ public class PlayerController : Entity
     public PhysicsBody2D _controller;
     public PlayerInputController _input;
     public EquipmentManager _equipmentManager;
+    public TalentTree talentTree;
+    public List<Talent> learnedTalents = new List<Talent>();
 
     public float rollSpeed = 2;
     public LayerMask rollMask;
@@ -44,6 +48,8 @@ public class PlayerController : Entity
     public ParticleSystem deathEffect;
 
     public ContactFilter2D itemFilter;
+    public PlayerCreationData playerData;
+
 
     protected override void Awake()
 	{
@@ -62,6 +68,19 @@ public class PlayerController : Entity
         colorSwap = new ColorSwap(spriteRenderer.material);
         colorSwapper = new ColorSwapper(spriteRenderer.material);
 
+    }
+
+    public void SetData(PlayerCreationData data)
+    {
+        playerData = data;
+
+        colorSwap.SetBaseColors(playerData.playerColors);
+
+        foreach (Talent talent in playerData.talents)
+        {
+            Talent newTalent = Instantiate(talent);
+            newTalent.LearnTalent(this);
+        }
     }
 
 
@@ -98,7 +117,7 @@ public class PlayerController : Entity
     void AttemptLedgeGrab()
     {
 
-        if(!_controller.isGrounded && !_attackManager.IsAttacking() && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
+        if(!_controller.isGrounded && movementState != PlayerMovementState.Attacking && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
         {
             movementState = PlayerMovementState.GrabLedge;
             if(_controller.collisionState.right)
@@ -121,7 +140,7 @@ public class PlayerController : Entity
             return false;
         }
 
-        if (!_attackManager.IsAttacking())
+        if (movementState != PlayerMovementState.Attacking)
         {
             movementState = PlayerMovementState.ClimbingLadder;
 
@@ -172,7 +191,7 @@ public class PlayerController : Entity
                 Climbing();
                 break;
             case PlayerMovementState.Attacking:
-
+                Attacking();
                 break;
             case PlayerMovementState.Dead:
                 if(_input.GetButtonDown(ButtonInput.Jump))
@@ -223,68 +242,96 @@ public class PlayerController : Entity
             StartCoroutine(Rolling());
         }
 
-        if(_input.GetLeftStickTapDown())
-        {
-            PickupItems();
-        }
+        //See if we are colliding with any items
+        List<ItemObject> itemsTouching = CheckForItems();
 
 
-        //Set animator state
-        if (_attackManager.IsAttacking())
+        if (itemsTouching.Count > 0)
         {
-            //attacking overrides other things
-        }
-        else
-        {
-            _animator.speed = 1;
-
-            switch (movementState)
+            //itemsTouching[0].ShowTooltip(this);
+            if(playerVersusUI != null && playerVersusUI.showItemTooltips)
             {
-                case PlayerMovementState.Falling:
+                playerVersusUI.tooltip.ShowTooltip(itemsTouching[0]);
+            }
 
-                    break;
-                case PlayerMovementState.Idle:
-                    _animator.Play(Animator.StringToHash("Idle"));
 
-                    break;
-                case PlayerMovementState.Crouch:
-                    _animator.Play(Animator.StringToHash("Crouch"));
-
-                    break;
-                case PlayerMovementState.Jump:
-                    _animator.Play(Animator.StringToHash("Jump"));
-
-                    break;
-                case PlayerMovementState.Run:
-                    _animator.Play(Animator.StringToHash("Run"));
-                    break;
-                case PlayerMovementState.GrabLedge:
-                    _animator.Play(Animator.StringToHash("GrabLedge"));
-                    break;
-                case PlayerMovementState.ClimbingLadder:
-                    if(normalizedVerticalSpeed != 0)
-                    {
-                        _animator.Play(Animator.StringToHash("ClimbingLadder"));
-                    } else
-                    {
-                        _animator.Play(Animator.StringToHash("ClimbingLadderIdle"));
-                    }
-                    break;
-                case PlayerMovementState.Dead:
-                    _animator.Play(Animator.StringToHash("Dead"));
-                    break;
-                    //case PlayerMovementState.Knockedback:
-
+            if (_input.GetLeftStickTapDown())
+            {
+                PickupItem(itemsTouching[0]);
+            }
+        } else
+        {
+            if (playerVersusUI != null)
+            {
+                playerVersusUI.tooltip.HideTooltip();
             }
         }
+
+
+
+        switch (movementState)
+        {
+            case PlayerMovementState.Falling:
+                _animator.speed = 1;
+
+                break;
+            case PlayerMovementState.Idle:
+                _animator.speed = 1;
+
+                _animator.Play(Animator.StringToHash("Idle"));
+
+                break;
+            case PlayerMovementState.Crouch:
+                _animator.speed = 1;
+
+                _animator.Play(Animator.StringToHash("Crouch"));
+
+                break;
+            case PlayerMovementState.Jump:
+                _animator.speed = 1;
+
+                _animator.Play(Animator.StringToHash("Jump"));
+
+                break;
+            case PlayerMovementState.Run:
+                _animator.speed = 1;
+
+                _animator.Play(Animator.StringToHash("Run"));
+                break;
+            case PlayerMovementState.GrabLedge:
+                _animator.speed = 1;
+
+                _animator.Play(Animator.StringToHash("GrabLedge"));
+                break;
+            case PlayerMovementState.ClimbingLadder:
+                _animator.speed = 1;
+
+                if (normalizedVerticalSpeed != 0)
+                {
+                    _animator.Play(Animator.StringToHash("ClimbingLadder"));
+                } else
+                {
+                    _animator.Play(Animator.StringToHash("ClimbingLadderIdle"));
+                }
+                break;
+            case PlayerMovementState.Dead:
+                _animator.speed = 1;
+                _animator.Play(Animator.StringToHash("Dead"));
+                break;
+            case PlayerMovementState.Attacking:
+                //attacks should handle their own animations
+
+                break;
+            //case PlayerMovementState.Knockedback:
+        }
+        
 
         //Debug.Log("Movement State This Frame " + movementState);
         //I could probably move this stuff somewhere else
 
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        if(movementState != PlayerMovementState.Attacking && !knockedBack
-            && (movementState != PlayerMovementState.Dead || (normalizedHorizontalSpeed == 0 && _controller.isGrounded)))
+        if(!knockedBack && (movementState != PlayerMovementState.Dead || (normalizedHorizontalSpeed == 0 && _controller.isGrounded)))
         {
             _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * smoothedMovementFactor);
         }
@@ -302,7 +349,38 @@ public class PlayerController : Entity
 
 		// grab our current _velocity to use as a base for all calculations
 		_velocity = _controller.velocity;
+
+        if(movementState != PlayerMovementState.Dead && _controller.collisionState.spiked)
+        {
+            Debug.Log(name + " has been spiked");
+            health.LoseHealth(999);
+        }
 	}
+
+    private void Attacking()
+    {
+
+        normalizedHorizontalSpeed = 0;
+        
+
+        if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
+        {
+            normalizedHorizontalSpeed = 1;
+            //SetDirection(EntityDirection.Right);
+
+
+        }
+        else if (_input.GetAxisValue(AxisInput.LeftStickX) < -0.5f)
+        {
+            normalizedHorizontalSpeed = -1;
+            //SetDirection(EntityDirection.Left);
+        }
+
+        if(_controller.isGrounded)
+        {
+            normalizedHorizontalSpeed *= .35f;
+        }
+    }
 
     private void Climbing()
     {
@@ -513,7 +591,13 @@ public class PlayerController : Entity
 
         _velocity.y = 0;
 
-
+        foreach (Ability ability in abilities)
+        {
+            if(ability is EffectOnWalk onWalk)
+            {
+                onWalk.OnWalk();
+            }
+        }
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
         {
@@ -652,7 +736,7 @@ public class PlayerController : Entity
         }
     }
 
-    public void Jump()
+    public void Jump(bool leap = false)
     {
         if(movementState == PlayerMovementState.Jump || _controller.collisionState.becameGroundedThisFrame)
         {
@@ -661,15 +745,23 @@ public class PlayerController : Entity
         }
 
 
+
         _velocity.y = Mathf.Sqrt(2* stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
         movementState = PlayerMovementState.Jump;
-
+        foreach(Ability ability in abilities)
+        {
+            if(ability is EffectOnJump jumpAbility)
+            {
+                jumpAbility.OnJump();
+            }
+        }
     }
 
     public override void Die()
     {
         base.Die();
-
+        StopAllCoroutines();
+        _attackManager.StopAllCoroutines();
         movementState = PlayerMovementState.Dead;
         StartCoroutine(Death());
     }
@@ -683,9 +775,19 @@ public class PlayerController : Entity
             yield return 0;
         }
 
+        if(ArenaBattleManager.instance.gameData.gameMode != GameMode.FreePlay)
+        {
+            playerData.lives--;
+        }
+        playerVersusUI.SetLives();
+
         GameManager.instance.RemovePlayerAtIndex(playerIndex);
         //Use this for when the player should be removed from updated stuff but we want to keep the body
-        StartCoroutine(ArenaBattleManager.instance.RespawnPlayer(playerIndex));
+        if (playerData.lives > 0)
+        {
+            StartCoroutine(ArenaBattleManager.instance.RespawnPlayer(playerIndex));
+        }
+
         /*
         if (_input != null)
         {
@@ -784,12 +886,15 @@ public class PlayerController : Entity
             while (_animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1)
             {
                 normalizedHorizontalSpeed = rollDirection;
+                /*
                 if(_input.GetButtonDown(ButtonInput.LightAttack))
                 {
                     followUpAttack = true;
                 }
+                */
                 yield return null;
             }
+            
 
             stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).RemoveBonus(speedBonus);
             _animator.speed = 1;
@@ -802,6 +907,7 @@ public class PlayerController : Entity
             yield return null;
         }
 
+        /*
         if (followUpAttack)
         {
             //_attackManager.ActivateAttack();
@@ -809,10 +915,25 @@ public class PlayerController : Entity
             _input.previousButtonInput[(int)ButtonInput.LightAttack] = false;
 
         }
+        */
     }
     
-    public void PickupItems()
+    public void PickupItem(ItemObject item)
     {
+        //Move this to an inventory thing i think
+        if(item.item is Weapon weapon)
+        {
+            _equipmentManager.EquipItem(weapon);
+        }
+
+        item.Collect();
+
+    }
+
+    public List<ItemObject> CheckForItems()
+    {
+        List<ItemObject> itemsFound = new List<ItemObject>();
+
         List<Collider2D> colliders = new List<Collider2D>();
         BoxCollider2D box = _controller.boxCollider;
         //box.size *= 2;
@@ -821,24 +942,21 @@ public class PlayerController : Entity
 
         for (int i = 0; i < colliders.Count; i++)
         {
-            ItemEntity item = colliders[i].GetComponent<ItemEntity>();
+            ItemObject item = colliders[i].GetComponent<ItemObject>();
 
-            //item.pickup;
-            Debug.Log("Picked Up " + item.name);
-
-            if(item.item is Weapon weapon)
+            if(item != null)
             {
-                _equipmentManager.EquipItem(weapon);
+                itemsFound.Add(item);
             }
 
-            item.Collect();
-            break;
         }
+
+        return itemsFound;
     }
 
     public override void SetDirection(EntityDirection dir)
     {
-        if(_attackManager.IsAttacking())
+        if (movementState == PlayerMovementState.Attacking || movementState == PlayerMovementState.Roll)
         {
             return;
         }

@@ -351,6 +351,9 @@ public class SecondaryStatBonus
         if (bonusValue >= 0)
         {
             tooltip += "+";
+        } else
+        {
+            tooltip += "-";
         }
 
         switch (modType)

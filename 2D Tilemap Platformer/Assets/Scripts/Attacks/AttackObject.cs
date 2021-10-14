@@ -87,9 +87,18 @@ public class AttackObject : MonoBehaviour
         if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && hurtbox.entity != owner)
         {
             HitEnemy(hurtbox.entity);
+            hits.Add(collider);
 
+        }
+
+
+        AttackObject otherHit = collider.GetComponent<AttackObject>();
+
+        if (otherHit != null && otherHit.state != ColliderState.Closed && otherHit.owner != owner)
+        {
             hits.Add(collider);
         }
+
 
     }
 

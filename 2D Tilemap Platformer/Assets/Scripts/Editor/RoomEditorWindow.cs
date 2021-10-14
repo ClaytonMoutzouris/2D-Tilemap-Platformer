@@ -77,18 +77,24 @@ public class RoomEditorWindow : EditorWindow
     {
         RoomData saveData = new RoomData();
 
-        for (int i = 0; i < gameGrid.tilemaps.Length; i++)
+        /*
+        for (int i = 0; i < gameGrid.tilemapLayers.Length; i++)
         {
             TilemapLayerSaveData layerData = new TilemapLayerSaveData();
             layerData.layerIndex = i;
             layerData.tiles = gameGrid.GetWorldTiles(i);
             saveData.mapLayers.Add(layerData);
-            saveData.generalType = generalType;
-            saveData.openings[0] = OpenTop;
-            saveData.openings[1] = OpenBottom;
-            saveData.openings[2] = OpenEast;
-            saveData.openings[3] = OpenWest;
+
         }
+        */
+
+        saveData.tiles = gameGrid.GetWorldTiles();
+
+        saveData.generalType = generalType;
+        saveData.openings[0] = OpenTop;
+        saveData.openings[1] = OpenBottom;
+        saveData.openings[2] = OpenEast;
+        saveData.openings[3] = OpenWest;
 
         if (File.Exists(path))
         {
@@ -109,11 +115,15 @@ public class RoomEditorWindow : EditorWindow
 
             RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
 
+            /*
             foreach (TilemapLayerSaveData layerData in loadData.mapLayers)
             {
-                gameGrid.SetWorldTiles(layerData.layerIndex, layerData.tiles, true);
+                gameGrid.SetWorldTiles(layerData.layerIndex, layerData.tiles, true, true);
 
             }
+            */
+
+            gameGrid.SetWorldTiles(loadData.tiles, true, true);
 
             OpenTop = loadData.openings[0];
             OpenBottom = loadData.openings[1];

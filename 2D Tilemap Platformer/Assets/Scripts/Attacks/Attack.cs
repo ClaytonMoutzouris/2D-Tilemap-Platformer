@@ -44,13 +44,25 @@ public class Attack : ScriptableObject
 
     public virtual void StartUp()
     {
+        if(entity != null)
+        {
+            entity._attackManager.activeAttack = this;
+        }
+        if(entity.movementState != PlayerMovementState.Jump)
+        {
+            entity._velocity = Vector3.zero;
+        }
 
+        entity.movementState = PlayerMovementState.Attacking;
+        
     }
 
     public virtual void CleanUp()
     {
         entity._animator.speed = 1;
         entity._attackManager.activeAttack = null;
+        entity.movementState = PlayerMovementState.Idle;
+
     }
 
 }

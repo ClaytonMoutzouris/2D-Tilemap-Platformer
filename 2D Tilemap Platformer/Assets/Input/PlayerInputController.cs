@@ -73,6 +73,23 @@ public class PlayerInputController : MonoBehaviour
         }
     }
 
+    void ClearInputs()
+    {
+        var axisCount = (byte)AxisInput.Count;
+
+        for (byte i = 0; i < axisCount; ++i)
+        {
+            previousAxisInput[i] = 0;
+        }
+
+        var buttonCount = (byte)ButtonInput.Count;
+
+        for (byte i = 0; i < buttonCount; ++i)
+        {
+            previousButtonInput[i] = false;
+        }
+    }
+
     public bool GetButtonDown(ButtonInput button)
     {
         return (buttonInput[(int)button] && !previousButtonInput[(int)button]);
@@ -150,6 +167,7 @@ public class PlayerInputController : MonoBehaviour
     {
         if(!mGamepadInput)
         {
+            ClearInputs();
             return;
         }
         UpdatePreviousInputs();

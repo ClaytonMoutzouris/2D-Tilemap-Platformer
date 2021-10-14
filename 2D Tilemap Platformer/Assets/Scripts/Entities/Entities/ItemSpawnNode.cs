@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemSpawnNode : Entity
+public class ItemSpawnNode : MonoBehaviour
 {
-    public ItemEntity prefab;
-    public Item item;
-    ItemEntity itemEntity;
+    public ItemObject prefab;
+    public List<ItemData> items;
+    ItemObject itemEntity;
+    public float spawnTime = 1;
 
     void Start()
     {
@@ -22,7 +23,7 @@ public class ItemSpawnNode : Entity
         itemEntity = Instantiate(prefab);
         itemEntity.transform.position = transform.position;
         itemEntity.SetSpawner(this);
-        itemEntity.SetItem(item);
+        itemEntity.SetItem(GetRandomItem());
     }
 
     public void ItemCollected()
@@ -33,9 +34,16 @@ public class ItemSpawnNode : Entity
     public IEnumerator Respawn()
     {
 
-        yield return new WaitForSeconds(5.0f);
+        yield return new WaitForSeconds(spawnTime);
         SpawnItem();
         //gameObject.SetActive(true);
 
+    }
+
+    public ItemData GetRandomItem()
+    {
+        int r = Random.Range(0, items.Count);
+
+        return items[r];
     }
 }

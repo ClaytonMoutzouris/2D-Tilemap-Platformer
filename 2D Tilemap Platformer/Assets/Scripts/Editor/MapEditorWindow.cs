@@ -104,14 +104,8 @@ public class MapEditorWindow : EditorWindow
     {
         RoomData saveData = new RoomData();
 
-        for (int i = 0; i < gameGrid.tilemaps.Length; i++)
-        {
-            TilemapLayerSaveData layerData = new TilemapLayerSaveData();
-            layerData.layerIndex = i;
-            layerData.tiles = gameGrid.GetWorldTiles(i);
-            saveData.mapLayers.Add(layerData);
+        saveData.tiles = gameGrid.GetWorldTiles();
 
-        }
 
         if (File.Exists(path))
         {
@@ -132,11 +126,9 @@ public class MapEditorWindow : EditorWindow
 
             RoomData loadData = JsonConvert.DeserializeObject<RoomData>(loadJson);
 
-            foreach (TilemapLayerSaveData layerData in loadData.mapLayers)
-            {
-                gameGrid.SetWorldTiles(layerData.layerIndex, layerData.tiles, true);
+            gameGrid.SetWorldTiles(loadData.tiles, true, true);
 
-            }
+            mapName = Path.GetFileNameWithoutExtension(path);
 
         }
         else

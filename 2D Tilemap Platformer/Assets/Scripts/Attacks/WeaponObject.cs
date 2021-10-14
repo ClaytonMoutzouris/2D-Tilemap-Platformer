@@ -9,6 +9,7 @@ public class WeaponObject : AttackObject
     public void SetWeapon(Weapon newWeapon)
     {
         weapon = newWeapon;
+        weapon.SetObject(this);
         spriteRenderer.sprite = weapon.sprite;
         spriteRenderer.color = weapon.color;
 
@@ -38,10 +39,35 @@ public class WeaponObject : AttackObject
             return;
         }
 
+        
         Vector2 size = weapon.weaponBase.hitbox.size + Vector2.up * weapon.GetStatValue(WeaponAttributesType.WeaponReach);
         Vector2 offset = weapon.weaponBase.hitbox.offset + Vector2.up * weapon.GetStatValue(WeaponAttributesType.WeaponReach) / 2;
         hitbox.size = size;
         hitbox.offset = offset;
+        
+        //If i want to change the size
+        //transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * weapon.GetStatValue(WeaponAttributesType.WeaponReach), transform.localScale.z);
     }
+
+
+    public void AimWeapon(Vector2 aim)
+    {
+
+        transform.localScale = new Vector3((int)owner.GetDirection() * Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+
+        if (owner.GetDirection() > 0)
+        {
+            spriteRenderer.flipY = false;
+        }
+        else
+        {
+            spriteRenderer.flipY = true;
+        }
+
+        float angle = Mathf.Atan2(aim.x, aim.y) * Mathf.Rad2Deg - 90;
+
+        transform.eulerAngles = new Vector3(0, 0, -angle);
+    }
+
 
 }

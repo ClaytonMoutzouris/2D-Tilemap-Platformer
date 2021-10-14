@@ -7,7 +7,7 @@ public enum EntityDirection { Left = -1, Right = 1 };
 [RequireComponent(typeof(Animator))]
 public class Entity : MonoBehaviour
 {
-    
+    public SpriteRenderer spriteRenderer;
     public Animator _animator;
     public AnimatorOverrideController overrideController;
     public AttackManager _attackManager;
@@ -23,7 +23,6 @@ public class Entity : MonoBehaviour
     public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
     public List<ParticleSystem> particleEffects = new List<ParticleSystem>();
-    public SpriteRenderer spriteRenderer;
     public Vector3 _velocity;
     public List<Ability> abilities = new List<Ability>();
     public List<Effect> statusEffects = new List<Effect>();
@@ -35,23 +34,24 @@ public class Entity : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        health = GetComponent<Health>();
-        health.entity = this;
-        hurtbox = GetComponentInChildren<Hurtbox>();
-        stats = GetComponent<Stats>();
-        if(stats != null)
-        {
-            stats.Initialize();
-        }
-        health.UpdateHealth();
+
+        
 
     }
 
     protected virtual void Awake()
     {
+        health = GetComponent<Health>();
+        hurtbox = GetComponentInChildren<Hurtbox>();
         _animator = GetComponent<Animator>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        stats = GetComponent<Stats>();
+        if (stats != null)
+        {
+            stats.Initialize();
+            health.UpdateHealth();
 
+        }
     }
 
     // Update is called once per frame

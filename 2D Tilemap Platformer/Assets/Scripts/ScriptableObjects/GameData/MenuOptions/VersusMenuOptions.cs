@@ -8,19 +8,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "VersusMenuOptions", menuName = "ScriptableObjects/GameData/VersusMenuOptions")]
 public class VersusMenuOptions : ScriptableObject
 {
-    public VersusGameMode gameMode;
+    public GameMode gameMode;
     public int lives;
     public int timeLimit;
     public string mapName;
 
-    public List<VersusGameMode> gameModes;
+    public List<GameMode> gameModes;
     public List<int> livesOptions;
     public List<int> timeLimits;
     public List<string> maps;
 
     public void LoadMaps()
     {
-
+        maps.Clear();
         //MenuOptionSelectorUI menuSelectorNode = menuOptions[(int)MenuOptionIndex.Map];
         //menuSelectorNode.ClearOptions();
         string path = Path.Combine(Application.streamingAssetsPath, "GameData", "Maps", "");

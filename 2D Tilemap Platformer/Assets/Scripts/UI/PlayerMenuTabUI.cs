@@ -3,18 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PlayerMenuTabUI : MonoBehaviour
+public class PlayerMenuTabUI : MenuTabUI
 {
-    public GameObject anchorObject;
     int playerIndex;
     // Start is called before the first frame update
     void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
     {
         
     }
@@ -24,7 +17,7 @@ public class PlayerMenuTabUI : MonoBehaviour
         playerIndex = index;
     }
 
-    public void OnEnable()
+    public override void SetAnchor()
     {
         Debug.Log("Player menu onEnable : " + playerIndex);
         if (GamepadInputManager.instance == null || GamepadInputManager.instance.gamepadInputs == null)
@@ -40,33 +33,6 @@ public class PlayerMenuTabUI : MonoBehaviour
             //GamepadInputManager.instance.gamepadInputs[playerIndex].GetComponent<EventSystem>().SetSelectedGameObject(anchorObject);
             StartCoroutine(UIUtilities.SelectAnchorObject(GamepadInputManager.instance.gamepadInputs[playerIndex].GetComponent<EventSystem>(), anchorObject));
         }
-
     }
 
-    public void GetAnchorObject()
-    {
-
-    }
-
-    public void CloseTab()
-    {
-        gameObject.SetActive(false);
-    }
-
-    public void OpenTab()
-    {
-        gameObject.SetActive(true);
-    }
-
-    public void OpenTab(int playerIndex)
-    {
-        this.playerIndex = playerIndex;
-        gameObject.SetActive(true);
-    }
-
-    public void DropPlayer()
-    {
-        GamepadInputManager.instance.DropPlayer(playerIndex);
-        //GameManager.instance.RemovePlayerAtIndex(playerIndex);
-    }
 }

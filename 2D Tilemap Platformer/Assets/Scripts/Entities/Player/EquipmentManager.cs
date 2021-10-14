@@ -10,7 +10,7 @@ public class EquipmentManager : MonoBehaviour
 
     public PlayerController player;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         player = GetComponent<PlayerController>();
     }

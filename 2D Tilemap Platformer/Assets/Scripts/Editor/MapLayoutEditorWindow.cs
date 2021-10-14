@@ -61,7 +61,7 @@ public class MapLayoutEditorWindow : EditorWindow
 
     }
 
-
+    //TODO: FIX THESE FOR THE NEW SAVE LOAD SYSTEM
     public void SaveLayout(string path)
     {
         MapLayout saveData = new MapLayout(mapSizeX, mapSizeY);

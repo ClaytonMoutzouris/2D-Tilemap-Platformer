@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Equipment", menuName = "ScriptableObjects/Items/Equipment/Equipment")]
-public class Equipment : Item
+public class Equipment : ItemData
 {
     public List<Ability> generalAbilities;
     public List<StatBonus> bonusStats;

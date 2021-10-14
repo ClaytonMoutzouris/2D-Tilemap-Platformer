@@ -10,7 +10,6 @@ public class MenuTabUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -19,14 +18,16 @@ public class MenuTabUI : MonoBehaviour
 
     }
 
-    public void OnEnable()
+    public virtual void SetAnchor()
     {
+        anchorObject = GetAnchorObject();
+
         if (anchorObject == null || GamepadInputManager.instance == null || GamepadInputManager.instance.gamepadInputs == null)
         {
             return;
         }
 
-        foreach(NewGamepadInput input in GamepadInputManager.instance.gamepadInputs)
+        foreach (NewGamepadInput input in GamepadInputManager.instance.gamepadInputs)
         {
             if (input != null)
             {
@@ -34,20 +35,25 @@ public class MenuTabUI : MonoBehaviour
                 StartCoroutine(UIUtilities.SelectAnchorObject(input.GetComponent<EventSystem>(), anchorObject));
             }
         }
-
     }
 
-    public GameObject GetAnchorObject()
+    public void OnEnable()
+    {
+
+        SetAnchor();
+    }
+
+    public virtual GameObject GetAnchorObject()
     {
         return anchorObject;
     }
 
-    public void CloseTab()
+    public virtual void CloseTab()
     {
         gameObject.SetActive(false);
     }
 
-    public void OpenTab()
+    public virtual void OpenTab()
     {
         gameObject.SetActive(true);
     }

@@ -6,7 +6,8 @@ using UnityEngine;
 public class LeapAttack : Attack
 {
     public float leapHeight = 5;
-    public float leapDuration = 0.3f;
+    public float leapDuration = 0.5f;
+    public float leapWeight = 10;
     //public List<AttackObject> activeObjects;
 
     //A basic attack.
@@ -19,7 +20,8 @@ public class LeapAttack : Attack
         float leapTimestamp = Time.time;
 
         entity.movementState = PlayerMovementState.Attacking;
-        entity._velocity.y = Mathf.Sqrt(2 * leapHeight * -GambleConstants.GRAVITY);
+        entity._velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
+        //entity.movementState = PlayerMovementState.Jump;
         
 
         while(Time.time <= leapTimestamp+leapDuration)
@@ -29,7 +31,7 @@ public class LeapAttack : Attack
         }
 
         // Enter the state
-        entity._velocity.y = -Mathf.Sqrt(leapHeight * -GambleConstants.GRAVITY);
+        entity._velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
         entity._velocity.x = 0;
         entity._animator.Play(attackAnimation.name);
         entity._animator.speed = attackSpeed;

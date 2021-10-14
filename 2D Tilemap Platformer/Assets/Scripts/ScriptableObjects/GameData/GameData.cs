@@ -8,12 +8,11 @@ using UnityEngine.InputSystem;
 [CreateAssetMenu(fileName = "GameData", menuName = "ScriptableObjects/GameData/GameData")]
 public class GameData : ScriptableObject
 {
-    public VersusGameMode gameMode;
-    public int lives;
-    public int timeLimit;
+    public GameMode gameMode;
     public string mapName;
-
     public PlayerCreationData[] playerDatas = new PlayerCreationData[4];
+    public int timeLimit = 5;
+    public int lives = 1;
 }
 
 // If you want the data to be stored permanently in the editor
@@ -27,5 +26,6 @@ public class PlayerCreationData
     public List<Color> playerColors = new List<Color>();
     public int playerIndex;
     public int lives;
+    public List<Talent> talents;
 
 }

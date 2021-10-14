@@ -3,13 +3,26 @@ using UnityEngine.UI;
 
 public static class ScrollRectExtensions
 {
-    public static Vector2 GetSnapToPositionToBringChildIntoView(this ScrollRect instance, Transform child)
+    //This might only work for vertical atm
+    public static Vector2 GetSnapToPositionToBringChildIntoViewVertical(this ScrollRect instance, RectTransform child)
     {
         Canvas.ForceUpdateCanvases();
         Vector2 viewportLocalPosition = instance.viewport.localPosition;
         Vector2 childLocalPosition = child.localPosition;
         Vector2 result = new Vector2(
             0 - (viewportLocalPosition.x + childLocalPosition.x),
+            0 - (viewportLocalPosition.y + childLocalPosition.y + child.sizeDelta.y/2)
+        );
+        return result;
+    }
+
+    public static Vector2 GetSnapToPositionToBringChildIntoViewHorizontal(this ScrollRect instance, RectTransform child)
+    {
+        Canvas.ForceUpdateCanvases();
+        Vector2 viewportLocalPosition = instance.viewport.localPosition;
+        Vector2 childLocalPosition = child.localPosition;
+        Vector2 result = new Vector2(
+            0 - (viewportLocalPosition.x + childLocalPosition.x + child.sizeDelta.x),
             0 - (viewportLocalPosition.y + childLocalPosition.y)
         );
         return result;
@@ -140,4 +153,5 @@ public static class ScrollRectExtensions
             scrollRect.horizontalNormalizedPosition = Mathf.Clamp(scrollPos, 0, 1);
         }
     }
+
 }

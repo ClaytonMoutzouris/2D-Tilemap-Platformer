@@ -44,7 +44,10 @@ public class PlayerInputController : MonoBehaviour
     {
         if(gamepad == null)
         {
-            mGamepadInput.player = null;
+            if(mGamepadInput != null)
+            {
+                mGamepadInput.player = null;
+            }
             mGamepadInput = gamepad;
         }
         else

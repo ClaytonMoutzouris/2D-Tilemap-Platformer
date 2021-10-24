@@ -133,7 +133,7 @@ public class EnemyPathfinding : MonoBehaviour
         if (entity._controller.isGrounded)
         {
             //Change this to just tell us if we need to jump or not
-            float jumpHeight = GetJumpHeightForPreviousNode();
+            float jumpHeight = GetJumpHeightForNextNode();
 
             if (jumpHeight > 0)
             {
@@ -309,7 +309,7 @@ public class EnemyPathfinding : MonoBehaviour
 
     public float GetJumpHeightForPreviousNode()
     {
-        if(mCurrentNodeId == 0)
+        if(mCurrentNodeId == 0 || mPath.Count < 1)
         {
             return 0;
         }
@@ -326,6 +326,25 @@ public class EnemyPathfinding : MonoBehaviour
                 if (mPath[i].y - mPath[prevNodeId].y < jumpHeight || GameGrid.instance.IsGround(mPath[i].x, mPath[i].y - 1))
                     return GetJumpFrameCount(jumpHeight);
             }
+        }
+
+        return 0;
+    }
+
+    public float GetJumpHeightForNextNode()
+    {
+        if(mPath.Count < 2 || mCurrentNodeId + 1 >= mPath.Count)
+        {
+            return 0;
+        }
+
+        int nextNodeID = mCurrentNodeId + 1;
+
+        if (mPath[nextNodeID].y - mPath[mCurrentNodeId].y > 0 && entity._controller.isGrounded)
+        {
+
+            return GetJumpFrameCount(mPath[nextNodeID].y - mPath[mCurrentNodeId].y + 1);
+            
         }
 
         return 0;

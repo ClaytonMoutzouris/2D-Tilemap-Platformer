@@ -106,6 +106,9 @@ public class Entity : MonoBehaviour
     }
 
 
+    public virtual void OnKill(Entity killed)
+    {
 
+    }
 
 }

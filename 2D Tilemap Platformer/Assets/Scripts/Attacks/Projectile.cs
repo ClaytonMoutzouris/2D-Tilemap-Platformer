@@ -15,6 +15,7 @@ public class Projectile : MonoBehaviour
 
     //Physics things
     protected PhysicsBody2D _controller;
+    public LayerMask baseLayermask;
     //Might want to create a seperate projectile class for "boomerangs", but modularity has its merits aswell
     bool returning = false;
 
@@ -30,7 +31,7 @@ public class Projectile : MonoBehaviour
         _attackObject = GetComponent<AttackObject>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-
+        baseLayermask = _controller.platformMask;
         // Might need this later?
         /*
         _controller.onControllerCollidedEvent += onControllerCollider;
@@ -122,7 +123,6 @@ public class Projectile : MonoBehaviour
         {
             if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.DestroyOnGround).GetValue())
             {
-                Debug.Log("Destroy on ground");
                 DestroyProjectile();
             } else if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.Bounce).GetValue() && !bouncedLastFrame)
             {
@@ -190,9 +190,19 @@ public class Projectile : MonoBehaviour
         _attackObject.attackData = wep.GetAttackData();
 
         projectileData.projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
+        projectileData.lifeTime = wep.GetStatValue(WeaponAttributesType.ProjectileLifeTime);
         projectileData.projectileFlags.AddBonuses(wep.projectileBonuses);
         projectileData.image = wep.sprite;
         spriteRenderer.color = wep.color;
+
+        if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGround).GetValue())
+        {
+            _controller.platformMask = new LayerMask();
+        }
+        else
+        {
+            _controller.platformMask = baseLayermask;
+        }
     }
 
     public void SetData(ProjectileData data)
@@ -212,9 +222,12 @@ public class Projectile : MonoBehaviour
             ParticleSystem temp = Instantiate(effect, transform);
         }
 
-        if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGround).GetValue())
+        if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGround).GetValue())
         {
             _controller.platformMask = new LayerMask();
+        } else
+        {
+            _controller.platformMask = baseLayermask;
         }
     }
 }

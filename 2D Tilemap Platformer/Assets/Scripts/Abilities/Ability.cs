@@ -36,6 +36,7 @@ public class Ability : ScriptableObject
         if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
         {
             player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
+
             player._attackManager.meleeWeaponObject.UpdateHitbox();
         }
 
@@ -50,6 +51,7 @@ public class Ability : ScriptableObject
 
         if (owner is PlayerController player)
         {
+
             player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
             player._attackManager.meleeWeaponObject.UpdateHitbox();
 

@@ -19,18 +19,43 @@ public class ArenaBattleManager : MonoBehaviour
         //Set the players lives from the gamedata
         instance = this;
         //set the timer from the gamedata
-        gameTimer = gameData.timeLimit*60;
+
+
+        StartGame();
+    }
+
+    public void StartGame()
+    {
+        StartCoroutine(GameSetup());
+    }
+
+    public IEnumerator GameSetup()
+    {
+        GameManager.instance.ClearPlayers();
+
+        gameTimer = gameData.timeLimit * 60;
 
         string path = Path.Combine(Application.streamingAssetsPath, "GameData", "Maps", gameData.mapName);
         path += ".map";
         GameGrid.instance.LoadMap(path);
 
+        Debug.Log("Game Starting in 3");
+        yield return new WaitForSeconds(1);
+
+        Debug.Log("Game Starting in 2");
+        yield return new WaitForSeconds(1);
+
+        Debug.Log("Game Starting in 1");
+        yield return new WaitForSeconds(1);
+
+        Debug.Log("Game Start!");
+
         List<SpawnPoint> pointsList = new List<SpawnPoint>();
         pointsList.AddRange(spawnPoints);
 
-        foreach(PlayerCreationData data in gameData.playerDatas)
+        foreach (PlayerCreationData data in gameData.playerDatas)
         {
-            if(data == null)
+            if (data == null)
             {
                 continue;
             }
@@ -39,6 +64,7 @@ public class ArenaBattleManager : MonoBehaviour
             GameManager.instance.SpawnPlayer(data.playerIndex, pointsList[r], data);
             pointsList.RemoveAt(r);
         }
+
     }
 
     // Update is called once per frame

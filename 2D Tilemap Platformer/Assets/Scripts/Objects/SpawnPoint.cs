@@ -6,9 +6,9 @@ public class SpawnPoint : MonoBehaviour
 {
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        
+        ArenaBattleManager.instance.spawnPoints.Add(this);
     }
 
     // Update is called once per frame

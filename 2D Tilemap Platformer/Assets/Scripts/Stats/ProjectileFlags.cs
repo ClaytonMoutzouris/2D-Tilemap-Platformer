@@ -49,7 +49,6 @@ public class ProjectileFlags
     {
         if (flags.ContainsKey(bonus.type))
         {
-            Debug.Log("Adding bonus " + bonus.type + " : " + bonus.bonusValue);
             flags[bonus.type].AddBonus(bonus);
         }
         else
@@ -139,8 +138,7 @@ public class ProjectileFlag
                 //If there is one false in the bonuses, break since no trumps yes
                 //Consider layering in the future, like in mtg
                 //(Example: something that says you cannot pierce will trump all bonuses that allow you to pierce
-                fullValue = bonus.bonusValue;
-                break;
+                return bonus.bonusValue;
             }
         }
 

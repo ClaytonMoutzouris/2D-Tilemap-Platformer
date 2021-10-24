@@ -184,11 +184,11 @@ public class GameGrid : MonoBehaviour
             {
                 if (tileAsset[i].name == tile.TileID)
                 {
-                    Debug.Log("Spawn object for tile " + tile.SpawnObject);
+                    //Debug.Log("Spawn object for tile " + tile.SpawnObject);
 
                     if (tile.SpawnObject != null && !editor)
                     {
-                        Debug.Log("Spawn object loaded");
+                        //Debug.Log("Spawn object loaded");
                         GameObject temp = Instantiate(Resources.Load("Prefabs/Entities/" + tile.SpawnObject) as GameObject, new Vector3(tile.LocalPlace.x+ 0.5f, tile.LocalPlace.y + 0.5f, 0), Quaternion.identity);
                     }
                     else

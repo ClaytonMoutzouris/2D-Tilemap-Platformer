@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameData gameData;
     public PlayerController[] players = new PlayerController[4];
     public PlayerController playerPrefab;
+    public ScoreScreen scoreScreen;
 
     // Start is called before the first frame update
     void Start()
@@ -42,6 +43,17 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public PlayerController GetLastActivePlayer()
+    {
+        foreach (PlayerController player in players)
+        {
+            if (player != null)
+                return player;
+        }
+
+        return null;
+    }
+
     public void RemovePlayerAtIndex(int index)
     {
         if (players[index] == null)
@@ -57,9 +69,28 @@ public class GameManager : MonoBehaviour
         players[index]._input.SetGamepadInput(null);
         //^^ put this in the player themself
 
+        if(CheckForGameOver())
+        {
+            GameOver();
+        }
+
         //Destroy(players[index].gameObject);
         //GamepadInputManager.instance.DropPlayer(index);
         //GamepadInputManager.instance.gamepadInputs[index].
+    }
+
+    public bool CheckForGameOver()
+    {
+        int numAlive = 0;
+        foreach(PlayerCreationData data in gameData.playerDatas)
+        {
+            if(data != null && data.lives > 0)
+            {
+                numAlive++;
+            }
+        }
+
+        return numAlive <= 1;
     }
 
     public void SpawnPlayer(int index, SpawnPoint spawnPoint, PlayerCreationData playerData)
@@ -131,9 +162,32 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void ClearPlayers()
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            RemovePlayerAtIndex(i);
+        }
+
+    }
+
+    public void GameOver()
+    {
+        //ClearPlayers();
+
+
+
+        ScoreScreen.instance.ShowScreen(GetLastActivePlayer());
+    }
 
     public void StartGame()
     {
         SceneManager.LoadScene("GambleArena");
+    }
+
+    public void MainMenu()
+    {
+        SceneManager.LoadScene("MenuScene");
+
     }
 }

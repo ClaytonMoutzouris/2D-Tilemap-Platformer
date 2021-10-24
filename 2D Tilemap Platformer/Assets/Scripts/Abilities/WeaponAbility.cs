@@ -18,7 +18,7 @@ public class WeaponAbility : Ability
     [HideInInspector]
     public Attack oldHeavyAttack;
 
-    public List<ProjectileFlagBonus> projectileEffects;
+    public List<ProjectileFlagBonus> weaponProjectileEffects;
     public List<StatBonus> wepBonusStats;
     public List<SecondaryStatBonus> wepSecondaryBonusStats;
     public List<WeaponAttributeBonus> wepWeaponBonuses;
@@ -52,17 +52,6 @@ public class WeaponAbility : Ability
     {
         if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null && player._equipmentManager.equippedWeapon.weaponClass == weaponClass)
         {
-
-            owner.stats.AddPrimaryBonuses(wepBonusStats);
-            owner.stats.AddSecondaryBonuses(wepSecondaryBonusStats);
-            owner.health.UpdateHealth();
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
-
-            //Instead of changing the projectiles data, the weapon should hold a verion of this... right?
-            player._equipmentManager.equippedWeapon.projectileBonuses.AddRange(projectileEffects);
-
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
-
             if (lightAttack != null)
             {
                 oldLightAttack = player._equipmentManager.equippedWeapon.attacks[0];
@@ -75,6 +64,23 @@ public class WeaponAbility : Ability
                 player._equipmentManager.equippedWeapon.heavyAttack = heavyAttack;
             }
 
+            owner.stats.AddPrimaryBonuses(wepBonusStats);
+            owner.stats.AddSecondaryBonuses(wepSecondaryBonusStats);
+            owner.health.UpdateHealth();
+            Debug.Log("Adding weaponability " + this);
+            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(wepWeaponBonuses);
+
+            //Instead of changing the projectiles data, the weapon should hold a verion of this... right?
+            player._equipmentManager.equippedWeapon.projectileBonuses.AddRange(weaponProjectileEffects);
+            foreach(ProjectileFlagBonus projectileBonus in weaponProjectileEffects)
+            {
+                Debug.Log("Adding bonus " + projectileBonus.type + ": " + projectileBonus.bonusValue);
+            }
+
+            player._attackManager.meleeWeaponObject.UpdateHitbox();
+
+
+
         }
     }
 
@@ -85,10 +91,10 @@ public class WeaponAbility : Ability
             owner.stats.RemovePrimaryBonuses(wepBonusStats);
             owner.stats.RemoveSecondaryBonuses(wepSecondaryBonusStats);
             owner.health.UpdateHealth();
-            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
+            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(wepWeaponBonuses);
 
             //No easier way to do this
-            foreach(ProjectileFlagBonus bonus in projectileEffects)
+            foreach(ProjectileFlagBonus bonus in weaponProjectileEffects)
             {
                 player._equipmentManager.equippedWeapon.projectileBonuses.Remove(bonus);
             }

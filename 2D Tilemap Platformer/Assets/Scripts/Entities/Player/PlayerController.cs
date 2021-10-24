@@ -49,6 +49,7 @@ public class PlayerController : Entity
 
     public ContactFilter2D itemFilter;
     public PlayerCreationData playerData;
+    public int kills = 0;
 
 
     protected override void Awake()
@@ -965,5 +966,13 @@ public class PlayerController : Entity
             transform.localScale = new Vector3((int)dir * Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
             _attackManager.rangedWeaponObject.transform.localScale = new Vector3((int)dir * Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         
+    }
+
+    public override void OnKill(Entity killed)
+    {
+        base.OnKill(killed);
+
+        kills++;
+        playerVersusUI.SetKills();
     }
 }

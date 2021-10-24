@@ -52,6 +52,11 @@ public class MenuOptionSelector : MenuOption
 
     }
 
+    public void SetName(string text)
+    {
+        nameText.text = text;
+    }
+
     public void Update()
     {
         //scrollRect.ScrollRepositionX(currentNode.GetComponent<RectTransform>());

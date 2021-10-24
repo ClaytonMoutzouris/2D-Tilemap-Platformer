@@ -72,6 +72,7 @@ public class AppearancePanelUI : UIScrollMenu
             skinColorSelector.AddColorOption(color);
         }
         skinColorSelector.Init();
+        skinColorSelector.SetName("Skin");
         AddOption(skinColorSelector);
 
         MenuOptionSelector hoodPrimaryColorSelector = Instantiate(prefab, container.transform);
@@ -80,6 +81,7 @@ public class AppearancePanelUI : UIScrollMenu
             hoodPrimaryColorSelector.AddColorOption(color);
         }
         hoodPrimaryColorSelector.Init();
+        hoodPrimaryColorSelector.SetName("Hood 1");
         AddOption(hoodPrimaryColorSelector);
 
         MenuOptionSelector hoodSecondaryColorSelector = Instantiate(prefab, container.transform);
@@ -88,6 +90,8 @@ public class AppearancePanelUI : UIScrollMenu
             hoodSecondaryColorSelector.AddColorOption(color);
         }
         hoodSecondaryColorSelector.Init();
+        hoodSecondaryColorSelector.SetName("Hood 2");
+
         AddOption(hoodSecondaryColorSelector);
 
         MenuOptionSelector shirtPrimaryColorSelector = Instantiate(prefab, container.transform);
@@ -96,6 +100,8 @@ public class AppearancePanelUI : UIScrollMenu
             shirtPrimaryColorSelector.AddColorOption(color);
         }
         shirtPrimaryColorSelector.Init();
+        shirtPrimaryColorSelector.SetName("Shirt 1");
+
         AddOption(shirtPrimaryColorSelector);
 
         MenuOptionSelector shirtSecondaryColorSelector = Instantiate(prefab, container.transform);
@@ -104,6 +110,8 @@ public class AppearancePanelUI : UIScrollMenu
             shirtSecondaryColorSelector.AddColorOption(color);
         }
         shirtSecondaryColorSelector.Init();
+        shirtSecondaryColorSelector.SetName("Shirt 2");
+
         AddOption(shirtSecondaryColorSelector);
 
         MenuOptionSelector shoesColorSelector = Instantiate(prefab, container.transform);
@@ -112,6 +120,8 @@ public class AppearancePanelUI : UIScrollMenu
             shoesColorSelector.AddColorOption(color);
         }
         shoesColorSelector.Init();
+        shoesColorSelector.SetName("Shoes");
+
         AddOption(shoesColorSelector);
 
         MenuOptionSelector pantsColorsSelector = Instantiate(prefab, container.transform);
@@ -120,6 +130,8 @@ public class AppearancePanelUI : UIScrollMenu
             pantsColorsSelector.AddColorOption(color);
         }
         pantsColorsSelector.Init();
+        pantsColorsSelector.SetName("Pants");
+
         AddOption(pantsColorsSelector);
 
         SetNavigation();

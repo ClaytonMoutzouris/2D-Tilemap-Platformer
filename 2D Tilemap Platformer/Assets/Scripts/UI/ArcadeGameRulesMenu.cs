@@ -23,15 +23,10 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         instance = this;
     }
 
-    public void OnEnable()
-    {
-        //LoadMode(ArcadeMenu.instance.gameMode);
-
-    }
-
     public override void LoadMenuOptions()
     {
         base.LoadMenuOptions();
+        Debug.Log("Loading Menu Options");
 
         MenuOptionSelector mapOptions = Instantiate(optionSelectorPrefab, container.transform);
 
@@ -43,6 +38,7 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         }
 
         mapOptions.Init();
+        mapOptions.SetName("Map");
         AddOption(mapOptions);
 
         MenuOptionSelector livesOptions = Instantiate(optionSelectorPrefab, container.transform);
@@ -53,6 +49,8 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         }
 
         livesOptions.Init();
+        livesOptions.SetName("Lives");
+
         AddOption(livesOptions);
 
         MenuOptionSelector timerOptions = Instantiate(optionSelectorPrefab, container.transform);
@@ -63,6 +61,7 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         }
 
         timerOptions.Init();
+        timerOptions.SetName("Time Limit");
         AddOption(timerOptions);
 
         SetNavigation();

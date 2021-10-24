@@ -15,17 +15,33 @@ public class UIScrollMenu : MonoBehaviour
     public MenuOption backButton;
     public MenuOption confirmButton;
 
-    public virtual void Start()
+    public void OnEnable()
     {
         LoadMenuOptions();
-
+        //LoadMode(ArcadeMenu.instance.gameMode);
 
     }
 
     public virtual void LoadMenuOptions()
     {
+        ClearMenuOptions();
         AddOption(backButton);
         AddOption(confirmButton);
+    }
+
+    public void ClearMenuOptions()
+    {
+        foreach(MenuOption node in nodes)
+        {
+            if(node == backButton || node == confirmButton)
+            {
+                continue;
+            }
+            Destroy(node.gameObject);
+        }
+
+        nodes.Clear();
+        currentNode = null;
     }
 
     public virtual void AddOption(MenuOption option)

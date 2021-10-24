@@ -115,7 +115,7 @@ public class Health : MonoBehaviour
         }
 
 
-        if (currentHealth <= 0)
+        if (!entity.isDead && currentHealth <= 0)
         {
             //Move this somewhere better
             if (attacker != null)
@@ -127,12 +127,12 @@ public class Health : MonoBehaviour
                         onKill.OnKill(entity);
                     }
                 }
+
+                attacker.OnKill(entity);
             }
 
-            if(!entity.isDead)
-            {
-                entity.Die();
-            }
+            entity.Die();
+
         }
 
     }

@@ -39,6 +39,7 @@ public class Weapon : Equipment
     public float weaponReach;
     public float fireRate;
     public float projectileSpeed;
+    public float projectileLifeTime = 2;
     public float numberOfProjectiles;
     public float spreadAngle;
     public int ammoCapacity;
@@ -66,6 +67,7 @@ public class Weapon : Equipment
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.SpreadAngle, spreadAngle));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.AmmoCapacity, ammoCapacity));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.ReloadTime, reloadTime));
+        weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.ProjectileLifeTime, projectileLifeTime));
 
         baseStatsLoaded = true;
     }
@@ -264,8 +266,6 @@ public class Weapon : Equipment
                 }
 
                 
-                
-                Debug.Log("Aim Direction " + dir);
                 proj.SetDirection(dir);
             }
         }

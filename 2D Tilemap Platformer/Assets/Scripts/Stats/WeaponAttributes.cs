@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WeaponAttributesType { Damage, DamageType, KnockbackPower, KnockbackAngle, CritChance, AttackSpeed, WeaponReach, FireRate, ProjectileSpeed, NumProjectiles, SpreadAngle, AmmoCapacity, ReloadTime  };
+public enum WeaponAttributesType { Damage, DamageType, KnockbackPower, KnockbackAngle, CritChance, AttackSpeed, WeaponReach, FireRate, ProjectileSpeed, NumProjectiles, SpreadAngle, AmmoCapacity, ReloadTime, ProjectileLifeTime  };
 
 [System.Serializable]
 public class WeaponAttributes
@@ -64,6 +64,7 @@ public class WeaponAttributes
         if (attributes.ContainsKey(bonus.type))
         {
             attributes[bonus.type].AddBonus(bonus);
+            Debug.Log("Adding Weapon Bonus: " + bonus.type + " - " + bonus.bonusValue);
         }
         else
         {
@@ -101,20 +102,6 @@ public class WeaponAttributes
             RemoveBonus(bonus);
         }
 
-    }
-
-    public void SetBaseAttributes()
-    {
-             List<WeaponAttribute> baseAttributes = new List<WeaponAttribute>{
-                new WeaponAttribute(WeaponAttributesType.NumProjectiles, 1),
-                new WeaponAttribute(WeaponAttributesType.SpreadAngle, 0),
-                new WeaponAttribute(WeaponAttributesType.AmmoCapacity, 5),
-                new WeaponAttribute(WeaponAttributesType.ReloadTime, 3),
-                new WeaponAttribute(WeaponAttributesType.Damage, 5),
-                new WeaponAttribute(WeaponAttributesType.FireRate, 3),
-                new WeaponAttribute(WeaponAttributesType.ProjectileSpeed, 100)};
-
-        SetStartingStats(baseAttributes);
     }
 }
 

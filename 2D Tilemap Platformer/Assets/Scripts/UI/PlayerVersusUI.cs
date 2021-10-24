@@ -10,6 +10,7 @@ public class PlayerVersusUI : MonoBehaviour
     public PlayerTooltip tooltip;
     public Camera playerCamera;
     public Text livesCounter;
+    public Text killCounter;
 
     public bool showItemTooltips = false;
 
@@ -38,11 +39,16 @@ public class PlayerVersusUI : MonoBehaviour
         player.health.SetHealthBar(healthBar);
         player.playerVersusUI = this;
         SetLives();
-
+        SetKills();
     }
 
     public void SetLives()
     {
         livesCounter.text = "Lives: " + player.playerData.lives;
+    }
+
+    public void SetKills()
+    {
+        killCounter.text = "Kills: " + player.kills;
     }
 }

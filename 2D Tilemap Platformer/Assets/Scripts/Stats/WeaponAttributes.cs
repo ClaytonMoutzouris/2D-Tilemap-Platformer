@@ -64,7 +64,7 @@ public class WeaponAttributes
         if (attributes.ContainsKey(bonus.type))
         {
             attributes[bonus.type].AddBonus(bonus);
-            Debug.Log("Adding Weapon Bonus: " + bonus.type + " - " + bonus.bonusValue);
+            //Debug.Log("Adding Weapon Bonus: " + bonus.type + " - " + bonus.bonusValue);
         }
         else
         {

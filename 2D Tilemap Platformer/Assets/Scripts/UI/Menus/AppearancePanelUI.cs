@@ -22,11 +22,6 @@ public class AppearancePanelUI : UIScrollMenu
 
     }
 
-    public MenuOptionSelector GetNode(int index)
-    {
-        return (MenuOptionSelector)nodes[index];
-    }
-
     public void LoadColors()
     {
         colors = new List<Color>();

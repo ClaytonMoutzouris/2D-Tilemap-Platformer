@@ -82,6 +82,9 @@ public class PlayerController : Entity
             Talent newTalent = Instantiate(talent);
             newTalent.LearnTalent(this);
         }
+
+        stats.SetStats(data.startingStats);
+        health.UpdateHealth();
     }
 
 
@@ -158,6 +161,19 @@ public class PlayerController : Entity
     // the Update loop contains a very simple example of moving the character around and controlling the animation
     void Update()
 	{
+
+        if(_input.GetButtonDown(ButtonInput.Pause))
+        {
+            if(PauseMenu.instance.gamePaused)
+            {
+                PauseMenu.instance.ResumeGame();
+            }
+            else
+            {
+                PauseMenu.instance.PauseGame();
+            }
+        }
+
 
         if (movementState != PlayerMovementState.Roll)
         {

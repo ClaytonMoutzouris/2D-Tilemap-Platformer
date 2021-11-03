@@ -370,6 +370,29 @@ public class GameGrid : MonoBehaviour
         return false;
     }
 
+    public Vector2 GetMapSize()
+    {
+        Vector2 gridBounds = Vector2.zero;
+
+        foreach(Tilemap map in tilemapLayers)
+        {
+            int x = map.size.x;
+            int y = map.size.y;
+
+            if(x > gridBounds.x)
+            {
+                gridBounds.x = x;
+            }
+
+            if (y > gridBounds.y)
+            {
+                gridBounds.y = y;
+            }
+        }
+
+        return gridBounds;
+    }
+
     public void LoadMap(string path)
     {
 
@@ -381,6 +404,13 @@ public class GameGrid : MonoBehaviour
 
             SetWorldTiles(loadData.tiles, true);
 
+            Debug.Log("Loaded Grid bounds: " + GetMapSize());
+
+            Vector2 bounds = GetMapSize();
+            mapSizeX = (int)bounds.x;
+            mapSizeY = (int)bounds.y;
+
+            InitPathFinder();
 
         }
         else

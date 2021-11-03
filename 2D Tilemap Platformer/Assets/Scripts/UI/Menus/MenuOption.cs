@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -10,6 +8,7 @@ public class MenuOption : MonoBehaviour, ISelectHandler
     public AudioClip selectSound;
     public UIScrollMenu parent;
     public int optionIndex;
+
 
     // Start is called before the first frame update
     void Start()
@@ -39,4 +38,9 @@ public class MenuOption : MonoBehaviour, ISelectHandler
         SoundManager.instance.PlaySingle(selectSound);
         parent.SetCurrentNode(this);
     }
+}
+
+public struct OptionValue {
+    public int nodeID;
+    public int nodeValue;
 }

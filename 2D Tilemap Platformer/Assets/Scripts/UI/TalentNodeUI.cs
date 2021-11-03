@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TalentNodeUI : MonoBehaviour, ISelectHandler
+public class TalentNodeUI : MonoBehaviour, ISelectHandler, IDeselectHandler
 {
     public Button button;
     public Talent talent;
@@ -59,4 +59,10 @@ public class TalentNodeUI : MonoBehaviour, ISelectHandler
         branch.talentTreePanel.tooltip.DisplayTooltip(talent.GetTooltip());
         branch.SetCurrentNode(this);
     }
+
+    public void OnDeselect(BaseEventData eventData)
+    {
+        branch.talentTreePanel.tooltip.ClearTooltip();
+    }
+
 }

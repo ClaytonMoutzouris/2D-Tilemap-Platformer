@@ -17,4 +17,10 @@ public class TooltipDisplay : MonoBehaviour
     {
         text.text = tooltip;
     }
+
+    public void ClearTooltip()
+    {
+        text.text = "";
+
+    }
 }

@@ -11,6 +11,7 @@ public class PlayerVersusUI : MonoBehaviour
     public Camera playerCamera;
     public Text livesCounter;
     public Text killCounter;
+    public PlayerMenu playerMenu;
 
     public bool showItemTooltips = false;
 
@@ -50,5 +51,10 @@ public class PlayerVersusUI : MonoBehaviour
     public void SetKills()
     {
         killCounter.text = "Kills: " + player.kills;
+    }
+
+    public void PauseMenu()
+    {
+
     }
 }

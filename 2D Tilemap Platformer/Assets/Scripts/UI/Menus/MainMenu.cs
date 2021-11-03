@@ -18,6 +18,8 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         instance = this;
+
+        ChangeTab((int)MainMenuTabIndex.MainMenu);
     }
 
     // Update is called once per frame

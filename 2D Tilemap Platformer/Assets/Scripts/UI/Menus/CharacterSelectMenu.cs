@@ -34,7 +34,7 @@ public class CharacterSelectMenu : MonoBehaviour
             {
                 continue;
             }
-
+            Debug.Log("Adding character select menu for " + input.input.playerIndex);
             characterSelectScreens[input.input.playerIndex].gameObject.SetActive(true);
 
             //Add a character select screen

@@ -27,5 +27,6 @@ public class PlayerCreationData
     public int playerIndex;
     public int lives;
     public List<Talent> talents;
+    public List<Stat> startingStats;
 
 }

@@ -51,11 +51,11 @@ public class Stats : MonoBehaviour
 
     public void SetStats(List<Stat> stats)
     {
-        this.primaryStats.Clear();
+        //this.primaryStats.Clear();
 
         foreach (Stat stat in stats)
         {
-            this.primaryStats.Add(stat.type, stat);
+            this.primaryStats[stat.type] = stat;
         }
 
     }

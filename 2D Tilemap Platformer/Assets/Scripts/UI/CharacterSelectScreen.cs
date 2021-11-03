@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-public enum SelectScreenTabIndex { General, Creation, Appearance }
+public enum SelectScreenTabIndex { General, Creation, Appearance, Talents, Confirmed }
 //This is for a single player to select/create their character
 public class CharacterSelectScreen : MonoBehaviour
 {
@@ -14,6 +12,7 @@ public class CharacterSelectScreen : MonoBehaviour
     public AppearancePanelUI appearancePanel;
     public CharacterSelectPortrait portrait;
     public TalentsPanelUI talentPanel;
+    public StatsPanelUI statsPanel;
     public int playerIndex = 0;
     public int currentTabIndex = 0;
     public bool playerReady = false;
@@ -22,7 +21,8 @@ public class CharacterSelectScreen : MonoBehaviour
     public BackoutBar backoutBar;
 
     // Start is called before the first frame update
-    void Start()
+
+    public void InitScreen()
     {
         foreach (PlayerMenuTabUI tab in menuTabs)
         {
@@ -32,7 +32,7 @@ public class CharacterSelectScreen : MonoBehaviour
         portrait.LoadPortrait();
         //appearancePanel.LoadMenuOptions();
         appearancePanel.LoadColors();
-
+        statsPanel.LoadStats();
     }
 
     // Update is called once per frame
@@ -89,6 +89,7 @@ public class CharacterSelectScreen : MonoBehaviour
         PlayerCreationData newData = new PlayerCreationData();
         newData.playerColors = appearancePanel.colors;
         newData.talents = talentPanel.learnedTalents;
+        newData.startingStats = statsPanel.stats;
         newData.playerIndex = playerIndex;
         ArcadeGameRulesMenu.instance.arcadeGameData.playerDatas[playerIndex] = newData;
         playerReady = true;
@@ -140,6 +141,7 @@ public class CharacterSelectScreen : MonoBehaviour
 
     public void OnEnable()
     {
+        InitScreen();
         //EventSystem.current.SetSelectedGameObject(anchorObject);
         ChangeTab((int)SelectScreenTabIndex.General);
         //UIUtilities.SelectAnchorObject(GamepadInputManager.instance.gamepadInputs[playerIndex].GetEventSystem(), menuTabs[currentTabIndex].anchorObject);

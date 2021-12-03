@@ -20,6 +20,7 @@ public class ProjectileData : ScriptableObject
     public bool ignoreGround = true;
     public bool isAngled = false;
     public bool bouncy = false;
+    public bool slippery = false;
 
     public float projSpeed = 5;
     public float elasticity = -0.5f;
@@ -54,6 +55,7 @@ public class ProjectileData : ScriptableObject
         projectileFlags.SetFlag(new ProjectileFlag(ProjectileFlagType.IgnoreGravity, ignoreGravity));
         projectileFlags.SetFlag(new ProjectileFlag(ProjectileFlagType.IsAngled, isAngled));
         projectileFlags.SetFlag(new ProjectileFlag(ProjectileFlagType.Bounce, bouncy));
+        projectileFlags.SetFlag(new ProjectileFlag(ProjectileFlagType.Slippery, slippery));
 
 
         baseFlagsLoaded = true;

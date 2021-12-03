@@ -17,14 +17,24 @@ public class PhysicsBody2D : MonoBehaviour
         public Vector3 topRight;
         public Vector3 ledgeGrabOffset;
 	}
-
+    [System.Serializable]
 	public class CharacterCollisionState2D
 	{
+        //AKA things that you are moving
+        public List<PhysicsBody2D> collidingBodies = new List<PhysicsBody2D>();
 		public bool right;
 		public bool left;
 		public bool above;
 		public bool below;
-		public bool becameGroundedThisFrame;
+        public bool pushRight;
+		public bool pushLeft;
+		public bool pushAbove;
+		public bool pushBelow;
+        public bool groundRight;
+        public bool groundLeft;
+        public bool groundAbove;
+        public bool groundBelow;
+        public bool becameGroundedThisFrame;
 		public bool wasGroundedLastFrame;
 		public bool movingDownSlope;
 		public float slopeAngle;
@@ -44,13 +54,14 @@ public class PhysicsBody2D : MonoBehaviour
 
 		public void reset()
 		{
-			right = left = above = below = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = onOneWayPlatform = spiked = false;
+			right = left = above = below = pushRight = pushLeft = pushAbove = pushBelow = groundRight = groundLeft = groundAbove = groundBelow
+                = becameGroundedThisFrame = movingDownSlope = canGrabLedge = onLadder = onOneWayPlatform = spiked = false;
 			slopeAngle = 0f;
             ledgeGrabPosition = Vector3.zero;
             ladderOffset = Vector3.zero;
 
             Vector2[] rays = new Vector2[4];
-
+            //collidingBodies = new List<PhysicsBody2D>();
     }
 
 
@@ -95,7 +106,7 @@ public class PhysicsBody2D : MonoBehaviour
 
 
 	/// <summary>
-	/// mask with all layers that the player should interact with
+	/// mask with all layers that this body should treat as a ground/wall/roof
 	/// </summary>
 	public LayerMask platformMask = 0;
 
@@ -154,11 +165,16 @@ public class PhysicsBody2D : MonoBehaviour
 	[HideInInspector][NonSerialized]
 	public Rigidbody2D rigidBody2D;
 
-	[HideInInspector][NonSerialized]
+	//[HideInInspector][NonSerialized]
 	public CharacterCollisionState2D collisionState = new CharacterCollisionState2D();
 	[HideInInspector][NonSerialized]
 	public Vector3 velocity;
 	public bool isGrounded { get { return collisionState.below; } }
+    //This pretty much means not pushable right?
+    public bool isKinematic = false; 
+    public bool isPlatform = false;
+    public List<PhysicsBody2D> riders = new List<PhysicsBody2D>();
+    //public bool isPushable = false;
 
 	const float kSkinWidthFloatFudgeFactor = 0.001f;
 
@@ -180,9 +196,10 @@ public class PhysicsBody2D : MonoBehaviour
 	/// horizontally and vertically so that we can send the events after all collision state is set
 	/// </summary>
 	List<RaycastHit2D> _raycastHitsThisFrame = new List<RaycastHit2D>( 2 );
+    List<RaycastHit2D> _raycastPushHitsThisFrame = new List<RaycastHit2D>(2);
 
-	// horizontal/vertical movement data
-	float _verticalDistanceBetweenRays;
+    // horizontal/vertical movement data
+    float _verticalDistanceBetweenRays;
 	float _horizontalDistanceBetweenRays;
 
 	// we use this flag to mark the case where we are travelling up a slope and we modified our delta.y to allow the climb to occur.
@@ -256,17 +273,19 @@ public class PhysicsBody2D : MonoBehaviour
 	/// stop when run into.
 	/// </summary>
 	/// <param name="deltaMovement">Delta movement.</param>
-	public void move( Vector3 deltaMovement )
+	public void move(Vector3 deltaMovement)
 	{
 
         // save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
+
         collisionState.wasGroundedLastFrame = collisionState.below;
 
-		// clear our state
-		collisionState.reset();
-		_raycastHitsThisFrame.Clear();
-		_isGoingUpSlope = false;
-
+        // clear our state
+        collisionState.reset();
+        _raycastHitsThisFrame.Clear();
+        _raycastPushHitsThisFrame.Clear();
+        _isGoingUpSlope = false;
+        
 		primeRaycastOrigins();
 
 
@@ -289,6 +308,19 @@ public class PhysicsBody2D : MonoBehaviour
         deltaMovement.z = 0;
 		transform.Translate( deltaMovement, Space.World );
 
+        List<PhysicsBody2D> tempRiders = new List<PhysicsBody2D>();
+        tempRiders.AddRange(riders);
+
+        foreach(PhysicsBody2D rider in tempRiders)
+        {
+            if(rider != null && riders.Contains(rider))
+            {
+                rider.pushMove(deltaMovement);
+            }
+        }
+
+        riders.Clear();
+
 		// only calculate velocity if we have a non-zero deltaTime
 		if( Time.deltaTime > 0f )
 			velocity = deltaMovement / Time.deltaTime;
@@ -308,17 +340,119 @@ public class PhysicsBody2D : MonoBehaviour
 				onControllerCollidedEvent( _raycastHitsThisFrame[i] );
 		}
 
-        //if(isGrounded)
-        //ignoreOneWayPlatformsThisFrame = false;
+        if( onControllerCollidedEvent != null)
+        {
+            //blah blah blah
+
+        }
+
+        /*
+        if (!isKinematic)
+        {
+            foreach (RaycastHit2D hit in _raycastHitsThisFrame)
+            {
+                //Check for platforms
+                PhysicsBody2D body = hit.transform.GetComponent<PhysicsBody2D>();
+
+                if (body != null && body.isKinematic && !collisionState.collidingBodies.Contains(body))
+                {
+                    collisionState.platform = body;
+                    break;
+                }
+            }
+        }
+
+        if(collisionState.platform != null)
+        {
+            transform.parent = collisionState.platform.transform;
+        } else
+        {
+            transform.parent = null;
+        }
+        */
+        /*
+        if(!isKinematic)
+        {
+            foreach (RaycastHit2D hit in _raycastHitsThisFrame)
+            {
+                //Check for platforms
+                PhysicsBody2D body = hit.transform.GetComponent<PhysicsBody2D>();
+
+                if (body != null && !collisionState.collidingBodies.Contains(body))
+                {
+                    body.collisionState.collidingBodies.Add(this);
+                }
+            }
+        }
+
+
+        foreach(PhysicsBody2D body in collisionState.collidingBodies)
+        {
+            body.transform.Translate(deltaMovement, Space.World);
+
+        }
+
+        collisionState.collidingBodies.Clear();
+
+        /*
+         * 
+        //foreach(PhysicsBody2D body in collisionState.)
+    }
+        */
+
+    }
+
+
+    public void pushMove(Vector3 deltaMovement)
+    {
+
+        // clear our state
+        //collisionState.reset();
+        //_isGoingUpSlope = false;
+
+        primeRaycastOrigins();
+
+
+        // first, we check for a slope below us before moving
+        // only check slopes if we are going down and grounded
+        //if( deltaMovement.y < 0f && collisionState.wasGroundedLastFrame )
+        //	handleVerticalSlope( ref deltaMovement );
+
+        // now we check movement in the horizontal dir
+        if (deltaMovement.x != 0f)
+            moveHorizontally(ref deltaMovement);
+
+        // next, check movement in the vertical dir
+        if (deltaMovement.y != 0f)
+            moveVertically(ref deltaMovement);
+
+
+        checkLadder(deltaMovement);
+        // move then update our state
+        deltaMovement.z = 0;
+        transform.Translate(deltaMovement, Space.World);
+
+
+        // set our becameGrounded state based on the previous and current collision state
+        if (!collisionState.wasGroundedLastFrame && collisionState.below)
+            collisionState.becameGroundedThisFrame = true;
+
+        // send off the collision events if we have a listener
+        if (onControllerCollidedEvent != null)
+        {
+            for (var i = 0; i < _raycastHitsThisFrame.Count; i++)
+                onControllerCollidedEvent(_raycastHitsThisFrame[i]);
+        }
+
+
 
         
     }
 
-
-	/// <summary>
-	/// moves directly down until grounded
-	/// </summary>
-	public void warpToGrounded()
+    /// <summary>
+    /// moves directly down until grounded
+    /// </summary>
+    public void warpToGrounded()
 	{
 		do
 		{
@@ -378,20 +512,20 @@ public class PhysicsBody2D : MonoBehaviour
     /// we have to increase the ray distance skinWidth then remember to remove skinWidth from deltaMovement before
     /// actually moving the player
     /// </summary>
-    void moveHorizontally( ref Vector3 deltaMovement )
-	{
-		var isGoingRight = deltaMovement.x > 0;
-		var rayDistance = Mathf.Abs( deltaMovement.x ) + _skinWidth;
-		var rayDirection = isGoingRight ? Vector2.right : -Vector2.right;
-		var initialRayOrigin = isGoingRight ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
+    void moveHorizontally(ref Vector3 deltaMovement)
+    {
+        var isGoingRight = deltaMovement.x > 0;
+        var rayDistance = Mathf.Abs(deltaMovement.x) + _skinWidth;
+        var rayDirection = isGoingRight ? Vector2.right : -Vector2.right;
+        var initialRayOrigin = isGoingRight ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
 
         bool grabRayOne = false;
         bool grabRayTwo = false;
 
-        for ( var i = 0; i < totalHorizontalRays; i++ )
-		{
-			var ray = new Vector2( initialRayOrigin.x, initialRayOrigin.y + i * _verticalDistanceBetweenRays );
-			DrawRay( ray, rayDirection * rayDistance, Color.red );
+        for (var i = 0; i < totalHorizontalRays; i++)
+        {
+            var ray = new Vector2(initialRayOrigin.x, initialRayOrigin.y + i * _verticalDistanceBetweenRays);
+            DrawRay(ray, rayDirection * rayDistance, Color.red);
 
             // if we are grounded we will include oneWayPlatforms only on the first ray (the bottom one). this will allow us to
             // walk up sloped oneWayPlatforms
@@ -401,149 +535,141 @@ public class PhysicsBody2D : MonoBehaviour
 			else
             */
 
-			hits = Physics2D.RaycastAll( ray, rayDirection, rayDistance, platformMask & ~oneWayPlatformMask );
+        hits = Physics2D.RaycastAll(ray, rayDirection, rayDistance, platformMask & ~oneWayPlatformMask);
 
-            for(int h = 0; h < hits.Length; h++)
+            for (int h = 0; h < hits.Length; h++)
             {
-                if(hits[h].transform.gameObject == gameObject)
+                if (hits[h].transform.gameObject == gameObject)
                 {
                     continue;
                 }
 
                 if (hits[h])
                 {
-                    DrawRay(ray, rayDirection * (rayDistance + 1), Color.red);
-
-                    if (i == totalHorizontalRays - 1)
+                    //DrawRay(ray, rayDirection * (rayDistance + 1), Color.red);
+                    //_raycastHit.point
+                    Tilemap map = hits[h].collider.GetComponent<Tilemap>();
+                    if (map != null)
                     {
-                        grabRayOne = true;
-                    }
-
-                    if (i == totalHorizontalRays - 2)
-                    {
-
-                        //_raycastHit.point
-                        Tilemap map = hits[h].collider.GetComponent<Tilemap>();
-                        if (map != null)
+                        if (i == totalHorizontalRays - 1)
                         {
+                            grabRayOne = true;
+                        }
+
+                        if (i == totalHorizontalRays - 2)
+                        {
+
+                            //_raycastHit.point
+
                             grabRayTwo = true;
                             //TileBase tile = map.GetTile(map.layoutGrid.WorldToCell(_raycastHit.point));
                             collisionState.ledgeGrabPosition = map.layoutGrid.WorldToCell(hits[h].point);
+
+
                         }
 
-                    }
+                        deltaMovement.x = hits[h].point.x - ray.x;
 
-                    /*
-                    // the bottom ray can hit a slope but no other ray can so we have special handling for these cases
-                    if( i == 0 && handleHorizontalSlope( ref deltaMovement, Vector2.Angle( _raycastHit.normal, Vector2.up ) ) )
-                    {
-                        _raycastHitsThisFrame.Add( _raycastHit );
-                        // if we weren't grounded last frame, that means we're landing on a slope horizontally.
-                        // this ensures that we stay flush to that slope
-                        if ( !collisionState.wasGroundedLastFrame )
+                        // set our new deltaMovement and recalculate the rayDistance taking it into account
+                        rayDistance = Mathf.Abs(deltaMovement.x);
+
+                        // remember to remove the skinWidth from our deltaMovement
+                        if (isGoingRight)
                         {
-                            float flushDistance = Mathf.Sign( deltaMovement.x ) * ( _raycastHit.distance - skinWidth );
-                            transform.Translate( new Vector2( flushDistance, 0 ) );
+                            deltaMovement.x -= _skinWidth;
+                            collisionState.right = true;
+                            collisionState.groundRight = true;
                         }
-                        break;
-                    }
-                    */
-                    // set our new deltaMovement and recalculate the rayDistance taking it into account
-                    deltaMovement.x = hits[h].point.x - ray.x;
-                    rayDistance = Mathf.Abs(deltaMovement.x);
+                        else
+                        {
+                            deltaMovement.x += _skinWidth;
+                            collisionState.left = true;
+                            collisionState.groundLeft = true;
 
-                    // remember to remove the skinWidth from our deltaMovement
-                    if (isGoingRight)
+                        }
+
+                        _raycastHitsThisFrame.Add(hits[h]);
+                    }
+
+
+
+                    PhysicsBody2D other = hits[h].transform.GetComponent<PhysicsBody2D>();
+
+
+                    if (other != null)
                     {
-                        deltaMovement.x -= _skinWidth;
-                        collisionState.right = true;
-                    }
-                    else
-                    {
-                        deltaMovement.x += _skinWidth;
-                        collisionState.left = true;
+
+                        if (other.isKinematic || (isGoingRight && other.collisionState.right) || (!isGoingRight && other.collisionState.left))
+                        {
+                            // set our new deltaMovement and recalculate the rayDistance taking it into account
+                            deltaMovement.x = hits[h].point.x - ray.x;
+                            rayDistance = Mathf.Abs(deltaMovement.x);
+
+                            // remember to remove the skinWidth from our deltaMovement
+                            if (isGoingRight)
+                            {
+                                deltaMovement.x -= _skinWidth;
+                                collisionState.right = true;
+                                collisionState.pushRight = true;
+                            }
+                            else
+                            {
+                                deltaMovement.x += _skinWidth;
+                                collisionState.left = true;
+                                collisionState.pushLeft = true;
+
+                            }
+
+                        }
+                        else
+                        {
+
+                            if (isGoingRight)
+                            {
+
+                                //deltaMovement.x -= _skinWidth;
+                                collisionState.right = true;
+                                collisionState.pushRight = true;
+                                other.collisionState.left = true;
+                                other.collisionState.pushLeft = true;
+
+                            }
+                            else
+                            {
+                                //deltaMovement.x += _skinWidth;
+                                collisionState.left = true;
+                                collisionState.pushLeft = true;
+                                other.collisionState.right = true;
+                                other.collisionState.pushRight = true;
+
+
+                            }
+                            //float pushAmount = (velocity.y - other.velocity.y) * Time.deltaTime;
+                            //other.transform.Translate(Vector2.right * deltaMovement.x);
+                            other.pushMove(Vector2.right * deltaMovement.x);
+
+                        }
+
+
+                        // we add a small fudge factor for the float operations here. if our rayDistance is smaller
+                        // than the width + fudge bail out because we have a direct impact
+                        if (rayDistance < _skinWidth + kSkinWidthFloatFudgeFactor)
+                            break;
+
                     }
 
-                    _raycastHitsThisFrame.Add(hits[h]);
 
-                    // we add a small fudge factor for the float operations here. if our rayDistance is smaller
-                    // than the width + fudge bail out because we have a direct impact
-                    /*
-                    if( rayDistance < _skinWidth + kSkinWidthFloatFudgeFactor )
-                        break;
-                    */
                 }
             }
+
+
         }
 
-        if(!grabRayOne && grabRayTwo)
+        if (!grabRayOne && grabRayTwo)
         {
-                collisionState.canGrabLedge = true;
+            collisionState.canGrabLedge = true;
         }
-	}
-
-
-	/// <summary>
-	/// handles adjusting deltaMovement if we are going up a slope.
-	/// </summary>
-	/// <returns><c>true</c>, if horizontal slope was handled, <c>false</c> otherwise.</returns>
-	/// <param name="deltaMovement">Delta movement.</param>
-	/// <param name="angle">Angle.</param>
-	bool handleHorizontalSlope( ref Vector3 deltaMovement, float angle )
-	{
-		// disregard 90 degree angles (walls)
-		if( Mathf.RoundToInt( angle ) == 90 )
-			return false;
-
-		// if we can walk on slopes and our angle is small enough we need to move up
-		if( angle < slopeLimit )
-		{
-			// we only need to adjust the deltaMovement if we are not jumping
-			// TODO: this uses a magic number which isn't ideal! The alternative is to have the user pass in if there is a jump this frame
-			if( deltaMovement.y < jumpingThreshold )
-			{
-				// apply the slopeModifier to slow our movement up the slope
-				var slopeModifier = slopeSpeedMultiplier.Evaluate( angle );
-				deltaMovement.x *= slopeModifier;
-
-				// we dont set collisions on the sides for this since a slope is not technically a side collision.
-				// smooth y movement when we climb. we make the y movement equivalent to the actual y location that corresponds
-				// to our new x location using our good friend Pythagoras
-				deltaMovement.y = Mathf.Abs( Mathf.Tan( angle * Mathf.Deg2Rad ) * deltaMovement.x );
-				var isGoingRight = deltaMovement.x > 0;
-
-				// safety check. we fire a ray in the direction of movement just in case the diagonal we calculated above ends up
-				// going through a wall. if the ray hits, we back off the horizontal movement to stay in bounds.
-				var ray = isGoingRight ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
-				RaycastHit2D raycastHit;
-
-				if( collisionState.wasGroundedLastFrame )
-					raycastHit = Physics2D.Raycast( ray, deltaMovement.normalized, deltaMovement.magnitude, platformMask );
-				else
-					raycastHit = Physics2D.Raycast( ray, deltaMovement.normalized, deltaMovement.magnitude, platformMask & ~oneWayPlatformMask );
-
-				if( raycastHit )
-				{
-					// we crossed an edge when using Pythagoras calculation, so we set the actual delta movement to the ray hit location
-					deltaMovement = (Vector3)raycastHit.point - ray;
-					if( isGoingRight )
-						deltaMovement.x -= _skinWidth;
-					else
-						deltaMovement.x += _skinWidth;
-				}
-
-				_isGoingUpSlope = true;
-				collisionState.below = true;
-				collisionState.slopeAngle = -angle;
-			}
-		}
-		else // too steep. get out of here
-		{
-			deltaMovement.x = 0;
-		}
-
-		return true;
-	}
+    }
 
     void checkLadder(Vector3 deltaMovement )
 	{
@@ -586,6 +712,7 @@ public class PhysicsBody2D : MonoBehaviour
 		// apply our horizontal deltaMovement here so that we do our raycast from the actual position we would be in if we had moved
 		initialRayOrigin.x += deltaMovement.x;
 
+        //Detect for "ground"
 		// if we are moving up, we should ignore the layers in oneWayPlatformMask
 		var mask = platformMask;
 		if( ( isGoingUp && !collisionState.wasGroundedLastFrame ) || ignoreOneWayPlatformsThisFrame )
@@ -595,7 +722,7 @@ public class PhysicsBody2D : MonoBehaviour
 		{
 			var ray = new Vector2( initialRayOrigin.x + i * _horizontalDistanceBetweenRays, initialRayOrigin.y );
 
-			DrawRay( ray, rayDirection *0.1f, Color.red );
+			//DrawRay( ray, rayDirection *0.1f, Color.red );
 
 
             hits = Physics2D.RaycastAll( ray, rayDirection, rayDistance, mask );
@@ -610,34 +737,45 @@ public class PhysicsBody2D : MonoBehaviour
 
                 if (hits[h])
                 {
-
-                    // set our new deltaMovement and recalculate the rayDistance taking it into account
-                    deltaMovement.y = hits[h].point.y - ray.y;
-                    rayDistance = Mathf.Abs(deltaMovement.y);
-
-                    // remember to remove the skinWidth from our deltaMovement
-                    if (isGoingUp)
+                    //DrawRay(ray, rayDirection * (rayDistance + 1), Color.red);
+                    //_raycastHit.point
+                    Tilemap map = hits[h].collider.GetComponent<Tilemap>();
+                    if (map != null)
                     {
-                        deltaMovement.y -= _skinWidth;
-                        collisionState.above = true;
-                    }
-                    else
-                    {
-                        deltaMovement.y += _skinWidth;
-                        collisionState.below = true;
-                        if (hits[h].transform.gameObject.layer == LayerMask.NameToLayer("OneWayPlatform"))
+
+
+                        // set our new deltaMovement and recalculate the rayDistance taking it into account
+                        deltaMovement.y = hits[h].point.y - ray.y;
+                        rayDistance = Mathf.Abs(deltaMovement.y);
+
+                        // remember to remove the skinWidth from our deltaMovement
+                        if (isGoingUp)
                         {
-                            collisionState.onOneWayPlatform = true;
+                            deltaMovement.y -= _skinWidth;
+                            collisionState.above = true;
+                            collisionState.groundAbove = true;
+
+                        }
+                        else
+                        {
+                            deltaMovement.y += _skinWidth;
+                            collisionState.below = true;
+                            collisionState.groundBelow = true;
+                            if (hits[h].transform.gameObject.layer == LayerMask.NameToLayer("OneWayPlatform"))
+                            {
+                                collisionState.onOneWayPlatform = true;
+                            }
+
                         }
 
+                        // this is a hack to deal with the top of slopes. if we walk up a slope and reach the apex we can get in a situation
+                        // where our ray gets a hit that is less then skinWidth causing us to be ungrounded the next frame due to residual velocity.
+                        if (!isGoingUp && deltaMovement.y > 0.00001f)
+                            _isGoingUpSlope = true;
                     }
 
-                    _raycastHitsThisFrame.Add(hits[h]);
 
-                    // this is a hack to deal with the top of slopes. if we walk up a slope and reach the apex we can get in a situation
-                    // where our ray gets a hit that is less then skinWidth causing us to be ungrounded the next frame due to residual velocity.
-                    if (!isGoingUp && deltaMovement.y > 0.00001f)
-                        _isGoingUpSlope = true;
+
 
                     // we add a small fudge factor for the float operations here. if our rayDistance is smaller
                     // than the width + fudge bail out because we have a direct impact
@@ -645,7 +783,95 @@ public class PhysicsBody2D : MonoBehaviour
                     if (rayDistance < _skinWidth + kSkinWidthFloatFudgeFactor)
                         break;
                     */
+                    PhysicsBody2D other = hits[h].transform.GetComponent<PhysicsBody2D>();
+
+                    if (other != null)
+                    {
+                        if(other.isPlatform && !isKinematic && isGoingDown)
+                        {
+                            deltaMovement.y = hits[h].point.y - ray.y;
+                            rayDistance = Mathf.Abs(deltaMovement.y);
+
+                            deltaMovement.y += _skinWidth;
+                            collisionState.below = true;
+                            collisionState.pushBelow = true;
+
+                            if (!isGoingUp && deltaMovement.y > 0.00001f)
+                                _isGoingUpSlope = true;
+
+                            if(!other.riders.Contains(this))
+                            other.riders.Add(this);
+                        }
+                        else
+                        {
+                            if (other.isKinematic || (isGoingUp && other.collisionState.above) || (!isGoingUp && other.collisionState.below))
+                            {
+                                // set our new deltaMovement and recalculate the rayDistance taking it into account
+                                deltaMovement.y = hits[h].point.y - ray.y;
+                                rayDistance = Mathf.Abs(deltaMovement.y);
+
+                                // remember to remove the skinWidth from our deltaMovement
+                                if (isGoingUp)
+                                {
+                                    deltaMovement.y -= _skinWidth;
+                                    collisionState.above = true;
+                                    collisionState.pushAbove = true;
+                                }
+                                else
+                                {
+                                    deltaMovement.y += _skinWidth;
+                                    collisionState.below = true;
+                                    collisionState.pushBelow = true;
+
+                                }
+
+                                if (!isGoingUp && deltaMovement.y > 0.00001f)
+                                    _isGoingUpSlope = true;
+                            }
+                            else
+                            {
+
+                                if (isGoingUp)
+                                {
+
+                                    //deltaMovement.x -= _skinWidth;
+                                    collisionState.above = true;
+                                    collisionState.pushAbove = true;
+                                    other.collisionState.below = true;
+                                    other.collisionState.pushBelow = true;
+                                }
+                                else
+                                {
+                                    //deltaMovement.x += _skinWidth;
+                                    collisionState.below = true;
+                                    collisionState.pushBelow = true;
+                                    other.collisionState.above = true;
+                                    other.collisionState.pushAbove = true;
+
+
+                                }
+                                //float pushAmount = (velocity.y - other.velocity.y) * Time.deltaTime;
+                                //other.transform.Translate(Vector2.right * deltaMovement.x);
+                                //other.pushMove(Vector2.up * deltaMovement.y);
+
+                            }
+
+
+                            // we add a small fudge factor for the float operations here. if our rayDistance is smaller
+                            // than the width + fudge bail out because we have a direct impact
+                            if (rayDistance < _skinWidth + kSkinWidthFloatFudgeFactor)
+                                break;
+                        }
+
+                        
+
+                    }
+
+
                 }
+
+                _raycastHitsThisFrame.Add(hits[h]);
+
             }
 
             if (isGoingDown && !collisionState.below)
@@ -659,8 +885,17 @@ public class PhysicsBody2D : MonoBehaviour
                 }
             }
 
+
+
+
         }
-	}
+        
+        
+
+        
+        
+    }
+
 
 	#endregion
 

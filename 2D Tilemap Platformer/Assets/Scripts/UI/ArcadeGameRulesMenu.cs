@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public enum GameMode { FreePlay, Versus, Coop }
-public enum MenuOptionIndex { Confirm, Back, Map, Lives, TimeLimit, Count }
+public enum MenuOptionIndex { Confirm, Back, Map, Lives, TimeLimit, TalentPoints, StatPoints, Count }
 public class ArcadeGameRulesMenu : UIScrollMenu
 {
     public static ArcadeGameRulesMenu instance;
@@ -64,6 +64,28 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         timerOptions.SetName("Time Limit");
         AddOption(timerOptions);
 
+        MenuOptionSelector talentPointsOptions = Instantiate(optionSelectorPrefab, container.transform);
+
+        foreach (int talentPoints in menuOptionsData.talentPoints)
+        {
+            talentPointsOptions.AddOption(talentPoints.ToString());
+        }
+
+        talentPointsOptions.Init();
+        talentPointsOptions.SetName("Talent Points");
+        AddOption(talentPointsOptions);
+
+        MenuOptionSelector statPointsOptions = Instantiate(optionSelectorPrefab, container.transform);
+
+        foreach (int statPoints in menuOptionsData.statPoints)
+        {
+            statPointsOptions.AddOption(statPoints.ToString());
+        }
+
+        statPointsOptions.Init();
+        statPointsOptions.SetName("Stat Points");
+        AddOption(statPointsOptions);
+
         SetNavigation();
         SetCurrentNode(0);
         GetComponent<MenuTabUI>().anchorObject = currentNode.gameObject;
@@ -107,16 +129,25 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         nodes[(int)MenuOptionIndex.Confirm].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Back].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Map].gameObject.SetActive(true);
+        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(true);
+        nodes[(int)MenuOptionIndex.StatPoints].gameObject.SetActive(true);
+
     }
 
     public void LoadVersusMode()
     {
+        foreach (MenuOption option in nodes)
+        {
+            option.gameObject.SetActive(false);
+        }
         //create the option objects and then set them
         nodes[(int)MenuOptionIndex.Confirm].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Back].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Map].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Lives].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.TimeLimit].gameObject.SetActive(true);
+        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(true);
+        nodes[(int)MenuOptionIndex.StatPoints].gameObject.SetActive(true);
 
     }
 
@@ -140,6 +171,12 @@ public class ArcadeGameRulesMenu : UIScrollMenu
                 break;
             case MenuOptionIndex.TimeLimit:
                 arcadeGameData.timeLimit = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
+                break;
+            case MenuOptionIndex.TalentPoints:
+                arcadeGameData.talentPoints = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
+                break;
+            case MenuOptionIndex.StatPoints:
+                arcadeGameData.statPoints = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
                 break;
         }
     }

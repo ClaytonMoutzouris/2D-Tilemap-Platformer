@@ -10,6 +10,10 @@ public static class StatusEffects
 
     public static IEnumerator Knockback(Entity entity, AttackObject attack)
     {
+        if(attack.attackData.knockbackPower <= 0)
+        {
+            yield break;
+        }
         float knockbackTimestamp = Time.time;
         Projectile proj = attack.GetComponent<Projectile>();
         Vector2 difference;

@@ -21,6 +21,18 @@ public class TalentsPanelUI : MonoBehaviour
 
     public TalentTreeMenuOption branchPrefab;
 
+    public int talentPoints = 0;
+    public Text talentPointsDisplay;
+
+    public void OnEnable()
+    {
+        talentPoints = ArcadeGameRulesMenu.instance.arcadeGameData.talentPoints;
+
+        talentPoints -= learnedTalents.Count;
+        UpdateTalentPointsDisplay();
+
+    }
+
     public void Start()
     {
         LoadTalentTree(talentTree);
@@ -44,19 +56,52 @@ public class TalentsPanelUI : MonoBehaviour
         }
     }
 
-    public void LearnTalent(TalentNodeUI talentNode)
+    public void TalentNodeSelected(TalentNodeUI talentNode)
     {
-        learnedTalents.Add(talentNode.talent);
+        if(talentNode.learned)
+        {
+            if(UnlearnTalent(talentNode.talent))
+            {
+                talentNode.SetLearned(false);
+                talentPoints++;
+                UpdateTalentPointsDisplay();
+            }
+        } else
+        {
+            if(LearnTalent(talentNode.talent))
+            {
+                talentNode.SetLearned(true);
+                talentPoints--;
+                UpdateTalentPointsDisplay();
+            }
+        }
     }
 
-    public void UnlearnTalent(TalentNodeUI talentNode)
+    public void UpdateTalentPointsDisplay()
     {
-        if(!learnedTalents.Contains(talentNode.talent))
-        {
-            Debug.Log("Doesnt contain the talent");
-            return;
+        talentPointsDisplay.text = "Talent Points: " + talentPoints;
+    }
+
+    public bool LearnTalent(Talent talent)
+    {
+        if (talentPoints > 0) { 
+            learnedTalents.Add(talent);
+            return true;
         }
-        learnedTalents.Remove(talentNode.talent);
+
+        return false;
+    }
+
+    public bool UnlearnTalent(Talent talent)
+    {
+        if(!learnedTalents.Contains(talent))
+        {
+            Debug.Log("Doesnt contain the talent, how did this happen?");
+            return false;
+        }
+
+        
+        return learnedTalents.Remove(talent);
     }
 
     public void SetNav()

@@ -8,9 +8,19 @@ public class StatsPanelUI : UIScrollMenu
     public PlayerMenuTabUI menuTab;
     public MenuOptionInteger optionPrefab;
     //This will be tricky, making the child 
-    public int statsToSpend = 5;
+    public int statsToSpend = 0;
     public Text statPointsText;
     public List<Stat> stats = new List<Stat>();
+
+    public override void OnEnable()
+    {
+        base.OnEnable();
+        //put something in to reload the known stats
+        statsToSpend = ArcadeGameRulesMenu.instance.arcadeGameData.statPoints;
+
+        UpdateStatPointsDisplay();
+
+    }
 
     public void LoadStats()
     {
@@ -66,8 +76,13 @@ public class StatsPanelUI : UIScrollMenu
             statsToSpend += Mathf.Abs(difference);
         }
 
-        statPointsText.text = "Stat Points: " + statsToSpend;
+        UpdateStatPointsDisplay();
         return true;
+    }
+
+    public void UpdateStatPointsDisplay()
+    {
+        statPointsText.text = "Stat Points: " + statsToSpend;
     }
 
     public int GetValueForStat(StatType type)

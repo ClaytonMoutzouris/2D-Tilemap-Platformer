@@ -5,7 +5,7 @@ using UnityEngine;
 public enum EntityDirection { Left = -1, Right = 1 };
 
 [RequireComponent(typeof(Animator))]
-public class Entity : MonoBehaviour
+public class Entity : MonoBehaviour, IHurtable
 {
     public SpriteRenderer spriteRenderer;
     public Animator _animator;
@@ -13,7 +13,7 @@ public class Entity : MonoBehaviour
     public AttackManager _attackManager;
 
     //Only used by enemy now, need to remove
-    public float movementSpeed = 0.5f;
+    public float movementSpeed = 0.0f;
 
     //Entity Flags
     public bool ignoreGravity = false;
@@ -43,6 +43,7 @@ public class Entity : MonoBehaviour
     {
         health = GetComponent<Health>();
         hurtbox = GetComponentInChildren<Hurtbox>();
+        hurtbox.SetOwner(this);
         _animator = GetComponent<Animator>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         stats = GetComponent<Stats>();
@@ -111,4 +112,35 @@ public class Entity : MonoBehaviour
 
     }
 
+
+    public virtual void GetHurt(AttackObject attackObject)
+    {
+        AttackData attackData = attackObject.GetAttackData();
+        attackObject.attackData = attackData;
+
+        float dodgeChance = stats.GetSecondaryStat(SecondaryStatType.DodgeChance).GetValue();
+
+        int dodge = Random.Range(0, 100);
+
+        if (dodge < dodgeChance)
+        {
+            ShowFloatingText("Dodged", Color.blue);
+            return;
+        }
+
+        int fullDamage = attackData.GetDamage();
+
+        health.LoseHealth(fullDamage, attackData.owner, attackData.crit);
+
+        StartCoroutine(StatusEffects.Knockback(this, attackObject));
+        
+
+        foreach (Ability ability in attackObject.owner.abilities)
+        {
+            if (ability is EffectOnHit onHit)
+            {
+                onHit.OnHit(this);
+            }
+        }
+    }
 }

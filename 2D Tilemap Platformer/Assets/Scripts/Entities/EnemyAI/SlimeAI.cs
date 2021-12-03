@@ -171,7 +171,6 @@ public class SlimeAI : MonoBehaviour
             entity.movementSpeed /= speedMod;
             entity._animator.speed = 1;
             entity._animator.Play(Animator.StringToHash("Slime_Idle"));
-            Debug.Log("Setting to Idle from A1");
             states = SLIME_STATE.IDLE;
             yield return null;
         }

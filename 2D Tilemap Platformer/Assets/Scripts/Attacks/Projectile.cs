@@ -68,10 +68,12 @@ public class Projectile : MonoBehaviour
         {
             _velocity.y = Mathf.Sqrt(projectileData.projSpeed *direction.normalized.y * -GambleConstants.GRAVITY);
             //Debug.Log("Velocity " + _velocity);
+            _velocity.x = direction.normalized.x * projectileData.projSpeed;
 
         }
         else
         {
+            _velocity.y = direction.normalized.y * projectileData.projSpeed;
             _velocity.x = direction.normalized.x * projectileData.projSpeed;
         }
 
@@ -85,22 +87,65 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    public void CheckBounce()
+    {
+        if (!bouncedLastFrame)
+        {
+            if (_controller.collisionState.above)
+            {
+                direction.y *= -1;
+            }
+            else if (_controller.collisionState.below)
+            {
+                direction.y *= -1;
+                if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
+                {
+                    _velocity.y = Mathf.Sqrt(projectileData.projSpeed * direction.y * -GambleConstants.GRAVITY);
+                }
+            }
+
+            if (_controller.collisionState.left || _controller.collisionState.right)
+            {
+                direction.x *= -1;
+
+            }
+            _attackObject.ClearHits();
+            bouncedLastFrame = true;
+            _velocity.y = direction.normalized.y * projectileData.projSpeed;
+            _velocity.x = direction.normalized.x * projectileData.projSpeed;
+        }
+        else
+        {
+            bouncedLastFrame = false;
+        }
+    }
+
     protected void Update()
     {
 
-        _velocity.x = direction.normalized.x * projectileData.projSpeed;
+        //_velocity.x = direction.normalized.x * projectileData.projSpeed;
 
 
-        if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
-        {
-            _velocity.y = direction.normalized.y * projectileData.projSpeed;
-        }  else
+        if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
         {
             _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
             //Debug.Log("Velocity " + _velocity);
 
 
         }
+
+        if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.Bounce).GetValue())
+        {
+            CheckBounce();
+        }
+        else if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.Slippery).GetValue())
+        {
+            if (_controller.collisionState.below || _controller.collisionState.left || _controller.collisionState.right)
+            {
+                _velocity.x = 0;
+            }
+        }
+
 
 
         if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.Boomerang).GetValue())
@@ -124,32 +169,7 @@ public class Projectile : MonoBehaviour
             if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.DestroyOnGround).GetValue())
             {
                 DestroyProjectile();
-            } else if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.Bounce).GetValue() && !bouncedLastFrame)
-            {
-                if(_controller.collisionState.above)
-                {
-                    direction.y *= -1;
-                } else if (_controller.collisionState.below)
-                {
-                    direction.y *= -1;
-                    if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
-                    {
-                        _velocity.y = Mathf.Sqrt(projectileData.projSpeed * direction.y * -GambleConstants.GRAVITY);
-                    }
-                }
-
-                if (_controller.collisionState.left || _controller.collisionState.right)
-                {
-                    direction.x *= -1;
-
-                }
-                _attackObject.ClearHits();
-                bouncedLastFrame = true;
-            }
-        } else
-        {
-            bouncedLastFrame = false;
-
+            } 
         }
 
         if (startTime + projectileData.lifeTime <= Time.time)
@@ -172,6 +192,9 @@ public class Projectile : MonoBehaviour
 
     public void Boomerang(ref Vector3 vel)
     {
+        _velocity.y = direction.normalized.y * projectileData.projSpeed;
+        _velocity.x = direction.normalized.x * projectileData.projSpeed;
+
         float returnSpeed = projectileData.elasticity * (Time.time - startTime);
         vel = vel - vel * returnSpeed;
 

@@ -49,6 +49,7 @@ public class AttackObject : MonoBehaviour
     public void SetOwner(Entity entity)
     {
         owner = entity;
+        attackData.owner = owner;
     }
 
     protected virtual void Update()
@@ -84,9 +85,10 @@ public class AttackObject : MonoBehaviour
 
         Hurtbox hurtbox = collider.GetComponent<Hurtbox>();
 
-        if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && hurtbox.entity != owner)
+        if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && hurtbox.owner != owner)
         {
-            HitEnemy(hurtbox.entity);
+            hurtbox.GetHurt(this);
+            //HitEnemy(hurtbox.entity);
             hits.Add(collider);
 
         }
@@ -102,10 +104,29 @@ public class AttackObject : MonoBehaviour
 
     }
 
+    /* HitEnemy deprecated
     public virtual void HitEnemy(Entity entity)
     {
+        //make sure to refresh this
         AttackData attackData = GetAttackData();
+
+        float dodgeChance = entity.stats.GetSecondaryStat(SecondaryStatType.DodgeChance).GetValue();
+
+        int dodge = Random.Range(0, 100);
+
+        if(dodge < dodgeChance)
+        {
+            entity.ShowFloatingText("Dodged", Color.blue);
+            return;
+        }
+
         int fullDamage = attackData.damage;
+
+        if(owner != null)
+        {
+            fullDamage += (int)owner.stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue();
+        }
+
         bool crit = false;
         int r = Random.Range(0, 100);
         //since the 0 is inclusive, we exclude the ceiling (crit chance)
@@ -135,6 +156,7 @@ public class AttackObject : MonoBehaviour
 
 
     }
+    */
 
     public virtual AttackData GetAttackData()
     {

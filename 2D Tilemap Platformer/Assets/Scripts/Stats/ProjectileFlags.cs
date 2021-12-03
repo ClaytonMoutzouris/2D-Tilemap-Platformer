@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ProjectileFlagType { Piercing, Boomerang, Homing, DestroyOnGround, IgnoreGround, IgnoreGravity, IsAngled, Bounce };
+public enum ProjectileFlagType { Piercing, Boomerang, Homing, DestroyOnGround, IgnoreGround, IgnoreGravity, IsAngled, Bounce, Slippery };
 public enum ProjectileAttributesType { ProjectileSpeed, Elasticity, LifeTime };
 
 public class ProjectileFlags

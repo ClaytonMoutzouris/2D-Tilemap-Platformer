@@ -86,7 +86,6 @@ public class AttackManager : MonoBehaviour
 
     public void ActivateHeavyAttack(ButtonInput button = ButtonInput.HeavyAttack)
     {
-        Debug.Log("ActivateHeavyAttack");
         if (activeAttack != null || entity._equipmentManager.equippedWeapon == null)
         {
             return;

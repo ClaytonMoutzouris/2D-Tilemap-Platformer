@@ -48,6 +48,7 @@ public class PlayerController : Entity
     public ParticleSystem deathEffect;
 
     public ContactFilter2D itemFilter;
+    public ContactFilter2D powerUpFilter;
     public PlayerCreationData playerData;
     public int kills = 0;
 
@@ -104,6 +105,7 @@ public class PlayerController : Entity
 	void onTriggerEnterEvent( Collider2D col )
 	{
         //Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
+
     }
 
 
@@ -258,6 +260,9 @@ public class PlayerController : Entity
         {
             StartCoroutine(Rolling());
         }
+
+        CheckForPowerups();
+
 
         //See if we are colliding with any items
         List<ItemObject> itemsTouching = CheckForItems();
@@ -969,6 +974,28 @@ public class PlayerController : Entity
         }
 
         return itemsFound;
+    }
+
+    public void CheckForPowerups()
+    {
+
+        List<Collider2D> colliders = new List<Collider2D>();
+        BoxCollider2D box = _controller.boxCollider;
+        //box.size *= 2;
+        Physics2D.OverlapCollider(_controller.boxCollider, powerUpFilter, colliders);
+        //box.size /= 2;
+
+        for (int i = 0; i < colliders.Count; i++)
+        {
+            PowerUpObject powerup = colliders[i].GetComponent<PowerUpObject>();
+
+            if (powerup != null)
+            {
+                powerup.CollectPowerUp(this);
+            }
+
+        }
+
     }
 
     public override void SetDirection(EntityDirection dir)

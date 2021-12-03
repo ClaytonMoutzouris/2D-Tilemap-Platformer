@@ -29,7 +29,9 @@ public class WeaponObject : AttackObject
 
     public override AttackData GetAttackData()
     {
-        return weapon.GetAttackData();
+        AttackData data = weapon.GetAttackData();
+        data.owner = owner;
+        return data;
     }
 
     public void UpdateHitbox()

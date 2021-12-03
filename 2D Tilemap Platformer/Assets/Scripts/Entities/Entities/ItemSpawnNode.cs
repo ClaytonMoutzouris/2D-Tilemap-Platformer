@@ -44,6 +44,6 @@ public class ItemSpawnNode : MonoBehaviour
     {
         int r = Random.Range(0, items.Count);
 
-        return items[r];
+        return Instantiate(items[r]);
     }
 }

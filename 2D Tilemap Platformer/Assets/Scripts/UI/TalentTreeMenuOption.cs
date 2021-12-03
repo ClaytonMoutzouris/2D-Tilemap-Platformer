@@ -8,12 +8,14 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler
 {
     public List<TalentNodeUI> talentNodes = new List<TalentNodeUI>();
     public TalentNodeUI currentNode;
+
     public TalentsPanelUI talentTreePanel;
     public GameObject container;
     public Button button;
     public ScrollRect scrollRect;
 
     public TalentNodeUI prefab;
+
 
     public void RedirectClick()
     {
@@ -47,17 +49,6 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler
 
     public void ClearNodes()
     {
-
-    }
-
-    public void LearnNode(TalentNodeUI learnNode)
-    {
-        talentTreePanel.LearnTalent(learnNode);
-    }
-
-    public void UnlearnNode(TalentNodeUI node)
-    {
-        talentTreePanel.UnlearnTalent(node);
 
     }
 

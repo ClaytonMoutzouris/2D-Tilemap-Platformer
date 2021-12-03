@@ -29,20 +29,22 @@ public class TalentNodeUI : MonoBehaviour, ISelectHandler, IDeselectHandler
             return;
         }
 
-        if (learned)
+        branch.talentTreePanel.TalentNodeSelected(this);
+
+    }
+
+    public void SetLearned(bool isLearned)
+    {
+        learned = isLearned;
+
+        if(learned)
         {
-            branch.UnlearnNode(this);
-            learned = false;
-            button.image.color = Color.white;
-        } else
-        {
-            branch.LearnNode(this);
-            learned = true;
             button.image.color = Color.yellow;
         }
-
-
-
+        else
+        {
+            button.image.color = Color.white;
+        }
     }
 
     public void Confirm()

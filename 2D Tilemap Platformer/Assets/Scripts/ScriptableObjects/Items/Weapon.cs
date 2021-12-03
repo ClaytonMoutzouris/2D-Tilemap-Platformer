@@ -317,6 +317,7 @@ public class Weapon : Equipment
     {
         return new AttackData()
         {
+            owner = this.owner,
             damage = (int)GetStatValue(WeaponAttributesType.Damage),
             knockbackPower = GetStatValue(WeaponAttributesType.KnockbackPower),
             damageType = (DamageType)GetStatValue(WeaponAttributesType.DamageType),

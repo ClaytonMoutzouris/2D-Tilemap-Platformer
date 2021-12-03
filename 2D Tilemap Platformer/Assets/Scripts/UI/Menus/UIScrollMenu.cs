@@ -15,7 +15,7 @@ public class UIScrollMenu : MonoBehaviour
     public MenuOption backButton;
     public MenuOption confirmButton;
 
-    public void OnEnable()
+    public virtual void OnEnable()
     {
         LoadMenuOptions();
         //LoadMode(ArcadeMenu.instance.gameMode);

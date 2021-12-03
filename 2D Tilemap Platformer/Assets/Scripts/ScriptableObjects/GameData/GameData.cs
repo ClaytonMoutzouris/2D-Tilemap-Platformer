@@ -13,6 +13,8 @@ public class GameData : ScriptableObject
     public PlayerCreationData[] playerDatas = new PlayerCreationData[4];
     public int timeLimit = 5;
     public int lives = 1;
+    public int talentPoints = 0;
+    public int statPoints = 0;
 }
 
 // If you want the data to be stored permanently in the editor

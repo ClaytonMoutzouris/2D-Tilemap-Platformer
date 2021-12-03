@@ -11,6 +11,8 @@ public class ArcadeMenuOptions : ScriptableObject
 {
     public List<int> livesOptions;
     public List<int> timeLimits;
+    public List<int> talentPoints;
+    public List<int> statPoints;
     public List<string> maps;
 
     public void LoadOptions()

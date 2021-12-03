@@ -25,17 +25,14 @@ public class ExplosiveProjectile : Projectile
 
     public override void SetFromWeapon(Weapon wep)
     {
-        _attackObject.SetOwner(wep.owner);
+        base.SetFromWeapon(wep);
 
-        _attackObject.attackData = wep.GetAttackData();
         damage = wep.GetAttackData().damage;
         knockbackPower = wep.GetAttackData().knockbackPower;
 
         _attackObject.attackData.damage = 0;
         _attackObject.attackData.knockbackPower = 0;
 
-        projectileData.projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
-        projectileData.projectileFlags.AddBonuses(wep.projectileBonuses);
 
 
 

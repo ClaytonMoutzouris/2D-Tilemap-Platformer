@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WeaponClassType { Sword, Gun, Axe, Dagger };
+public enum WeaponClassType { Sword, Gun, Axe, Dagger, Thrown };
 
 [CreateAssetMenu(fileName = "WeaponClass", menuName = "ScriptableObjects/Items/WeaponClass")]
 public class WeaponClass : ScriptableObject

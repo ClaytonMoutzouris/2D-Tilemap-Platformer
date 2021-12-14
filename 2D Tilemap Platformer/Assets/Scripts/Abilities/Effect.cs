@@ -12,20 +12,25 @@ public class Effect : ScriptableObject
 
     protected Entity effected;
     protected Entity effector;
+    public float procChance = 100;
 
-    public virtual void Apply(Entity effected, Entity effector = null)
+    public void Trigger(Entity effected, Entity effector = null)
     {
+        int bonusProcChance = (effector == null ? 0 : effector.stats.GetStat(StatType.Luck).GetValue());
+        if (Random.Range(0, 100) >= procChance + bonusProcChance)
+        {
+            return;
+        }
+
         this.effected = effected;
         this.effector = effector;
 
+        ApplyEffect();
     }
 
-    public virtual void Remove()
+    public virtual void ApplyEffect()
     {
-        //Remove from players list of effects, then garbage collect?
-        //Destroy(this);
-        effected = null;
-        effector = null;
+
     }
 
 

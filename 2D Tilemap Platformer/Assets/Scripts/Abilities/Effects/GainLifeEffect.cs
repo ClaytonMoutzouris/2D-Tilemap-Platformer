@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Effects/GainLife")]
-public class GainLifeEffect : ImmediateEffect
+public class GainLifeEffect : Effect
 {
     public int baseLifeGain = 5;
 
-    public override void Apply(Entity effected, Entity effector = null)
+    public override void ApplyEffect()
     {
-        base.Apply(effected, effector);
         effected.health.GainLife(baseLifeGain);
+
     }
 
 }

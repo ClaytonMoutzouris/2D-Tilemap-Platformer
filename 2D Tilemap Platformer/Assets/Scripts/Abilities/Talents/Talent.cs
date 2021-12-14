@@ -11,6 +11,7 @@ public class Talent : ScriptableObject
     public List<StatBonus> bonusStats;
     public List<SecondaryStatBonus> secondaryBonusStats;
     public List<WeaponAttributeBonus> weaponBonuses;
+    public List<AbilityFlagBonus> abilityFlagBonuses;
 
     public List<Ability> abilities;
     public bool isLearned = false;
@@ -38,6 +39,7 @@ public class Talent : ScriptableObject
         owner = player;
         owner.stats.AddPrimaryBonuses(bonusStats);
         owner.stats.AddSecondaryBonuses(secondaryBonusStats);
+        owner.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
 
         List<Ability> temp = new List<Ability>();
 
@@ -80,6 +82,7 @@ public class Talent : ScriptableObject
         //owner.abilities.Remove(this);
         owner.stats.RemovePrimaryBonuses(bonusStats);
         owner.stats.RemoveSecondaryBonuses(secondaryBonusStats);
+        owner.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
 
         foreach (Ability ability in abilities)
         {

@@ -33,7 +33,7 @@ public class PowerUpObject : MonoBehaviour
         if (entity != null)
         {
             StatusEffect effect = Instantiate(powerUp.statusEffect);
-            effect.Apply(entity);
+            effect.Trigger(entity);
 
             if (spawner != null)
             {

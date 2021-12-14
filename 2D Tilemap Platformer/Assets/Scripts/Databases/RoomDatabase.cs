@@ -67,6 +67,7 @@ public static class RoomDatabase
             if (data.GetRoomAccessType() == access && (data.generalType == RoomGeneralType.All || data.generalType == generalType))
             {
                 eligibleRooms.Add(data);
+                Debug.Log("Eligible Room found " + access);
             }
         }
 
@@ -77,6 +78,8 @@ public static class RoomDatabase
         else
         {
             //else its a blank room for now
+            Debug.Log("No Rooms Found ");
+
             return new RoomData();
         }
     }

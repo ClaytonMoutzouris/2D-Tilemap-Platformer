@@ -18,10 +18,11 @@ public class AttackData
     //Other goodies
 
     
-    public int GetDamage()
+    public int GetDamage(Entity hit)
     {
         int r = Random.Range(0, 100);
         int finalDamage = damage;
+        int damageReduction = 0;
 
         if (owner != null)
         {
@@ -35,6 +36,18 @@ public class AttackData
         {
             crit = true;
             finalDamage *= 2;
+
+        }
+
+        //Before or after crit?
+        if (hit != null)
+        {
+            //This one reduced by 1% per damage reduction
+            //damageReduction = Mathf.FloorToInt((int)(finalDamage * ((hit.stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue()) / 100)));
+
+            //This reduces damage by 1 for every 5 Damage Reduction (which is 1 to 1 with defense atm)
+            damageReduction = Mathf.FloorToInt(hit.stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue() / 5);
+            finalDamage -= damageReduction;
 
         }
 

@@ -10,7 +10,7 @@ public class ItemObject : MonoBehaviour
     public ItemData item;
     public PhysicsBody2D _controller;
     ItemSpawnNode spawner;
-    Vector3 _velocity = Vector3.zero;
+    public Vector3 _velocity = Vector3.zero;
 
     public bool ignoreGravity = false;
     //public GameObject itemTooltip;
@@ -18,10 +18,7 @@ public class ItemObject : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(item != null)
-        {
-            SetItem(Instantiate(item));
-        }
+
     }
 
     protected void Awake()
@@ -35,10 +32,24 @@ public class ItemObject : MonoBehaviour
     void Update()
     {
 
-            if (!ignoreGravity)
-                _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
+        if (!ignoreGravity)
+            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
-            _controller.move(_velocity * Time.deltaTime);
+        _controller.move(_velocity * Time.deltaTime);
+
+        if(_controller.isGrounded)
+        {
+            _velocity.x = 0;
+        }
+    }
+
+    public IEnumerator Despawn(float despawnTime)
+    {
+
+        yield return new WaitForSeconds(despawnTime);
+
+        Destroy(gameObject);
+
 
     }
 

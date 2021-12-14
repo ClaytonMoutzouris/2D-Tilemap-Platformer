@@ -8,8 +8,10 @@ public class ArenaBattleManager : MonoBehaviour
 {
     public static ArenaBattleManager instance;
     public List<SpawnPoint> spawnPoints;
+    public List<ChestSpawnNode> chestSpawnPoints;
     public GameData gameData;
 
+    public int numChests = 1;
     public float gameTimer;
     public Text gameTimeText;
 
@@ -35,9 +37,21 @@ public class ArenaBattleManager : MonoBehaviour
 
         gameTimer = gameData.timeLimit * 60;
 
-        string path = Path.Combine(Application.streamingAssetsPath, "GameData", "Maps", gameData.mapName);
-        path += ".map";
-        GameGrid.instance.LoadMap(path);
+
+        if(string.Equals(gameData.mapName, "GeneratedMap"))
+        {
+            MapData mapData = MapGenerator.GenerateWorldMap();
+
+            GameGrid.instance.SetMap(mapData);
+
+        }
+        else
+        {
+            string path = Path.Combine(Application.streamingAssetsPath, "GameData", "Maps", gameData.mapName);
+            path += ".map";
+            GameGrid.instance.LoadMap(path);
+        }
+
 
         Debug.Log("Game Starting in 3");
         yield return new WaitForSeconds(1);
@@ -64,6 +78,9 @@ public class ArenaBattleManager : MonoBehaviour
             GameManager.instance.SpawnPlayer(data.playerIndex, pointsList[r], data);
             pointsList.RemoveAt(r);
         }
+
+        StartCoroutine(SpawnChest(0));
+
 
     }
 
@@ -100,4 +117,18 @@ public class ArenaBattleManager : MonoBehaviour
 
     }
 
+
+    public void ChestCollected()
+    {
+        StartCoroutine(SpawnChest(10));
+    }
+
+    public IEnumerator SpawnChest(int spawnTime)
+    {
+        yield return new WaitForSeconds(spawnTime);
+
+        int r = Random.Range(0, chestSpawnPoints.Count);
+
+        chestSpawnPoints[r].SpawnChest();
+    }
 }

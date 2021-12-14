@@ -22,7 +22,7 @@ public class EffectOnWalk : Ability
             {
                 Effect walkEffect = Instantiate(this.walkEffect);
 
-                walkEffect.Apply(owner);
+                walkEffect.Trigger(owner);
                 walkCount = 0;
 
             }

@@ -21,6 +21,7 @@ public class WeaponAbility : Ability
     public List<ProjectileFlagBonus> weaponProjectileEffects;
     public List<StatBonus> wepBonusStats;
     public List<SecondaryStatBonus> wepSecondaryBonusStats;
+    public List<AbilityFlagBonus> wepAbilityFlagBonus;
     public List<WeaponAttributeBonus> wepWeaponBonuses;
 
     
@@ -66,6 +67,8 @@ public class WeaponAbility : Ability
 
             owner.stats.AddPrimaryBonuses(wepBonusStats);
             owner.stats.AddSecondaryBonuses(wepSecondaryBonusStats);
+            owner.stats.AddAbilityFlagBonuses(wepAbilityFlagBonus);
+
             owner.health.UpdateHealth();
             Debug.Log("Adding weaponability " + this);
             player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(wepWeaponBonuses);
@@ -90,6 +93,8 @@ public class WeaponAbility : Ability
         {
             owner.stats.RemovePrimaryBonuses(wepBonusStats);
             owner.stats.RemoveSecondaryBonuses(wepSecondaryBonusStats);
+            owner.stats.RemoveAbilityFlagBonuses(wepAbilityFlagBonus);
+
             owner.health.UpdateHealth();
             player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(wepWeaponBonuses);
 

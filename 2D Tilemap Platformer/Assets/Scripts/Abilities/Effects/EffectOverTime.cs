@@ -32,7 +32,7 @@ public class EffectOverTime : StatusEffect
             if (tickDuration >= tickInterval)
             {
                 Effect newEffect = Instantiate(effect);
-                newEffect.Apply(effected, effector);
+                newEffect.Trigger(effected, effector);
                 tickDuration = 0;
             }
             yield return null;

@@ -14,7 +14,7 @@ public class EffectOnJump : Ability
         {
             Effect jumpEffect = Instantiate(this.jumpEffect);
 
-            jumpEffect.Apply(owner);
+            jumpEffect.Trigger(owner);
 
         }
 

@@ -13,8 +13,9 @@ public class StatusEffect : Effect
     public List<StatBonus> statBonuses;
     public List<SecondaryStatBonus> secondaryStatBonus;
 
-    public override void Apply(Entity effected, Entity effector = null)
+    public override void ApplyEffect()
     {
+
         if (!stackable)
         {
             foreach (Effect effect in effected.statusEffects)
@@ -27,9 +28,8 @@ public class StatusEffect : Effect
             }
         }
 
-
-        base.Apply(effected, effector);
         effected.StartCoroutine(HandleEffect());
+
     }
 
     public virtual void StartUp()

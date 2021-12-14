@@ -24,7 +24,9 @@ public class MapLayout
         foreach (WorldTile tile in tiles)
         {
             layout[tile.LocalPlace.x, tile.LocalPlace.y] = (RoomAccessType)System.Enum.Parse(typeof(RoomAccessType), tile.TileID);
+
         }
+
     }
 
     public void GeneralLayoutFromTiles(List<WorldTile> tiles)

@@ -23,7 +23,7 @@ public class PlayerTooltip : MonoBehaviour
     public void ShowTooltip(ItemObject item)
     {
         gameObject.SetActive(true);
-        text.text = item.item.ToString();
+        text.text = item.item.GetTooltip();
 
         RectTransform rect = GetComponent<RectTransform>();
         RectTransform canvasRect = versusUI.GetComponent<RectTransform>();

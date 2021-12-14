@@ -11,8 +11,6 @@ public class RoomData
     //This is a container class for saving rooms
 
     //How do i handle the layers? this is one layer of tiles.
-    public List<TilemapLayerSaveData> mapLayers = new List<TilemapLayerSaveData>();
-
     public List<WorldTile> tiles = new List<WorldTile>();
 
 
@@ -34,13 +32,7 @@ public class RoomData
     public static RoomData DeepCopy(RoomData original)
     {
         RoomData data = new RoomData();
-        data.mapLayers = new List<TilemapLayerSaveData>();
         data.tiles = new List<WorldTile>();
-
-        foreach (TilemapLayerSaveData layer in original.mapLayers)
-        {
-            data.mapLayers.Add(TilemapLayerSaveData.DeepCopy(layer));
-        }
 
         foreach (WorldTile tile in original.tiles)
         {

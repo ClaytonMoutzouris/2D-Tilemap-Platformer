@@ -43,7 +43,8 @@ public class ItemSpawnNode : MonoBehaviour
     public ItemData GetRandomItem()
     {
         int r = Random.Range(0, items.Count);
-
-        return Instantiate(items[r]);
+        ItemData newData = Instantiate(items[r]);
+        newData.RandomizeStats();
+        return newData;
     }
 }

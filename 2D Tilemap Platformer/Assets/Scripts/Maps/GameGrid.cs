@@ -31,7 +31,7 @@ public class GameGrid : MonoBehaviour
         if(tilemapLayers[0] != null)
         {
             Gizmos.color = new Color(0.0f, 1.0f, 0.0f);
-            Gizmos.DrawWireCube(tilemapLayers[0].origin+ tilemapLayers[0].size/2, tilemapLayers[0].size);
+            Gizmos.DrawWireCube((Vector3)tilemapLayers[0].origin + (Vector3)tilemapLayers[0].size/2.0f, (Vector3)tilemapLayers[0].size);
         }
 
     }
@@ -212,49 +212,37 @@ public class GameGrid : MonoBehaviour
     }
 
     //This method is not currently being used.
-    public void SetRoom(RoomData room, int x, int y)
+    public void SetRoom(RoomData room, int x, int y, bool editor = false)
     {
         Tile[] tileAsset = Resources.LoadAll<Tile>("Tiles");
 
-        foreach (TilemapLayerSaveData layerData in room.mapLayers)
+        foreach (WorldTile tile in room.tiles)
         {
-            foreach (WorldTile tile in layerData.tiles)
+            for (int i = 0; i < tileAsset.Length; i++)
             {
-
-                for (int i = 0; i < tileAsset.Length; i++)
+                if (tileAsset[i].name == tile.TileID)
                 {
-                    if (tileAsset[i].name == tile.TileID)
+                    Vector3Int tileMapPos = new Vector3Int(tile.LocalPlace.x + GambleConstants.RoomSizeX * x, tile.LocalPlace.y + GambleConstants.RoomSizeY * y, tile.LocalPlace.z);
+
+                    if (tile.SpawnObject != null && !editor)
                     {
-                        //Careful, these 10s should not be hardcoded
-                        Vector3Int tileMapPos = new Vector3Int(tile.LocalPlace.x + GambleConstants.RoomSizeX * x, tile.LocalPlace.y + GambleConstants.RoomSizeY * y, tile.LocalPlace.z);
-                        tilemapLayers[layerData.layerIndex].SetTile(tileMapPos, tileAsset[i]);
-                        i = tileAsset.Length;
+                        Debug.Log("Spawn object for tile " + tile.SpawnObject);
+
+                        //Debug.Log("Spawn object loaded");
+                        GameObject temp = Instantiate(Resources.Load("Prefabs/Entities/" + tile.SpawnObject) as GameObject, new Vector3(tileMapPos.x + 0.5f, tileMapPos.y + 0.5f, 0), Quaternion.identity);
                     }
+                    else
+                    {
+                        tilemapLayers[(int)tile.LayerID].SetTile(tileMapPos, tileAsset[i]);
+                    }
+
+                    i = tileAsset.Length;
                 }
             }
         }
 
         Resources.UnloadUnusedAssets();
 
-    }
-
-    public void SetMap(MapData data)
-    {
-        ClearTiles();
-
-        mapSizeX = data.mapSizeX;
-        mapSizeY = data.mapSizeY;
-        ResizeMaps();
-        foreach (RoomData room in data.rooms)
-        {
-            foreach (TilemapLayerSaveData layerData in room.mapLayers)
-            {
-                SetWorldTiles(layerData.layerIndex, layerData.tiles, false);
-            }
-        }
-
-        currentMap = data;
-        InitPathFinder();
     }
 
     public void ClearTiles()
@@ -417,5 +405,26 @@ public class GameGrid : MonoBehaviour
         {
             Debug.LogError("Map not found.");
         }
+    }
+
+    public void SetMap(MapData data, bool editor = false)
+    {
+        ClearMap();
+
+        mapSizeX = data.mapSizeX;
+        mapSizeY = data.mapSizeY;
+        ResizeMaps();
+
+        for (int x = 0; x < data.numRoomsX; x++)
+        {
+            for (int y = 0; y < data.numRoomsY; y++)
+            {
+                SetRoom(data.rooms[x, y], x, y, editor);
+            }
+        }
+
+
+        currentMap = data;
+        InitPathFinder();
     }
 }

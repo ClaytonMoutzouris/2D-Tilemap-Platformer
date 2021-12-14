@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TakeDamage", menuName = "ScriptableObjects/Effects/TakeDamage")]
-public class TakeDamageEffect : ImmediateEffect
+public class TakeDamageEffect : Effect
 {
     public int baseDamage = 1;
 
-    public override void Apply(Entity effected, Entity effector = null)
+
+    public override void ApplyEffect()
     {
-        base.Apply(effected, effector);
         effected.health.LoseHealth(baseDamage);
     }
-
 }

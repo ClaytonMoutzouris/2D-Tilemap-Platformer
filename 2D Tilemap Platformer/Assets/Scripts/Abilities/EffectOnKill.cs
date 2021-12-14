@@ -14,7 +14,7 @@ public class EffectOnKill : Ability
         {
             Effect gainEffect = Instantiate(this.gainEffect);
 
-            gainEffect.Apply(owner);
+            gainEffect.Trigger(owner);
         }
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum EntityDirection { Left = -1, Right = 1 };
+public enum AbilityFlagType { Flight, Stealth }
 
 [RequireComponent(typeof(Animator))]
 public class Entity : MonoBehaviour, IHurtable
@@ -53,6 +54,7 @@ public class Entity : MonoBehaviour, IHurtable
             health.UpdateHealth();
 
         }
+
     }
 
     // Update is called once per frame
@@ -128,7 +130,7 @@ public class Entity : MonoBehaviour, IHurtable
             return;
         }
 
-        int fullDamage = attackData.GetDamage();
+        int fullDamage = attackData.GetDamage(this);
 
         health.LoseHealth(fullDamage, attackData.owner, attackData.crit);
 

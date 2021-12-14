@@ -11,6 +11,9 @@ public class Stats : MonoBehaviour
     public List<WeaponAttributeBonus> weaponBonuses;
     public Stat[] startingStats = new Stat[(int)StatType.Luck+1];
     public SecondaryStat[] startingSecondaryStats = new SecondaryStat[(int)SecondaryStatType.DamageReduction+1];
+    public Dictionary<AbilityFlagType, AbilityFlag> abilityFlags;
+
+
 
     public void Start()
     {
@@ -45,6 +48,12 @@ public class Stats : MonoBehaviour
             secondaryStats.Add(secondaryStat.type, secondaryStat);
         }
 
+        abilityFlags = new Dictionary<AbilityFlagType, AbilityFlag>();
+        foreach (AbilityFlagType flag in System.Enum.GetValues(typeof(AbilityFlagType)))
+        {
+            abilityFlags.Add(flag, new AbilityFlag(flag));
+        }
+
         //weaponBonuses = new List<WeaponAttributeBonus>();
 
     }
@@ -68,6 +77,11 @@ public class Stats : MonoBehaviour
     public SecondaryStat GetSecondaryStat(SecondaryStatType type)
     {
         return secondaryStats[type];
+    }
+
+    public AbilityFlag GetAbilityFlag(AbilityFlagType type)
+    {
+        return abilityFlags[type];
     }
 
     public void AddPrimaryBonus(StatBonus bonus)
@@ -122,6 +136,34 @@ public class Stats : MonoBehaviour
         foreach (SecondaryStatBonus bonus in bonuses)
         {
             secondaryStats[bonus.type].RemoveBonus(bonus);
+        }
+
+    }
+
+    public void AddAbilityFlagBonus(AbilityFlagBonus bonus)
+    {
+        abilityFlags[bonus.type].AddBonus(bonus);
+    }
+
+    public void RemoveAbilityFlagBonus(AbilityFlagBonus bonus)
+    {
+        abilityFlags[bonus.type].RemoveBonus(bonus);
+    }
+
+    public void AddAbilityFlagBonuses(List<AbilityFlagBonus> bonuses)
+    {
+        foreach (AbilityFlagBonus bonus in bonuses)
+        {
+            abilityFlags[bonus.type].AddBonus(bonus);
+        }
+
+    }
+
+    public void RemoveAbilityFlagBonuses(List<AbilityFlagBonus> bonuses)
+    {
+        foreach (AbilityFlagBonus bonus in bonuses)
+        {
+            abilityFlags[bonus.type].RemoveBonus(bonus);
         }
 
     }
@@ -209,6 +251,78 @@ public class Stat
 
         return (int)(fullValue + fullValue * multiplier);
     }
+}
+
+[System.Serializable]
+public class AbilityFlag
+{
+    public AbilityFlagType type;
+    public bool value;
+    [HideInInspector]
+    public List<AbilityFlagBonus> bonuses;
+    //Refence to the parent stats, mostly for secondary stats
+
+    public AbilityFlag(AbilityFlagType t, bool startingValue = false)
+    {
+        type = t;
+        value = startingValue;
+        bonuses = new List<AbilityFlagBonus>();
+    }
+
+    public void AddBonus(AbilityFlagBonus bonus)
+    {
+        bonuses.Add(bonus);
+    }
+
+    public void RemoveBonus(AbilityFlagBonus bonus)
+    {
+        bonuses.Remove(bonus);
+    }
+
+    public bool GetBaseValue()
+    {
+        return value;
+    }
+
+    public virtual bool GetValue()
+    {
+        bool finalValue = value;
+
+        foreach (AbilityFlagBonus bonus in bonuses)
+        {
+            if(!bonus.bonusValue)
+            {
+                return false;
+            }
+            else
+            {
+                finalValue = bonus.bonusValue;
+            }
+        }
+
+        return finalValue;
+    }
+}
+
+[System.Serializable]
+public class AbilityFlagBonus
+{
+    public AbilityFlagType type;
+    public bool bonusValue;
+
+    public AbilityFlagBonus(AbilityFlagType t, bool bonus)
+    {
+        type = t;
+        bonusValue = bonus;
+    }
+
+    public string GetTooltip()
+    {
+        string tooltip = "";
+
+        return tooltip;
+    }
+
 }
 
 [System.Serializable]

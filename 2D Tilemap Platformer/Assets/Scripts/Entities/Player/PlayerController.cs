@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch };
+public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch, Flight };
 
 public class PlayerController : Entity
 {
@@ -51,7 +51,6 @@ public class PlayerController : Entity
     public ContactFilter2D powerUpFilter;
     public PlayerCreationData playerData;
     public int kills = 0;
-
 
     protected override void Awake()
 	{
@@ -218,6 +217,9 @@ public class PlayerController : Entity
                     StartCoroutine(Ressurect());
                 }
                 break;
+            case PlayerMovementState.Flight:
+                Flight();
+                break;
         }
 
         if (_input.GetButtonDown(ButtonInput.Interact)) {
@@ -344,7 +346,11 @@ public class PlayerController : Entity
                 //attacks should handle their own animations
 
                 break;
-            //case PlayerMovementState.Knockedback:
+            case PlayerMovementState.Flight:
+                _animator.speed = 1;
+                _animator.Play(Animator.StringToHash("Flight"));
+                break;
+                //case PlayerMovementState.Knockedback:
         }
         
 
@@ -668,6 +674,66 @@ public class PlayerController : Entity
         }
     }
 
+    void Flight()
+    {
+        normalizedHorizontalSpeed = 0;
+        normalizedVerticalSpeed = 0;
+        ignoreGravity = true;
+
+        if (_controller.isGrounded)
+        {
+            movementState = PlayerMovementState.Idle;
+            return;
+        }
+
+        //_animator.Play(Animator.StringToHash("Jump"));
+
+        if (_input.GetButtonDown(ButtonInput.Jump))
+        {
+            movementState = PlayerMovementState.Jump;
+            return;
+        }
+
+        if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
+        {
+            normalizedHorizontalSpeed = 1;
+            SetDirection(EntityDirection.Right);
+
+        }
+        else if (_input.GetAxisValue(AxisInput.LeftStickX) < -0.5f)
+        {
+            normalizedHorizontalSpeed = -1;
+            SetDirection(EntityDirection.Left);
+
+        }
+
+        if (_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f)
+        {
+            normalizedVerticalSpeed = 1;
+
+        }
+        else if (_input.GetAxisValue(AxisInput.LeftStickY) < -0.5f)
+        {
+            normalizedVerticalSpeed = -1;
+
+        }
+
+        //AttemptLedgeGrab();
+
+        /*
+        if ((_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f || _input.GetAxisValue(AxisInput.LeftStickY) < -0.5f) && _controller.collisionState.onLadder)
+        {
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
+        }
+        */
+
+        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
+
+    }
+
     void Jumping()
     {
         normalizedHorizontalSpeed = 0;
@@ -679,6 +745,12 @@ public class PlayerController : Entity
         }
 
         //_animator.Play(Animator.StringToHash("Jump"));
+        if(stats.abilityFlags[AbilityFlagType.Flight].GetValue() && _input.GetButtonDown(ButtonInput.Jump))
+        {
+            movementState = PlayerMovementState.Flight;
+
+        }
+
 
         if (!_input.GetButton(ButtonInput.Jump) && _velocity.y > 0.0f)
         {
@@ -943,9 +1015,9 @@ public class PlayerController : Entity
     public void PickupItem(ItemObject item)
     {
         //Move this to an inventory thing i think
-        if(item.item is Weapon weapon)
+        if(item.item is Equipment equipment)
         {
-            _equipmentManager.EquipItem(weapon);
+            _equipmentManager.EquipItem(equipment);
         }
 
         item.Collect();

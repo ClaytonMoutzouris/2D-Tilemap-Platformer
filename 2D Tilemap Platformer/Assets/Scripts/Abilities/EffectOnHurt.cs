@@ -10,18 +10,19 @@ public class EffectOnHurt : Ability
 
     public void OnHurt(Entity attacker)
     {
+        Debug.Log("On Hurt");
         if (attackerEffect != null)
         {
             Effect effect = Instantiate(this.attackerEffect);
 
-            effect.Apply(attacker);
+            effect.Trigger(attacker);
         }
 
         if (ownerEffect != null)
         {
             Effect effect = Instantiate(this.ownerEffect);
 
-            effect.Apply(owner);
+            effect.Trigger(owner);
         }
 
     }

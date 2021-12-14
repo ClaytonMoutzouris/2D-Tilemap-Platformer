@@ -109,9 +109,13 @@ public class Health : MonoBehaviour
             {
                 if (ability is EffectOnHurt onHurt)
                 {
+                    Debug.Log("Effect on Hurt");
                     onHurt.OnHurt(attacker);
                 }
             }
+        } else
+        {
+            Debug.Log("Attacker is null");
         }
 
 

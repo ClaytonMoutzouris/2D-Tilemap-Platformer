@@ -14,14 +14,14 @@ public class EffectOnHit : Ability
         {
             Effect effect = Instantiate(hitEffect);
 
-            effect.Apply(hit, owner);
+            effect.Trigger(hit, owner);
         }
 
         if (gainEffect != null)
         {
             Effect gainEffect = Instantiate(this.gainEffect);
 
-            gainEffect.Apply(owner);
+            gainEffect.Trigger(owner);
         }
 
     }

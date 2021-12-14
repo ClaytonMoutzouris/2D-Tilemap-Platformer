@@ -13,7 +13,7 @@ public class PlayerVersusUI : MonoBehaviour
     public Text killCounter;
     public PlayerMenu playerMenu;
 
-    public bool showItemTooltips = false;
+    public bool showItemTooltips = true;
 
     // Start is called before the first frame update
     void Start()

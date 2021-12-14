@@ -10,7 +10,7 @@ public class EnemyEntity : Entity
     public Vector3 mOldPosition;
     public Entity target;
     public Sightbox sight;
-
+    public List<AttackObject> attackObjects;
 
     public int normalizedHorizontalSpeed = 0;
 
@@ -25,6 +25,11 @@ public class EnemyEntity : Entity
         //_controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
+
+        foreach(AttackObject attack in attackObjects)
+        {
+            attack.SetOwner(this);
+        }
     }
 
     // Update is called once per frame

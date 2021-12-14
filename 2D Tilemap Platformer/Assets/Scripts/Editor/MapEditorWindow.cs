@@ -83,20 +83,16 @@ public class MapEditorWindow : EditorWindow
     public void GenerateMap()
     {
         NewMap();
-        MapLayout layout = MapLayoutDatabase.GetRandomMapLayout();
-        mapsizeX = layout.mapSizeX;
-        mapsizeY = layout.mapSizeY;
 
-        Debug.Log("size X: " + mapsizeX + ", size y: " + mapsizeY);
-        for (int x = 0; x < mapsizeX; x++)
-        {
-            for (int y = 0; y < mapsizeY; y++)
-            {
-                mapData.SetRoom(RoomDatabase.GetRoom(layout.layout[x,y], layout.generalLayout[x,y]), x, y);
-            }
-        }
+        mapData = MapGenerator.GenerateWorldMap();
 
-        gameGrid.SetMap(mapData);
+        mapsizeX = mapData.numRoomsX;
+        mapsizeY = mapData.numRoomsY;
+
+        gameGrid.ResizeMaps();
+
+
+        gameGrid.SetMap(mapData, true);
     }
 
 

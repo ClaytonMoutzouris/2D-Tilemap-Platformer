@@ -42,6 +42,7 @@ TextureImporter:
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
+  ignoreMasterTextureLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -51,11 +52,11 @@ TextureImporter:
   textureSettings:
     serializedVersion: 2
     filterMode: 0
-    aniso: -1
-    mipBias: -100
+    aniso: 1
+    mipBias: 0
     wrapU: 1
     wrapV: 1
-    wrapW: -1
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -73,6 +74,8 @@ TextureImporter:
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
   maxTextureSizeSet: 0
   compressionQualitySet: 0
   textureFormatSet: 0
@@ -146,7 +149,7 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: f2dae4e10a9f793b0800000000000000
-      internalID: -5505657553338585809
+      internalID: 8691119499509335032
       vertices: []
       indices: 
       edges: []
@@ -167,7 +170,7 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: f32ec60349dbb3390800000000000000
-      internalID: -7837462282342964673
+      internalID: 6899073325435046753
       vertices: []
       indices: 
       edges: []
@@ -188,7 +191,7 @@ TextureImporter:
       tessellationDetail: 0
       bones: []
       spriteID: 3c103cf7266383810800000000000000
-      internalID: 1745204652284248515
+      internalID: -1175633275510703006
       vertices: []
       indices: 
       edges: []
@@ -203,6 +206,10 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
+    nameFileIdTable:
+      Slime_Move _Haydon_1: 6899073325435046753
+      Slime_Move _Haydon_0: 8691119499509335032
+      Slime_Move _Haydon_2: -1175633275510703006
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

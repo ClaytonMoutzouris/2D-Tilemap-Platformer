@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Lever : MonoBehaviour, IHurtable
+public class Lever : MonoBehaviour, IHurtable, IInteractable
 {
     public bool isTriggered = false;
     public SpriteRenderer spriteRenderer;
     public Animator animator;
     public Hurtbox hurtbox;
+    public ITriggerable triggerable;
 
     public void Awake()
     {
@@ -16,6 +17,11 @@ public class Lever : MonoBehaviour, IHurtable
     }
 
     public void GetHurt(AttackObject attackObject)
+    {
+        Trigger();
+    }
+
+    public void Interact(Entity entity)
     {
         Trigger();
     }
@@ -33,5 +39,11 @@ public class Lever : MonoBehaviour, IHurtable
             animator.Play("Lever_Off");
 
         }
+
+        if(triggerable != null)
+        {
+            triggerable.Trigger();
+        }
+
     }
 }

@@ -49,7 +49,7 @@ public class SlimeAI : MonoBehaviour
         entity.normalizedHorizontalSpeed = 0;
         entity._animator.speed = 1;
         entity._animator.Play(Animator.StringToHash("Slime_Idle"));
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(.5f);
 
 
         // EXECUTE IDLE STATE
@@ -114,7 +114,7 @@ public class SlimeAI : MonoBehaviour
             }
 
             //If we are in range of target
-            if (Vector3.Distance(entity.target.transform.position, transform.position) < 1.5 && !entity.knockedBack)
+            if (Vector3.Distance(entity.target.transform.position, transform.position) < 2.5 && !entity.knockedBack)
             {
                 movementController.mCurrentNodeId = -1;
                 states = SLIME_STATE.SLIMEATTACK1;
@@ -141,13 +141,16 @@ public class SlimeAI : MonoBehaviour
     IEnumerator SLIMEATTACK1()
     {
         // ENTER THE ATTACK STATE
-        entity.normalizedHorizontalSpeed = entity.GetDirection();
-
+        entity.normalizedHorizontalSpeed = 0;
         //entity.normalizedHorizontalSpeed = entity.GetDirection();
-        float speedMod = attackSpeed;
+        //Set this incase the attack speed changes
         //entity._velocity.y = Mathf.Sqrt(entity.maxJumpHeight * -GambleConstants.GRAVITY);
         //entity._velocity.x = entity.GetDirection()*entity.movementSpeed*2;
-        entity.movementSpeed *= speedMod;
+        yield return new WaitForSeconds(.5f);
+        entity.normalizedHorizontalSpeed = entity.GetDirection();
+        float speedMod = attackSpeed;
+
+        entity.movementSpeed *= speedMod *3;
 
 
         // EXECUTE ATTACK STATE
@@ -168,7 +171,7 @@ public class SlimeAI : MonoBehaviour
                 yield return null;
             }
 
-            entity.movementSpeed /= speedMod;
+            entity.movementSpeed /= (speedMod*3);
             entity._animator.speed = 1;
             entity._animator.Play(Animator.StringToHash("Slime_Idle"));
             states = SLIME_STATE.IDLE;

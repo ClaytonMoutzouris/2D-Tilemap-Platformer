@@ -38,16 +38,19 @@ public class MovingPlatform : MonoBehaviour
 
     }
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         _controller = GetComponent<PhysicsBody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
+
+
     // Update is called once per frame
     void Update()
     {
+        //_controller.collisionState.
 
         switch (movementType)
         {
@@ -70,7 +73,7 @@ public class MovingPlatform : MonoBehaviour
 
     }
 
-    public void MoveHorizontal()
+    public virtual void MoveHorizontal()
     {
         if (_controller.collisionState.groundRight)
         {
@@ -84,7 +87,7 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    public void MoveVertical()
+    public virtual void MoveVertical()
     {
         if (_controller.collisionState.groundBelow)
         {

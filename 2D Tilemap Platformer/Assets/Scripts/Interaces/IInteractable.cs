@@ -7,3 +7,5 @@ public interface IInteractable
     void Interact(Entity entity);
 
 }
+
+

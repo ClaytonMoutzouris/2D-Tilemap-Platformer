@@ -40,6 +40,11 @@ public class Health : MonoBehaviour
 
     }
 
+    public bool AtFullHealth()
+    {
+        return currentHealth == maxHealth;
+    }
+
     public void UpdateHealth()
     {
         if(entity == null)
@@ -78,7 +83,7 @@ public class Health : MonoBehaviour
     }
 
     //Returns true if it kills the enemy
-    public virtual void LoseHealth(int Damage, Entity attacker = null, bool crit = false)
+    public void LoseHealth(int Damage)
     {
         if (Damage <= 0)
         {
@@ -91,52 +96,66 @@ public class Health : MonoBehaviour
             textColor = Color.red;
         } 
 
-        if(crit)
-        {
-            textColor = Color.yellow;
-            entity.ShowFloatingText(Damage.ToString(), textColor, 1, 1, 2);
-        }
-        else
-        {
-            entity.ShowFloatingText(Damage.ToString(), textColor);
-        }
+
+        entity.ShowFloatingText(Damage.ToString(), textColor);
+        
 
         SetHealth(currentHealth - Damage);
 
-        if (attacker != null)
+        if (!entity.isDead && currentHealth <= 0)
         {
-            foreach (Ability ability in entity.abilities)
-            {
-                if (ability is EffectOnHurt onHurt)
-                {
-                    Debug.Log("Effect on Hurt");
-                    onHurt.OnHurt(attacker);
-                }
-            }
-        } else
-        {
-            Debug.Log("Attacker is null");
+
+            entity.Die();
         }
 
+    }
+
+    //Returns true if it kills the enemy
+    public void LoseHealth(AttackData attackData)
+    {
+
+        int fullDamage = attackData.GetDamage(entity);
+
+
+        if (fullDamage <= 0)
+        {
+            return;
+        }
+        Color textColor = Color.white;
+
+        if (entity is PlayerController)
+        {
+            textColor = Color.red;
+        }
+
+        if (attackData.crit)
+        {
+            textColor = Color.yellow;
+            entity.ShowFloatingText(fullDamage.ToString(), textColor, 1, 1, 2);
+        }
+        else
+        {
+            entity.ShowFloatingText(fullDamage.ToString(), textColor);
+        }
+
+        SetHealth(currentHealth - fullDamage);
+
+        foreach (Ability ability in entity.abilities)
+        {
+            ability.OnHurt(attackData);
+        }
 
         if (!entity.isDead && currentHealth <= 0)
         {
-            //Move this somewhere better
-            if (attacker != null)
+            foreach (Ability ability in attackData.owner.abilities)
             {
-                foreach (Ability ability in attacker.abilities)
-                {
-                    if (ability is EffectOnKill onKill)
-                    {
-                        onKill.OnKill(entity);
-                    }
-                }
-
-                attacker.OnKill(entity);
+                ability.OnKill(attackData, entity);
             }
 
-            entity.Die();
+            attackData.owner.OnKill(entity);
 
+
+            entity.Die();
         }
 
     }

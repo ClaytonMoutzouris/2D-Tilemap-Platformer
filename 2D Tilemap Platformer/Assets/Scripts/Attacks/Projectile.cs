@@ -76,6 +76,7 @@ public class Projectile : MonoBehaviour
             _velocity.y = direction.normalized.y * projectileData.projSpeed;
             _velocity.x = direction.normalized.x * projectileData.projSpeed;
         }
+        _controller.velocity = _velocity;
 
     }
 
@@ -122,9 +123,9 @@ public class Projectile : MonoBehaviour
 
     protected void Update()
     {
+        _velocity = _controller.velocity;
 
         //_velocity.x = direction.normalized.x * projectileData.projSpeed;
-
 
         if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
         {
@@ -163,6 +164,7 @@ public class Projectile : MonoBehaviour
         _controller.move(_velocity * Time.deltaTime);
 
         _velocity = _controller.velocity;
+
 
         if (_controller.collisionState.hasCollision())
         {

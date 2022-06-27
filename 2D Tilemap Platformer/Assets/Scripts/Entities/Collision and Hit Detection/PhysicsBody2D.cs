@@ -45,6 +45,7 @@ public class PhysicsBody2D : MonoBehaviour
         public bool onLadder;
         public Vector3 ladderOffset = Vector3.zero;
         public bool spiked = false;
+        public bool hasPassenger = false;
 
 		public bool hasCollision()
 		{
@@ -86,6 +87,7 @@ public class PhysicsBody2D : MonoBehaviour
 	/// when true, one way platforms will be ignored when moving vertically for a single frame
 	/// </summary>
 	public bool ignoreOneWayPlatformsThisFrame;
+    public bool ignoreGravity;
 
 	[SerializeField]
 	[Range( 0.001f, 0.3f )]
@@ -267,7 +269,10 @@ public class PhysicsBody2D : MonoBehaviour
 
 
 	#region Public
-
+    public void move()
+    {
+        move(velocity * Time.deltaTime);
+    }
 	/// <summary>
 	/// attempts to move the character to position + deltaMovement. Any colliders in the way will cause the movement to
 	/// stop when run into.
@@ -525,7 +530,9 @@ public class PhysicsBody2D : MonoBehaviour
         for (var i = 0; i < totalHorizontalRays; i++)
         {
             var ray = new Vector2(initialRayOrigin.x, initialRayOrigin.y + i * _verticalDistanceBetweenRays);
-            DrawRay(ray, rayDirection * rayDistance, Color.red);
+
+            //This will display the rays being drawn
+            //DrawRay(ray, rayDirection * rayDistance, Color.red);
 
             // if we are grounded we will include oneWayPlatforms only on the first ray (the bottom one). this will allow us to
             // walk up sloped oneWayPlatforms

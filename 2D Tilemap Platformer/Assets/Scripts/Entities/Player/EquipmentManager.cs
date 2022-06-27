@@ -7,8 +7,10 @@ public class EquipmentManager : MonoBehaviour
     public ItemObject itemPrefab;
 
     public Weapon equippedWeapon;
+    public Weapon storedWeapon;
 
     public Dictionary<EquipmentSlot, Armor> armorEquipment;
+    public List<ConsumableItem> consumables;
 
     public PlayerController player;
     // Start is called before the first frame update
@@ -21,6 +23,30 @@ public class EquipmentManager : MonoBehaviour
         {
             armorEquipment.Add(slot, null);
         }
+
+        consumables = new List<ConsumableItem>();
+    }
+
+    public void AddConsumable(ConsumableItem consumable)
+    {
+        consumables.Add(consumable);
+    }
+
+    public void UseNextConsumable()
+    {
+        if(consumables.Count <= 0)
+        {
+            return;
+        }
+
+        ConsumableItem temp = consumables[0];
+        bool used = temp.Use(player);
+
+        if(used)
+        {
+            consumables.RemoveAt(0);
+        }
+
     }
 
     public bool IsSlotEmpty(EquipmentSlot slot)
@@ -81,6 +107,20 @@ public class EquipmentManager : MonoBehaviour
 
     }
 
+    public void EquipWeapon(Weapon wep)
+    {
+        if (equippedWeapon != null)
+        {
+            equippedWeapon.OnUnequipped(player);
+            DropItem(equippedWeapon);
+
+        }
+
+        equippedWeapon = wep;
+
+        wep.OnEquipped(player);
+    }
+
     public void DropItem(ItemData item)
     {
 
@@ -99,7 +139,26 @@ public class EquipmentManager : MonoBehaviour
         dropped._velocity = dir * 4;
         dropped.StartCoroutine(dropped.Despawn(5));
 
-        Debug.Log("Dropped item " + item.name);
+
+    }
+
+    public void SwapWeaponSlots()
+    {
+        Weapon toEquip = storedWeapon;
+        if(equippedWeapon != null)
+        {
+            equippedWeapon.OnUnequipped(player);
+
+            storedWeapon = equippedWeapon;
+            equippedWeapon = null;
+        }
+
+        if(toEquip != null)
+        {
+            toEquip.OnEquipped(player);
+            equippedWeapon = toEquip;
+
+        }
 
     }
 }

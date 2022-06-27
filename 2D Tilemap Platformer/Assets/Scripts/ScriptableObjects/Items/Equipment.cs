@@ -28,7 +28,7 @@ public class Equipment : ItemData
         //Add the abilities
         foreach (Ability ability in generalAbilities)
         {
-            ability.GainAbility(owner);
+            ability.OnGainedAbility(owner);
         }
 
         //Add the stat bonuses
@@ -47,7 +47,7 @@ public class Equipment : ItemData
 
         foreach (Ability ability in generalAbilities)
         {
-            ability.LoseAbility(entity);
+            ability.OnAbilityLost();
         }
 
         //Add the stat bonuses

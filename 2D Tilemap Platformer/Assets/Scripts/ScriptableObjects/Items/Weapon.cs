@@ -99,20 +99,14 @@ public class Weapon : Equipment
             SetBaseStats();
         }
 
+        
         foreach (Ability ability in owner.abilities)
         {
-            weaponAttributes.AddBonuses(ability.weaponBonuses);
-
-            //TODO: This needs to be changed, but is more about how abilities work than how this works
-            if (ability is WeaponAbility weaponAbility)
-            {
-
-                weaponAbility.OnWeaponEquipped();
-
-            }
+            ability.OnEquippedWeapon();
         }
+        
 
-        foreach(Talent talent in owner.learnedTalents)
+        foreach (Talent talent in owner.learnedTalents)
         {
             weaponAttributes.AddBonuses(talent.weaponBonuses);
         }
@@ -127,17 +121,13 @@ public class Weapon : Equipment
 
     public override void OnUnequipped(Entity entity)
     {
+        
         foreach (Ability ability in entity.abilities)
         {
-            weaponAttributes.RemoveBonuses(ability.weaponBonuses);
+            ability.OnUnequippedWeapon();
 
-            //TODO: This needs to be changed
-            if (ability is WeaponAbility weaponAbility)
-            {
-                weaponAbility.OnWeaponUnequipped();
-
-            }
         }
+        
 
         foreach (Talent talent in owner.learnedTalents)
         {

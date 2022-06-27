@@ -55,3 +55,13 @@ public class AttackData
     }
     
 }
+
+
+public class AttackHitData
+{
+    public Entity attackOwner;
+    public Entity hitEntity;
+
+    public int damageDealt;
+    public bool crit;
+}

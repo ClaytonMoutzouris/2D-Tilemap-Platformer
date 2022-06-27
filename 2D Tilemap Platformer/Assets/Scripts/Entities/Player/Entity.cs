@@ -17,16 +17,20 @@ public class Entity : MonoBehaviour, IHurtable
     public float movementSpeed = 0.0f;
 
     //Entity Flags
-    public bool ignoreGravity = false;
-    public bool knockedBack = false;
 
     public Health health;
     public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
     public List<ParticleSystem> particleEffects = new List<ParticleSystem>();
+
+    #region MoveToController
     public Vector3 _velocity;
+    public bool ignoreGravity = false;
+    public bool knockedBack = false;
+    #endregion
+
     public List<Ability> abilities = new List<Ability>();
-    public List<Effect> statusEffects = new List<Effect>();
+    public List<StatusEffect> statusEffects = new List<StatusEffect>();
 
     public Stats stats;
     public bool isDead = false;
@@ -130,19 +134,26 @@ public class Entity : MonoBehaviour, IHurtable
             return;
         }
 
-        int fullDamage = attackData.GetDamage(this);
+        /*
+        AttackHitData hitData = new AttackHitData()
+        {
+            attackOwner = attackData.owner,
+            hitEntity = this
+        };
+        */
 
-        health.LoseHealth(fullDamage, attackData.owner, attackData.crit);
 
-        StartCoroutine(StatusEffects.Knockback(this, attackObject));
-        
-
+        //At this point, we know we've hit but havent dealt the damage yet
         foreach (Ability ability in attackObject.owner.abilities)
         {
-            if (ability is EffectOnHit onHit)
-            {
-                onHit.OnHit(this);
-            }
+            ability.OnHit(attackData, this);
         }
+
+        health.LoseHealth(attackData);
+
+        StartCoroutine(StatusEffects.Knockback(this, (transform.position - attackObject.transform.position).normalized, attackData.knockbackPower));
+
+        
+
     }
 }

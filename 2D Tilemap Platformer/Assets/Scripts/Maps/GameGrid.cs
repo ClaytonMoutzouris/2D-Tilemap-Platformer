@@ -50,6 +50,90 @@ public class GameGrid : MonoBehaviour
         }
     }
 
+    public WorldTile GetGroundTile(int x, int y)
+    {
+        Vector3Int lPos = new Vector3Int(x, y, 0);
+        tilemapLayers[0].HasTile(lPos);
+
+        TileBase tilebase = tilemapLayers[0].GetTile(lPos);
+        WorldTile _tile;
+
+
+        _tile = new WorldTile()
+        {
+            LocalPlace = lPos,
+            TileID = tilebase.name,
+            LayerID = (TileMapLayersEnum)0,
+            SpawnObject = null,
+
+        };
+
+        return _tile;
+    }
+
+    public Vector2Int GetGroundBelow(int x, int y)
+    {
+        Vector2Int possibleTiles = Vector2Int.zero;
+
+        for (int i = y-1; i >= 0; i--)
+        {
+            if(IsGround(x, i))
+            {
+                return new Vector2Int(x, i+1);
+            }
+
+        }
+
+        return possibleTiles;
+    }
+
+    public Vector2Int FindGroundWithinRange(int x , int y, int range = 5)
+    {
+        List<Vector2Int> possibleTiles = new List<Vector2Int>();
+        Debug.Log("Looking in range of " + x + ", " + y);
+        for(int i = x-range; i < x+range; i++)
+        {
+            if(i < 0 || i > mapSizeX)
+            {
+                continue;
+            }
+
+            for(int j = y-range; j < y+range; j++)
+            {
+                if (j < 0 || j > mapSizeY)
+                {
+                    continue;
+                }
+                Debug.Log("Tile in range " + i + ", " + j);
+
+                if (!IsGround(i,j) && IsGround(i,j-1))
+                {
+                    Debug.Log("Possible tile");
+                    possibleTiles.Add(new Vector2Int(i, j));
+                }
+
+            }
+
+        }
+
+        if (possibleTiles.Count < 1)
+        {
+            return Vector2Int.zero;
+        }
+
+        int r = Random.Range(0, possibleTiles.Count);
+
+        /*
+        var path = GameGrid.instance.mPathFinder.FindPath(
+            new Vector2Int(x,y),
+            destination,
+            Mathf.CeilToInt(mHeight),
+            Mathf.CeilToInt(mWidth),
+            (short)entity.maxJumpHeight);
+            */
+        return possibleTiles[r];
+    }
+
     public List<WorldTile> GetWorldTiles(int layerID)
     {
         List<WorldTile> tiles = new List<WorldTile>();
@@ -201,6 +285,12 @@ public class GameGrid : MonoBehaviour
             }
         }
         Resources.UnloadUnusedAssets();
+    }
+
+    public void SpawnObject(GameObject obj, Vector2Int location)
+    {
+        //GameObject temp = Instantiate(Resources.Load("Prefabs/Entities/" + tile.SpawnObject) as GameObject, new Vector3(tile.LocalPlace.x + 0.5f, tile.LocalPlace.y + 0.5f, 0), Quaternion.identity);
+
     }
 
     public void ClearMap()

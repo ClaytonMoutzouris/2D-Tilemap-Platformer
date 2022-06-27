@@ -162,8 +162,9 @@ public class PlayerController : Entity
     // the Update loop contains a very simple example of moving the character around and controlling the animation
     void Update()
 	{
+        _velocity = _controller.velocity;
 
-        if(_input.GetButtonDown(ButtonInput.Pause))
+        if (_input.GetButtonDown(ButtonInput.Pause))
         {
             if(PauseMenu.instance.gamePaused)
             {
@@ -263,6 +264,8 @@ public class PlayerController : Entity
             StartCoroutine(Rolling());
         }
 
+
+        //Section for outer
         CheckForPowerups();
 
 
@@ -289,6 +292,16 @@ public class PlayerController : Entity
             {
                 playerVersusUI.tooltip.HideTooltip();
             }
+        }
+
+        if (_input.GetButtonDown(ButtonInput.SwapWeapon))
+        {
+            _equipmentManager.SwapWeaponSlots();
+        }
+
+        if (_input.GetButtonDown(ButtonInput.Interact))
+        {
+            _equipmentManager.UseNextConsumable();
         }
 
 
@@ -621,10 +634,7 @@ public class PlayerController : Entity
 
         foreach (Ability ability in abilities)
         {
-            if(ability is EffectOnWalk onWalk)
-            {
-                onWalk.OnWalk();
-            }
+            ability.OnWalk();
         }
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -844,10 +854,7 @@ public class PlayerController : Entity
         movementState = PlayerMovementState.Jump;
         foreach(Ability ability in abilities)
         {
-            if(ability is EffectOnJump jumpAbility)
-            {
-                jumpAbility.OnJump();
-            }
+            ability.OnJump();
         }
     }
 
@@ -1020,6 +1027,12 @@ public class PlayerController : Entity
             _equipmentManager.EquipItem(equipment);
         }
 
+        if(item.item is ConsumableItem consumable)
+        {
+            _equipmentManager.AddConsumable(consumable);
+
+        }
+
         item.Collect();
 
     }
@@ -1067,6 +1080,11 @@ public class PlayerController : Entity
             }
 
         }
+
+    }
+
+    public void CheckForContacts()
+    {
 
     }
 

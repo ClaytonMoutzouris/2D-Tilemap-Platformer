@@ -199,6 +199,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Minimap] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];
                 buttonInput[(int)ButtonInput.Gadget1] = mGamepadInput.buttonInputs[(int)GamepadButtons.LeftBumper];
                 buttonInput[(int)ButtonInput.Fire] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightTrigger];
+                buttonInput[(int)ButtonInput.SwapWeapon] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadLeft]
+                    || mGamepadInput.buttonInputs[(int)GamepadButtons.DpadRight];
                 buttonInput[(int)ButtonInput.BeamUp] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadDown];
                 buttonInput[(int)ButtonInput.Gadget2] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
@@ -242,6 +244,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Gadget1] = false;
                 buttonInput[(int)ButtonInput.Fire] = false;
                 buttonInput[(int)ButtonInput.BeamUp] = false;
+                buttonInput[(int)ButtonInput.SwapWeapon] = false;
 
                 buttonInput[(int)ButtonInput.Gadget2] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
@@ -285,6 +288,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.SkipLevel] = false;
                 buttonInput[(int)ButtonInput.Gadget1] = false;
                 buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.SwapWeapon] = false;
+
                 buttonInput[(int)ButtonInput.Gadget2] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
@@ -326,6 +331,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.SkipLevel] = false;
                 buttonInput[(int)ButtonInput.Gadget1] = false;
                 buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.SwapWeapon] = false;
+
                 buttonInput[(int)ButtonInput.Gadget2] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
@@ -368,6 +375,8 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.SkipLevel] = false;
                 buttonInput[(int)ButtonInput.Gadget1] = false;
                 buttonInput[(int)ButtonInput.Fire] = false;
+                buttonInput[(int)ButtonInput.SwapWeapon] = false;
+
                 buttonInput[(int)ButtonInput.Gadget2] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;

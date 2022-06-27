@@ -33,6 +33,7 @@ public class ArenaBattleManager : MonoBehaviour
 
     public IEnumerator GameSetup()
     {
+        SoundManager.instance.PlayLevelMusic(1);
         GameManager.instance.ClearPlayers();
 
         gameTimer = gameData.timeLimit * 60;
@@ -79,7 +80,8 @@ public class ArenaBattleManager : MonoBehaviour
             pointsList.RemoveAt(r);
         }
 
-        StartCoroutine(SpawnChest(0));
+        if(chestSpawnPoints.Count > 0)
+            StartCoroutine(SpawnChest(0));
 
 
     }

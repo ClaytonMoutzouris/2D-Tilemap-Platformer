@@ -52,7 +52,7 @@ public class Talent : ScriptableObject
 
         foreach (Ability ability in abilities)
         {
-            ability.GainAbility(owner);
+            ability.OnGainedAbility(owner);
         }
 
         owner.health.UpdateHealth();
@@ -64,11 +64,6 @@ public class Talent : ScriptableObject
         }
 
         owner.learnedTalents.Add(this);
-
-    }
-
-    public void OnEquipWeapon()
-    {
 
     }
 
@@ -86,7 +81,7 @@ public class Talent : ScriptableObject
 
         foreach (Ability ability in abilities)
         {
-            ability.LoseAbility(owner);
+            ability.OnAbilityLost();
         }
 
         owner.health.UpdateHealth();

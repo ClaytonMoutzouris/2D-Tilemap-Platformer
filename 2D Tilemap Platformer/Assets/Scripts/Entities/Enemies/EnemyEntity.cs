@@ -35,6 +35,7 @@ public class EnemyEntity : Entity
     // Update is called once per frame
     void Update()
     {
+        _velocity = _controller.velocity;
 
         if (target!= null && target.health.IsDead())
         {

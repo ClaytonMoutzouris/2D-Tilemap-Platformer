@@ -11,8 +11,11 @@ public class PowerUpObject : MonoBehaviour
     PowerUpSpawnNode spawner;
 
     public PhysicsBody2D _controller;
+
+    #region MoveToController
     public bool ignoreGravity = false;
     Vector3 _velocity = Vector3.zero;
+    #endregion
 
     void Awake()
     {
@@ -30,10 +33,10 @@ public class PowerUpObject : MonoBehaviour
 
     public void CollectPowerUp(Entity entity)
     {
-        if (entity != null)
+        if (entity != null && powerUp.powerUpEffect != null)
         {
-            StatusEffect effect = Instantiate(powerUp.statusEffect);
-            effect.Trigger(entity);
+            StatusEffect effect = Instantiate(powerUp.powerUpEffect);
+            effect.ApplyEffect(entity);
 
             if (spawner != null)
             {
@@ -51,12 +54,15 @@ public class PowerUpObject : MonoBehaviour
 
     public void Update()
     {
+        _velocity = _controller.velocity;
 
 
         if (!ignoreGravity)
             _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
         _controller.move(_velocity * Time.deltaTime);
+        _velocity = _controller.velocity;
+
     }
 
     public void SetEffect(PowerUp powerUp)

@@ -9,5 +9,5 @@ public class PowerUp : ScriptableObject
     public Sprite sprite;
     public Color color;
 
-    public StatusEffect statusEffect;
+    public StatusEffect powerUpEffect;
 }

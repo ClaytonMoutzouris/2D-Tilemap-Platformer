@@ -10,9 +10,11 @@ public class ItemObject : MonoBehaviour
     public ItemData item;
     public PhysicsBody2D _controller;
     ItemSpawnNode spawner;
-    public Vector3 _velocity = Vector3.zero;
 
+    #region MoveToController
+    public Vector3 _velocity = Vector3.zero;
     public bool ignoreGravity = false;
+    #endregion
     //public GameObject itemTooltip;
 
     // Start is called before the first frame update
@@ -31,15 +33,21 @@ public class ItemObject : MonoBehaviour
         // Update is called once per frame
     void Update()
     {
+        _velocity = _controller.velocity;
+
 
         if (!ignoreGravity)
             _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
         _controller.move(_velocity * Time.deltaTime);
 
-        if(_controller.isGrounded)
+        _velocity = _controller.velocity;
+
+        if (_controller.isGrounded)
         {
             _velocity.x = 0;
+            _velocity.y = 0;
+
         }
     }
 

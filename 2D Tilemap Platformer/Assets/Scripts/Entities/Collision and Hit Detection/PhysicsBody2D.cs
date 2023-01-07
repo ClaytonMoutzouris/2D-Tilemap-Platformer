@@ -269,18 +269,21 @@ public class PhysicsBody2D : MonoBehaviour
 
 
 	#region Public
-    public void move()
-    {
-        move(velocity * Time.deltaTime);
-    }
+
 	/// <summary>
 	/// attempts to move the character to position + deltaMovement. Any colliders in the way will cause the movement to
 	/// stop when run into.
 	/// </summary>
 	/// <param name="deltaMovement">Delta movement.</param>
-	public void move(Vector3 deltaMovement)
+	public void move()
 	{
+        //Apply Gravity
+        if (!ignoreGravity)
+        {
+            velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
+        }
 
+        Vector3 deltaMovement = (velocity * Time.deltaTime);
         // save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
 
         collisionState.wasGroundedLastFrame = collisionState.below;
@@ -457,6 +460,9 @@ public class PhysicsBody2D : MonoBehaviour
     /// <summary>
     /// moves directly down until grounded
     /// </summary>
+    /// 
+    /// 
+    /*
     public void warpToGrounded()
 	{
 		do
@@ -464,7 +470,7 @@ public class PhysicsBody2D : MonoBehaviour
 			move( new Vector3( 0, -1f, 0 ) );
 		} while( !isGrounded );
 	}
-
+    */
 
 	/// <summary>
 	/// this should be called anytime you have to modify the BoxCollider2D at runtime. It will recalculate the distance between the rays used for collision detection.

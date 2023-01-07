@@ -30,7 +30,7 @@ public class DashAttack : Attack
         //This allows for the animator speed to be adjusted by the "attack speed"
         while (entity._animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
         {
-            entity._velocity.x = entity.GetDirection() * dashSpeed;
+            entity._controller.velocity.x = entity.GetDirection() * dashSpeed;
             yield return null;
         }
 

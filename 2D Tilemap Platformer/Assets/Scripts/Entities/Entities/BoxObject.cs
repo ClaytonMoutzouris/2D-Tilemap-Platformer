@@ -8,9 +8,7 @@ public class BoxObject : MonoBehaviour
     public Animator animator;
 
     public PhysicsBody2D _controller;
-    Vector3 _velocity = Vector3.zero;
 
-    public bool ignoreGravity = false;
     //public GameObject itemTooltip;
 
     // Start is called before the first frame update
@@ -28,14 +26,9 @@ public class BoxObject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        _velocity = _controller.velocity;
 
-        if (!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
+        _controller.move();
 
-        _controller.move(_velocity * Time.deltaTime);
-
-        _velocity = _controller.velocity;
     }
 
 

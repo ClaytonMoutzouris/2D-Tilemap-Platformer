@@ -1,11 +1,10 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MenuOptionInteger : MenuOption
 {
-    public Text nameText;
-
-    public Text valueText;
+    public TextMeshProUGUI valueText;
     public int value = 1;
     public int tempValue = 1;
     public Button decButton;

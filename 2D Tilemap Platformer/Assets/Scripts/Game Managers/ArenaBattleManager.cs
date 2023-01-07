@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,7 @@ public class ArenaBattleManager : MonoBehaviour
 
     public int numChests = 1;
     public float gameTimer;
-    public Text gameTimeText;
+    public TextMeshProUGUI gameTimeText;
 
     // Start is called before the first frame update
     void Start()
@@ -68,12 +69,23 @@ public class ArenaBattleManager : MonoBehaviour
         List<SpawnPoint> pointsList = new List<SpawnPoint>();
         pointsList.AddRange(spawnPoints);
 
+        int count = 0;
+
         foreach (PlayerCreationData data in gameData.playerDatas)
         {
             if (data == null)
             {
                 continue;
             }
+            //This is a whack fix, figure out why double spawning is happening (maybe caused by loading)
+            count++;
+
+            if (count-1 != data.playerIndex)
+            {
+                continue;
+            }
+
+            Debug.LogError("Spawning player " + data.playerIndex);
             data.lives = gameData.lives;
             int r = Random.Range(0, pointsList.Count);
             GameManager.instance.SpawnPlayer(data.playerIndex, pointsList[r], data);

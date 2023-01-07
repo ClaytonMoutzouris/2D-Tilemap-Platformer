@@ -8,9 +8,6 @@ public class FallingBlock : MonoBehaviour, ITriggerable
     public Animator animator;
 
     public PhysicsBody2D _controller;
-    Vector3 _velocity = Vector3.zero;
-
-    public bool ignoreGravity = true;
     //public GameObject itemTooltip;
     public PressurePlate trigger;
     bool spawned = false;
@@ -45,18 +42,13 @@ public class FallingBlock : MonoBehaviour, ITriggerable
             SpawnTrigger();
         }
 
-        _velocity = _controller.velocity;
 
-        if (!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
+        _controller.move();
 
-        _controller.move(_velocity * Time.deltaTime);
-
-        _velocity = _controller.velocity;
     }
 
     public void Trigger()
     {
-        ignoreGravity = false;
+        _controller.ignoreGravity = false;
     }
 }

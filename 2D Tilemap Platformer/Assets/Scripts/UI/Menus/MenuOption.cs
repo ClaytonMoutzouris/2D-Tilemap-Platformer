@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -8,7 +9,7 @@ public class MenuOption : MonoBehaviour, ISelectHandler
     public AudioClip selectSound;
     public UIScrollMenu parent;
     public int optionIndex;
-
+    public TextMeshProUGUI text;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +32,11 @@ public class MenuOption : MonoBehaviour, ISelectHandler
     {
         this.parent = menu;
         optionIndex = index;
+    }
+
+    public void SetOptionName(string name)
+    {
+        text.text = name;
     }
 
     public virtual void OnSelect(BaseEventData eventData)

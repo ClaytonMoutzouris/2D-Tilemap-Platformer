@@ -17,6 +17,8 @@ public class SpinAttack : Attack
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;
         entity._animator.Play(attackAnimation.name);
         entity._animator.speed = attackSpeed;
+        //Quaternion startRotation = entity._attackManager.meleeWeaponObject.transform.rotation;
+
         float rotSpeed = rotationSpeed * entity.GetDirection() * -1;
         float rotReset = 0;
 
@@ -29,7 +31,17 @@ public class SpinAttack : Attack
         //This allows for the animator speed to be adjusted by the "attack speed"
         while (entity._animator.GetCurrentAnimatorStateInfo(0).normalizedTime <= 1)
         {
-            entity.transform.Rotate(new Vector3(0, 0, rotSpeed));
+            //entity.transform.Rotate(new Vector3(0, 0, rotSpeed));
+            //Debug.Log("weaponObject rotation Before: " + entity._attackManager.meleeWeaponObject.transform.rotation);
+            //wepRotation.Set(wepRotation.x, wepRotation.y, wepRotation.z, wepRotation.w);
+
+            entity._attackManager.RotationObject.transform.Rotate(Vector3.forward, rotSpeed);
+            //rotSpeed += rotSpeed;
+            //Debug.Log("weaponObject rotation: " + entity._attackManager.meleeWeaponObject.transform.rotation);
+            //user._attackManager.meleeWeaponObject.transform.Rotate(new Vector3(0, 0, rotSpeed));
+
+            //weapon.eulerAngles = new Vector3(0, 0, -180);
+
             rotReset += Mathf.Abs(rotSpeed);
             if(rotReset > 360)
             {
@@ -43,7 +55,9 @@ public class SpinAttack : Attack
         //float waitTime = attackAnimation.length * (1 / entity._animator.speed);
         //yield return new WaitForSeconds(waitTime);
         entity._animator.speed = 1;
-        entity.transform.rotation = Quaternion.Euler(Vector3.zero);
+        //entity.transform.rotation = Quaternion.Euler(Vector3.zero);
+        entity._attackManager.RotationObject.transform.rotation = Quaternion.Euler(Vector3.zero);
+
 
         if (entity.movementState != PlayerMovementState.Dead)
         {

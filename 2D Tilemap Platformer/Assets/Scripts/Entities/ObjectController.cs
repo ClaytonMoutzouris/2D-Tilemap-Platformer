@@ -67,16 +67,13 @@ public class ObjectController : Entity
 
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
+        _controller.velocity.x = Mathf.Lerp(_controller.velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
 
-        // apply gravity before moving
-        if(!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
-        _controller.move(_velocity * Time.deltaTime);
+
+        _controller.move();
 
         // grab our current _velocity to use as a base for all calculations
-        _velocity = _controller.velocity;
     }
 
 }

@@ -133,7 +133,7 @@ public class PlayerController : Entity
                 ledgeGrabOffset.x = Mathf.Abs(ledgeGrabOffset.x);
             }
             ledgeGrabPosition = _controller.collisionState.ledgeGrabPosition + ledgeGrabOffset;
-            Debug.Log(ledgeGrabPosition);
+            //Debug.Log(ledgeGrabPosition);
         }
 
     }
@@ -162,7 +162,6 @@ public class PlayerController : Entity
     // the Update loop contains a very simple example of moving the character around and controlling the animation
     void Update()
 	{
-        _velocity = _controller.velocity;
 
         if (_input.GetButtonDown(ButtonInput.Pause))
         {
@@ -183,8 +182,7 @@ public class PlayerController : Entity
         }
         normalizedVerticalSpeed = 0;
 
-        ignoreGravity = false;
-
+        _controller.ignoreGravity = false;
 
         switch (movementState)
         {
@@ -230,6 +228,41 @@ public class PlayerController : Entity
 
         }
 
+
+        //Handle Attacks
+        /*
+        if(movementState != PlayerMovementState.GrabLedge && movementState != PlayerMovementState.Roll
+            && movementState != PlayerMovementState.Dead&& !knockedBack)
+        {
+
+            if (_input.GetButtonDown(ButtonInput.Attack_Down))
+            {
+                _attackManager.ActivateAttack(ButtonInput.Attack_Down);
+            }
+
+            if (_input.GetButtonDown(ButtonInput.Attack_Up))
+            {
+                _attackManager.ActivateAttack(ButtonInput.Attack_Up);
+            }
+
+            if (_input.GetButtonDown(ButtonInput.Attack_Left))
+            {
+                _attackManager.ActivateAttack(ButtonInput.Attack_Left);
+            }
+
+            if (_input.GetButtonDown(ButtonInput.Attack_Right))
+            {
+                _attackManager.ActivateAttack(ButtonInput.Attack_Right);
+            }
+
+            if (_input.GetButtonDown(ButtonInput.Attack_Neutral)) {
+                _attackManager.ActivateAttack(ButtonInput.Attack_Neutral);
+            }
+
+
+        }
+
+
         if (_input.GetButtonDown(ButtonInput.LightAttack) && movementState != PlayerMovementState.GrabLedge
             && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
         {
@@ -239,14 +272,7 @@ public class PlayerController : Entity
 
         }
 
-        if (_input.GetButtonDown(ButtonInput.Fire) && movementState != PlayerMovementState.GrabLedge
-            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
-        {
-            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
 
-            _attackManager.ActivateAttack(ButtonInput.Fire);
-
-        }
 
         if (_input.GetButtonDown(ButtonInput.HeavyAttack) && movementState != PlayerMovementState.GrabLedge
             && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
@@ -254,6 +280,17 @@ public class PlayerController : Entity
             //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
 
             _attackManager.ActivateHeavyAttack(ButtonInput.HeavyAttack);
+
+        }
+
+        */
+
+        if (_input.GetButtonDown(ButtonInput.Fire) && movementState != PlayerMovementState.GrabLedge
+            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
+        {
+            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
+
+            //_attackManager.ActivateAttack(ButtonInput.Fire);
 
         }
 
@@ -374,22 +411,18 @@ public class PlayerController : Entity
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
         if(!knockedBack && (movementState != PlayerMovementState.Dead || (normalizedHorizontalSpeed == 0 && _controller.isGrounded)))
         {
-            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * smoothedMovementFactor);
+            _controller.velocity.x = Mathf.Lerp(_controller.velocity.x, normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * smoothedMovementFactor);
         }
 
         if (movementState == PlayerMovementState.GrabLedge)
         {
-            _velocity = Vector3.zero;
+            _controller.velocity = Vector3.zero;
         }
 
-        if (!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
+        _controller.move();
 
-        _controller.move( _velocity * Time.deltaTime );
-
-		// grab our current _velocity to use as a base for all calculations
-		_velocity = _controller.velocity;
+        // grab our current _velocity to use as a base for all calculations
 
         if(movementState != PlayerMovementState.Dead && _controller.collisionState.spiked)
         {
@@ -428,7 +461,7 @@ public class PlayerController : Entity
         climbTimeStamp = Time.time;
 
         _controller.transform.position = new Vector2(ladderClimbPosition.x, _controller.transform.position.y);
-        ignoreGravity = true;
+        _controller.ignoreGravity = true;
         
         //_velocity = Vector3.zero;
 
@@ -455,7 +488,7 @@ public class PlayerController : Entity
 
         }
 
-        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
+        _controller.velocity.y = Mathf.Lerp(_controller.velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
 
         if (_input.GetButtonDown(ButtonInput.Jump))
         {
@@ -492,7 +525,7 @@ public class PlayerController : Entity
             return;
         }
 
-        _velocity.y = 0;
+        _controller.velocity.y = 0;
 
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -535,7 +568,7 @@ public class PlayerController : Entity
         if (_input.GetLeftStickTapDown() && _controller.collisionState.onOneWayPlatform)
         {
 
-            _velocity.y -= 1f;
+            _controller.velocity.y -= 1f;
             _controller.ignoreOneWayPlatformsThisFrame = true;
 
             //movementState = PlayerMovementState.Jumping;
@@ -567,7 +600,7 @@ public class PlayerController : Entity
             return;
         }
 
-        _velocity.y = 0;
+        _controller.velocity.y = 0;
 
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -609,7 +642,7 @@ public class PlayerController : Entity
         // this lets us jump down through one way platforms
         if (_input.GetLeftStickTapDown() && _controller.collisionState.onOneWayPlatform)
         {
-            _velocity.y -= 2f;
+            _controller.velocity.y -= 2f;
             _controller.ignoreOneWayPlatformsThisFrame = true;
 
             //movementState = PlayerMovementState.Jumping;
@@ -630,7 +663,7 @@ public class PlayerController : Entity
 
 
 
-        _velocity.y = 0;
+        _controller.velocity.y = 0;
 
         foreach (Ability ability in abilities)
         {
@@ -677,7 +710,7 @@ public class PlayerController : Entity
         // this lets us jump down through one way platforms
         if (_input.GetLeftStickTapDown() && _controller.collisionState.onOneWayPlatform)
         {
-            _velocity.y -= 1f;
+            _controller.velocity.y -= 1f;
             _controller.ignoreOneWayPlatformsThisFrame = true;
             //movementState = PlayerMovementState.Jumping;
 
@@ -688,7 +721,7 @@ public class PlayerController : Entity
     {
         normalizedHorizontalSpeed = 0;
         normalizedVerticalSpeed = 0;
-        ignoreGravity = true;
+        _controller.ignoreGravity = true;
 
         if (_controller.isGrounded)
         {
@@ -740,7 +773,7 @@ public class PlayerController : Entity
         }
         */
 
-        _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
+        _controller.velocity.y = Mathf.Lerp(_controller.velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
 
     }
 
@@ -762,9 +795,9 @@ public class PlayerController : Entity
         }
 
 
-        if (!_input.GetButton(ButtonInput.Jump) && _velocity.y > 0.0f)
+        if (!_input.GetButton(ButtonInput.Jump) && _controller.velocity.y > 0.0f)
         {
-            _velocity.y = Mathf.Min(_velocity.y, Mathf.Sqrt(stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue()*-GambleConstants.GRAVITY));
+            _controller.velocity.y = Mathf.Min(_controller.velocity.y, Mathf.Sqrt(stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue()*-GambleConstants.GRAVITY));
         }
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -803,7 +836,7 @@ public class PlayerController : Entity
 
     void GrabLedge()
     {
-        _velocity = Vector3.zero;
+        _controller.velocity = Vector3.zero;
         _controller.transform.position = ledgeGrabPosition;
         /*
         if (_input.(KeyCode.RightArrow) && !_controller.collisionState.right)
@@ -834,7 +867,7 @@ public class PlayerController : Entity
 
         if (_input.GetLeftStickTapDown())
         {
-            _velocity.y -= 1f;
+            _controller.velocity.y -= 1f;
             movementState = PlayerMovementState.Jump;
 
         }
@@ -850,7 +883,7 @@ public class PlayerController : Entity
 
 
 
-        _velocity.y = Mathf.Sqrt(2* stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
+        _controller.velocity.y = Mathf.Sqrt(2* stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
         movementState = PlayerMovementState.Jump;
         foreach(Ability ability in abilities)
         {

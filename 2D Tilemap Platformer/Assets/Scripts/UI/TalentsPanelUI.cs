@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +23,7 @@ public class TalentsPanelUI : MonoBehaviour
     public TalentTreeMenuOption branchPrefab;
 
     public int talentPoints = 0;
-    public Text talentPointsDisplay;
+    public TextMeshProUGUI talentPointsDisplay;
 
     public void OnEnable()
     {

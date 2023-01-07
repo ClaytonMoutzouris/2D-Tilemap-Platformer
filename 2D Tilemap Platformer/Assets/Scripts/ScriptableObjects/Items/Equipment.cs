@@ -131,7 +131,7 @@ public class Equipment : ItemData
 
         foreach (Ability ability in generalAbilities)
         {
-            tooltip += "\n<color=cyan>" + ability.GetTooltip() + "</color>";
+            tooltip += "\n<color=#00FFFF>" + ability.GetTooltip() + "</color>";
         }
 
         foreach (StatBonus bonus in bonusStats)

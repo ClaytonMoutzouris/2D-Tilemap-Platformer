@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum DamageType { Physical, Magical }
-
+public enum AttackInput { Up, Down, Forward, Backward, Neutral, Shoot }
 [CreateAssetMenu(fileName = "Weapon", menuName = "ScriptableObjects/Items/Equipment/Weapon")]
 public class Weapon : Equipment
 {
@@ -14,6 +14,13 @@ public class Weapon : Equipment
     [Header("Attacks")]
     public List<Attack> attacks;
     public Attack heavyAttack;
+
+    public Attack attackUp;
+    public Attack attackDown;
+    public Attack attackForward;
+    public Attack attackBack;
+    public Attack attackNeutral;
+
     public ProjectileData projectile;
 
 
@@ -114,7 +121,6 @@ public class Weapon : Equipment
         base.OnEquipped(entity);
 
 
-
         owner._attackManager.SetWeaponObject(this);
 
     }
@@ -160,6 +166,30 @@ public class Weapon : Equipment
 
         
         return attack;
+    }
+
+    public Attack GetAttack(AttackInput attackDir)
+    {
+
+
+        switch(attackDir)
+        {
+            case AttackInput.Down:
+                return attackDown;
+            case AttackInput.Up:
+                return attackUp;
+            case AttackInput.Forward:
+                return attackForward;
+            case AttackInput.Backward:
+                return attackBack;
+            case AttackInput.Neutral:
+                return attackNeutral;
+            case AttackInput.Shoot:
+                return attacks[0];
+        }
+
+        return attacks[0];
+
     }
 
     public Attack GetHeavyAttack()

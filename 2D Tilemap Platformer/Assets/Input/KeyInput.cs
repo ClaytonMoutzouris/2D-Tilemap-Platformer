@@ -36,6 +36,11 @@ public enum ButtonInput
     Menu_Back,
     FireMode,
     Roll,
+    Attack_Left,
+    Attack_Right,
+    Attack_Up,
+    Attack_Down,
+    Attack_Neutral,
     Count
 }
 

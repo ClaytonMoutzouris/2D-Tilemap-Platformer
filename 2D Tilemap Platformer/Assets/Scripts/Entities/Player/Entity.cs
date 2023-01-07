@@ -24,8 +24,7 @@ public class Entity : MonoBehaviour, IHurtable
     public List<ParticleSystem> particleEffects = new List<ParticleSystem>();
 
     #region MoveToController
-    public Vector3 _velocity;
-    public bool ignoreGravity = false;
+    //public Vector3 _velocity;
     public bool knockedBack = false;
     #endregion
 
@@ -105,11 +104,11 @@ public class Entity : MonoBehaviour, IHurtable
     {
         FloatingText floatingText = GameObject.Instantiate(Resources.Load<FloatingText>("Prefabs/UI/FloatingText") as FloatingText, transform.position, Quaternion.identity);
         //floatingText.SetOffset(Vector3.up * (Body.mAABB.HalfSize.y * 2 + 10));
-        floatingText.text.characterSize = floatingText.text.characterSize * sizeMult;
+        floatingText.text.fontSize = floatingText.text.fontSize * sizeMult;
         floatingText.duration = dTime;
         floatingText.scrollSpeed = sSpeed;
-        floatingText.GetComponent<TextMesh>().text = "" + text;
-        floatingText.GetComponent<TextMesh>().color = color;
+        floatingText.SetText(text);
+        floatingText.SetColor(color);
     }
 
 

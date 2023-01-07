@@ -15,6 +15,7 @@ public class GameData : ScriptableObject
     public int lives = 1;
     public int talentPoints = 0;
     public int statPoints = 0;
+    public int levelTier = 0;
 }
 
 // If you want the data to be stored permanently in the editor
@@ -23,12 +24,77 @@ public class GameData : ScriptableObject
 //
 // I intentionally used a non-serializable class here to show that also 
 // non Serializable types can be passed between scenes 
+[System.Serializable]
 public class PlayerCreationData
 {
     public List<Color> playerColors = new List<Color>();
     public int playerIndex;
     public int lives;
-    public List<Talent> talents;
-    public List<Stat> startingStats;
+    public List<Talent> talents = new List<Talent>();
+    public List<Stat> startingStats = new List<Stat>();
+    public int levelTier;
 
+}
+
+[System.Serializable]
+public class PlayerSaveData
+{
+    public List<SaveableColor> playerColors = new List<SaveableColor>();
+    public List<Talent> talents = new List<Talent>();
+    public List<Stat> startingStats = new List<Stat>();
+    public int levelTier;
+
+    public PlayerSaveData()
+    {
+
+    }
+
+    public PlayerSaveData(PlayerCreationData data)
+    {
+        talents = data.talents;
+        startingStats = data.startingStats;
+        levelTier = data.levelTier;
+        playerColors = new List<SaveableColor>();
+
+        foreach (Color c in data.playerColors)
+        {
+            playerColors.Add(new SaveableColor(c));
+        }
+    }
+
+    public List<Color> GetColors()
+    {
+        List<Color> colors = new List<Color>();
+
+        foreach(SaveableColor sColor in playerColors)
+        {
+            colors.Add(sColor.GetColor());
+        }
+
+        return colors;
+    }
+
+}
+
+public class SaveableColor
+{
+    public float[] values = new float[4];
+
+    public SaveableColor(Color color)
+    {
+        SetColor(color);
+    }
+
+    public Color GetColor()
+    {
+        return new Color(values[0], values[1], values[2], values[3]);
+    }
+
+    public void SetColor(Color color)
+    {
+        values[0] = color.r;
+        values[1] = color.g;
+        values[2] = color.b;
+        values[3] = color.a;
+    }
 }

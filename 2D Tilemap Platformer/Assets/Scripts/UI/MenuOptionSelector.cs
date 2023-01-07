@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class MenuOptionSelector : MenuOption
 {
-    public Text nameText;
+    public TextMeshProUGUI nameText;
 
 
     //selector stuff
@@ -31,9 +32,6 @@ public class MenuOptionSelector : MenuOption
     {
         yield return new WaitForEndOfFrame();
 
-        int sizeAux = nameText.cachedTextGenerator.fontSizeUsedForBestFit;
-
-        nameText.fontSize = sizeAux;
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
 
         //Do staff
@@ -120,7 +118,7 @@ public class MenuOptionSelector : MenuOption
         currentNode = menuOptionNodeUI;
 
         scrollRect.content.localPosition = scrollRect.GetSnapToPositionToBringChildIntoViewHorizontal(currentNode.GetComponent<RectTransform>());
-
+        //ScrollRectExtensions.ScrollRepositionX(scrollRect, currentNode.GetComponent<RectTransform>());
     }
 
     public override void OnSelect(BaseEventData eventData)

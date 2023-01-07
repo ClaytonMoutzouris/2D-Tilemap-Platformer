@@ -30,6 +30,8 @@ public class EquipmentManager : MonoBehaviour
     public void AddConsumable(ConsumableItem consumable)
     {
         consumables.Add(consumable);
+        player.playerVersusUI.consumableSlot.SetItem(consumables[0]);
+
     }
 
     public void UseNextConsumable()
@@ -45,6 +47,14 @@ public class EquipmentManager : MonoBehaviour
         if(used)
         {
             consumables.RemoveAt(0);
+            if (consumables.Count > 0)
+            {
+                player.playerVersusUI.consumableSlot.SetItem(consumables[0]);
+            } else
+            {
+                player.playerVersusUI.consumableSlot.ClearSlot();
+            }
+
         }
 
     }
@@ -80,6 +90,8 @@ public class EquipmentManager : MonoBehaviour
             equippedWeapon = weapon;
 
             weapon.OnEquipped(player);
+            player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
+
         }
         else if(equipment is Armor armor)
         {
@@ -117,7 +129,7 @@ public class EquipmentManager : MonoBehaviour
         }
 
         equippedWeapon = wep;
-
+        player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
         wep.OnEquipped(player);
     }
 
@@ -136,7 +148,7 @@ public class EquipmentManager : MonoBehaviour
         _velocity.x = direction.normalized.x * projectileData.projSpeed;
         */
 
-        dropped._velocity = dir * 4;
+        dropped._controller.velocity = dir * 4;
         dropped.StartCoroutine(dropped.Despawn(5));
 
 
@@ -148,9 +160,9 @@ public class EquipmentManager : MonoBehaviour
         if(equippedWeapon != null)
         {
             equippedWeapon.OnUnequipped(player);
-
             storedWeapon = equippedWeapon;
             equippedWeapon = null;
+
         }
 
         if(toEquip != null)
@@ -159,6 +171,10 @@ public class EquipmentManager : MonoBehaviour
             equippedWeapon = toEquip;
 
         }
+
+        player.playerVersusUI.slot2.SetWeapon(storedWeapon);
+        player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
+
 
     }
 }

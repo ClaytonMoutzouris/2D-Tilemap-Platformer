@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ public class MenuSelectorNodeUI : MonoBehaviour, ISelectHandler
 {
     public Button button;
     public MenuOptionSelector parent;
-    public Text text;
+    public TextMeshProUGUI text;
     public AudioClip selectClip;
 
     public void Start()

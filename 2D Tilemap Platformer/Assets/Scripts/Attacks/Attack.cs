@@ -50,7 +50,7 @@ public class Attack : ScriptableObject
         }
         if(entity.movementState != PlayerMovementState.Jump)
         {
-            entity._velocity = Vector3.zero;
+            entity._controller.velocity = Vector3.zero;
         }
 
         entity.movementState = PlayerMovementState.Attacking;

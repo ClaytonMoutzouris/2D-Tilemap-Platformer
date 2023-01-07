@@ -10,6 +10,7 @@ public class PressurePlate : MonoBehaviour, IContactable
     public ITriggerable triggerable;
     public ContactFilter2D contactFilter;
     public BoxCollider2D triggerCollider;
+    public AudioClip triggerSFX;
 
     public void Awake()
     {
@@ -27,7 +28,10 @@ public class PressurePlate : MonoBehaviour, IContactable
 
         for (int i = 0; i < colliders.Count; i++)
         {
-            Contact();
+            if(colliders[i].transform != transform)
+            {
+                Contact();
+            }
 
         }
     }
@@ -41,11 +45,17 @@ public class PressurePlate : MonoBehaviour, IContactable
 
     public void Trigger()
     {
+        if(isTriggered)
+        {
+            return;
+        }
+
         isTriggered = true;
         animator.Play("PressurePlate_Triggered");
 
         if (triggerable != null)
         {
+            SoundManager.instance.PlaySingle(triggerSFX);
             triggerable.Trigger();
         }
 

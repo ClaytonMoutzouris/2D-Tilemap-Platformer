@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,9 +10,13 @@ public class PlayerVersusUI : MonoBehaviour
     public HealthBarUI healthBar;
     public PlayerTooltip tooltip;
     public Camera playerCamera;
-    public Text livesCounter;
-    public Text killCounter;
+    public TextMeshProUGUI livesCounter;
+    public TextMeshProUGUI killCounter;
     public PlayerMenu playerMenu;
+    //public GameObject
+    public WeaponSlotDisplay slot1;
+    public WeaponSlotDisplay slot2;
+    public ConsumableDisplay consumableSlot;
 
     public bool showItemTooltips = true;
 
@@ -41,6 +46,9 @@ public class PlayerVersusUI : MonoBehaviour
         player.playerVersusUI = this;
         SetLives();
         SetKills();
+
+        slot1.ClearSlot();
+        slot2.ClearSlot();
     }
 
     public void SetLives()

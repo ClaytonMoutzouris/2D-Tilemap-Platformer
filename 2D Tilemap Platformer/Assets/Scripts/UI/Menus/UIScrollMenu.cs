@@ -26,7 +26,10 @@ public class UIScrollMenu : MonoBehaviour
     {
         ClearMenuOptions();
         AddOption(backButton);
-        AddOption(confirmButton);
+        if(confirmButton != null)
+        {
+            AddOption(confirmButton);
+        }
     }
 
     public void ClearMenuOptions()

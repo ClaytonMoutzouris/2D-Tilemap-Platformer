@@ -35,7 +35,6 @@ public class EnemyEntity : Entity
     // Update is called once per frame
     void Update()
     {
-        _velocity = _controller.velocity;
 
         if (target!= null && target.health.IsDead())
         {
@@ -44,16 +43,13 @@ public class EnemyEntity : Entity
 
         if (!knockedBack)
         {
-            _velocity.x = normalizedHorizontalSpeed * movementSpeed;
+            _controller.velocity.x = normalizedHorizontalSpeed * movementSpeed;
         }
 
-        if (!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
 
         mOldPosition = transform.position;
-        _controller.move(_velocity * Time.deltaTime);
+        _controller.move();
 
-        _velocity = _controller.velocity;
 
     }
 

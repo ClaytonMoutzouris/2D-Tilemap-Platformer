@@ -12,11 +12,6 @@ public class PowerUpObject : MonoBehaviour
 
     public PhysicsBody2D _controller;
 
-    #region MoveToController
-    public bool ignoreGravity = false;
-    Vector3 _velocity = Vector3.zero;
-    #endregion
-
     void Awake()
     {
         _controller = GetComponent<PhysicsBody2D>();
@@ -54,14 +49,9 @@ public class PowerUpObject : MonoBehaviour
 
     public void Update()
     {
-        _velocity = _controller.velocity;
 
 
-        if (!ignoreGravity)
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
-
-        _controller.move(_velocity * Time.deltaTime);
-        _velocity = _controller.velocity;
+        _controller.move();
 
     }
 

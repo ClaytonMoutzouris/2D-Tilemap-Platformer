@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,7 +10,7 @@ public class StatsPanelUI : UIScrollMenu
     public MenuOptionInteger optionPrefab;
     //This will be tricky, making the child 
     public int statsToSpend = 0;
-    public Text statPointsText;
+    public TextMeshProUGUI statPointsText;
     public List<Stat> stats = new List<Stat>();
 
     public override void OnEnable()
@@ -45,7 +46,7 @@ public class StatsPanelUI : UIScrollMenu
             statOption.SetValue(1);
             statOption.OnValueChanged += OnStatChanged;
             statOption.Init();
-            statOption.nameText.text = type.ToString();
+            statOption.text.text = type.ToString();
             AddOption(statOption);
         }
 

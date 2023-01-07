@@ -5,13 +5,15 @@ using UnityEngine;
 public class AttackManager : MonoBehaviour
 {
     //List of different player attack animations
-    public PlayerController entity;
+    public PlayerController player;
     //public List<AttackData> attacks = new List<AttackData>();
     public Attack activeAttack;
 
     //Where do you really need to be?
     public WeaponObject meleeWeaponObject;
     public WeaponObject rangedWeaponObject;
+
+    public GameObject RotationObject;
 
     //Right now its not, but this should follow up off the end of an attack, like a cooldown.
     public float followUpThreshold = 1f;
@@ -21,8 +23,56 @@ public class AttackManager : MonoBehaviour
 
     private void Start()
     {
-        entity = GetComponent<PlayerController>();
+        player = GetComponent<PlayerController>();
         List<Weapon> tempList = new List<Weapon>();
+        //player._animator.keepAnimatorControllerStateOnDisable = true;
+    }
+
+    public void Update()
+    {
+
+        if (player.movementState != PlayerMovementState.GrabLedge && player.movementState != PlayerMovementState.Roll
+            && player.movementState != PlayerMovementState.Dead && !player.knockedBack)
+        {
+
+            if (player._input.GetButtonDown(ButtonInput.Attack_Down))
+            {
+                ActivateAttack(AttackInput.Down, ButtonInput.LightAttack);
+            }
+
+            if (player._input.GetButtonDown(ButtonInput.Attack_Up))
+            {
+                ActivateAttack(AttackInput.Up, ButtonInput.LightAttack);
+            }
+
+            if ((player._input.GetButtonDown(ButtonInput.Attack_Left) && player.GetDirection() == -1) || 
+                (player._input.GetButtonDown(ButtonInput.Attack_Right) && player.GetDirection() == 1))
+            {
+                ActivateAttack(AttackInput.Forward, ButtonInput.LightAttack);
+            }
+
+            if ((player._input.GetButtonDown(ButtonInput.Attack_Left) && player.GetDirection() == 1) ||
+                (player._input.GetButtonDown(ButtonInput.Attack_Right) && player.GetDirection() == -1))
+            {
+                ActivateAttack(AttackInput.Backward, ButtonInput.LightAttack);
+            }
+
+            if (player._input.GetButtonDown(ButtonInput.Attack_Neutral))
+            {
+                ActivateAttack(AttackInput.Neutral, ButtonInput.LightAttack);
+            }
+
+            if (player._input.GetButtonDown(ButtonInput.HeavyAttack))
+            {
+                ActivateHeavyAttack();
+            }
+
+            if (player._input.GetButtonDown(ButtonInput.Fire))
+            {
+                ActivateAttack(AttackInput.Shoot, ButtonInput.Fire);
+            }
+
+        }
 
     }
 
@@ -63,14 +113,14 @@ public class AttackManager : MonoBehaviour
     }
     */
 
-    public void ActivateAttack(ButtonInput button = ButtonInput.LightAttack)
+    public void ActivateAttack(AttackInput direction, ButtonInput buttonInput)
     {
-        if (activeAttack != null || entity._equipmentManager.equippedWeapon == null)
+        if (activeAttack != null || player._equipmentManager.equippedWeapon == null)
         {
             return;
         }
 
-        Attack newAttack = entity._equipmentManager.equippedWeapon.GetNextAttack();
+        Attack newAttack = player._equipmentManager.equippedWeapon.GetAttack(direction);
         if (newAttack == null)
         {
             return;
@@ -78,7 +128,7 @@ public class AttackManager : MonoBehaviour
 
         activeAttack = newAttack;
 
-        StartCoroutine(newAttack.Activate(entity, button));
+        StartCoroutine(newAttack.Activate(player, buttonInput));
 
         
 
@@ -86,32 +136,32 @@ public class AttackManager : MonoBehaviour
 
     public void ActivateHeavyAttack(ButtonInput button = ButtonInput.HeavyAttack)
     {
-        if (activeAttack != null || entity._equipmentManager.equippedWeapon == null)
+        if (activeAttack != null || player._equipmentManager.equippedWeapon == null)
         {
             return;
         }
 
-        Attack newAttack = entity._equipmentManager.equippedWeapon.GetHeavyAttack();
+        Attack newAttack = player._equipmentManager.equippedWeapon.GetHeavyAttack();
         if(newAttack == null)
         {
             return;
         }
         activeAttack = newAttack;
 
-        StartCoroutine(newAttack.Activate(entity, button));
+        StartCoroutine(newAttack.Activate(player, button));
     }
 
     //This method fires a projectile at a certain angle (default to straight ahead
     public void FireProjectile(int angle = 90)
     {
-        entity._equipmentManager.equippedWeapon.FireProjectile(angle);
+        player._equipmentManager.equippedWeapon.FireProjectile(angle);
     }
 
     //This method gets the players aim input
     public void FireAimedProjectile()
     {
 
-        entity._equipmentManager.equippedWeapon.FireAimedProjectile();
+        player._equipmentManager.equippedWeapon.FireAimedProjectile();
 
     }
 
@@ -122,7 +172,7 @@ public class AttackManager : MonoBehaviour
 
     public void ThrowWeapon()
     {
-        entity._equipmentManager.equippedWeapon.ThrowWeapon();
+        player._equipmentManager.equippedWeapon.ThrowWeapon();
 
 
     }

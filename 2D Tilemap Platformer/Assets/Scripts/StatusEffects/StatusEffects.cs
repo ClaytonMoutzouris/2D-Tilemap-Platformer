@@ -13,8 +13,11 @@ public static class StatusEffects
         }
         float knockbackTimestamp = Time.time;
 
-
-        entity._velocity = direction * knockbackPower + Vector2.up * Mathf.Sqrt(-GambleConstants.GRAVITY) * Mathf.Clamp01(knockbackPower);
+        PhysicsBody2D body = entity.GetComponent<PhysicsBody2D>();
+        if(body)
+        {
+            body.velocity = direction * knockbackPower + Vector2.up * Mathf.Sqrt(-GambleConstants.GRAVITY) * Mathf.Clamp01(knockbackPower);
+        }
 
         entity.knockedBack = true;
 

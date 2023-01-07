@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public enum SelectScreenTabIndex { General, Creation, Appearance, Talents, Confirmed }
@@ -8,7 +10,7 @@ public class CharacterSelectScreen : MonoBehaviour
 {
     public GameObject anchorObject;
     public List<PlayerMenuTabUI> menuTabs;
-
+    public LoadMenuUI loadMenu;
     public AppearancePanelUI appearancePanel;
     public CharacterSelectPortrait portrait;
     public TalentsPanelUI talentPanel;
@@ -17,8 +19,8 @@ public class CharacterSelectScreen : MonoBehaviour
     public int currentTabIndex = 0;
     public bool playerReady = false;
     public float backoutTime = 2;
-
     public BackoutBar backoutBar;
+
 
     // Start is called before the first frame update
 
@@ -33,6 +35,7 @@ public class CharacterSelectScreen : MonoBehaviour
         //appearancePanel.LoadMenuOptions();
         appearancePanel.LoadColors();
         statsPanel.LoadStats();
+        loadMenu.LoadCharacters();
     }
 
     // Update is called once per frame
@@ -92,8 +95,44 @@ public class CharacterSelectScreen : MonoBehaviour
         newData.startingStats = statsPanel.stats;
         newData.playerIndex = playerIndex;
         ArcadeGameRulesMenu.instance.arcadeGameData.playerDatas[playerIndex] = newData;
+        SaveCharacter(newData);
         playerReady = true;
         ChangeTab(4);
+    }
+
+    public void LoadCharacter(PlayerSaveData saveData)
+    {
+        PlayerCreationData newData = new PlayerCreationData();
+        newData.playerColors = saveData.GetColors();
+        newData.talents = saveData.talents;
+        newData.startingStats = saveData.startingStats;
+        newData.levelTier = saveData.levelTier;
+        newData.playerIndex = playerIndex;
+        portrait.colorSwap.SetBaseColors(newData.playerColors);
+
+        ArcadeGameRulesMenu.instance.arcadeGameData.playerDatas[playerIndex] = newData;
+        playerReady = true;
+        ChangeTab(4);
+    }
+
+    public void SaveCharacter(PlayerCreationData characterData)
+    {
+        string name = "Player" + (characterData.playerIndex+1) + " " + "Tier" + characterData.levelTier + " " + System.DateTime.Now.ToString("yyy-MM-dd-hh-mm-ss");
+        string path = Path.Combine(new string[] { Application.streamingAssetsPath, "GameData", "Characters", name + ".player" });
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        } else
+        {
+            //Directory.CreateDirectory(path);
+        }
+        PlayerSaveData saveData = new PlayerSaveData(characterData);
+
+
+        string saveJson = JsonConvert.SerializeObject(saveData);
+
+        File.WriteAllText(path, saveJson);
     }
 
     public void DeconfirmCreation()

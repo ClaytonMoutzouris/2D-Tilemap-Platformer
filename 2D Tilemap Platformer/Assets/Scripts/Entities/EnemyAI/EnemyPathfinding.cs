@@ -171,7 +171,7 @@ public class EnemyPathfinding : MonoBehaviour
             jumpHeight = entity.maxJumpHeight;
         }
         //Basically just set the velocity to the jump speed
-        entity._velocity.y = Mathf.Sqrt(2 * (jumpHeight + 0.5f) * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(2 * (jumpHeight + 0.5f) * -GambleConstants.GRAVITY);
 
     }
 

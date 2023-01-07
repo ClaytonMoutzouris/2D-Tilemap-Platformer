@@ -5,9 +5,6 @@ using UnityEngine;
 public class TriggeredPlatform : MovingPlatform
 {
 
-
-    Vector3 _velocity = Vector3.zero;
-
     public bool waiting = true;
     public EntityDirection direction = EntityDirection.Left;
     public PhysicsBody2D rider = null;
@@ -51,10 +48,10 @@ public class TriggeredPlatform : MovingPlatform
         //_controller.collisionState.
         if(waiting)
         {
-            _velocity = Vector2.zero;
+            _controller.velocity = Vector2.zero;
             if(Time.time > waitTimeStamp + waitCooldown && _controller.riders.Count > 0)
             {
-                waiting = false;                
+                waiting = false;
 
             }
 
@@ -66,7 +63,7 @@ public class TriggeredPlatform : MovingPlatform
         }
 
 
-        _controller.move(_velocity * Time.deltaTime);
+        _controller.move();
 
     }
 
@@ -81,7 +78,7 @@ public class TriggeredPlatform : MovingPlatform
         }
         else
         {
-            _velocity.x = (int)direction*MovementSpeed;
+            _controller.velocity.x = (int)direction*MovementSpeed;
 
         }
        

@@ -21,7 +21,6 @@ public class Projectile : MonoBehaviour
 
     public SpriteRenderer spriteRenderer;
     public Animator animator;
-    public Vector3 _velocity = Vector3.zero;
     public bool bouncedLastFrame = false;
 
 
@@ -66,17 +65,16 @@ public class Projectile : MonoBehaviour
 
         if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
         {
-            _velocity.y = Mathf.Sqrt(projectileData.projSpeed *direction.normalized.y * -GambleConstants.GRAVITY);
+            _controller.velocity.y = Mathf.Sqrt(projectileData.projSpeed *direction.normalized.y * -GambleConstants.GRAVITY);
             //Debug.Log("Velocity " + _velocity);
-            _velocity.x = direction.normalized.x * projectileData.projSpeed;
+            _controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
 
         }
         else
         {
-            _velocity.y = direction.normalized.y * projectileData.projSpeed;
-            _velocity.x = direction.normalized.x * projectileData.projSpeed;
+            _controller.velocity.y = direction.normalized.y * projectileData.projSpeed;
+            _controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
         }
-        _controller.velocity = _velocity;
 
     }
 
@@ -101,7 +99,7 @@ public class Projectile : MonoBehaviour
                 direction.y *= -1;
                 if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
                 {
-                    _velocity.y = Mathf.Sqrt(projectileData.projSpeed * direction.y * -GambleConstants.GRAVITY);
+                    _controller.velocity.y = Mathf.Sqrt(projectileData.projSpeed * direction.y * -GambleConstants.GRAVITY);
                 }
             }
 
@@ -112,8 +110,8 @@ public class Projectile : MonoBehaviour
             }
             _attackObject.ClearHits();
             bouncedLastFrame = true;
-            _velocity.y = direction.normalized.y * projectileData.projSpeed;
-            _velocity.x = direction.normalized.x * projectileData.projSpeed;
+            _controller.velocity.y = direction.normalized.y * projectileData.projSpeed;
+            _controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
         }
         else
         {
@@ -123,17 +121,8 @@ public class Projectile : MonoBehaviour
 
     protected void Update()
     {
-        _velocity = _controller.velocity;
 
         //_velocity.x = direction.normalized.x * projectileData.projSpeed;
-
-        if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
-        {
-            _velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
-            //Debug.Log("Velocity " + _velocity);
-
-
-        }
 
         if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.Bounce).GetValue())
         {
@@ -143,7 +132,7 @@ public class Projectile : MonoBehaviour
         {
             if (_controller.collisionState.below || _controller.collisionState.left || _controller.collisionState.right)
             {
-                _velocity.x = 0;
+                _controller.velocity.x = 0;
             }
         }
 
@@ -151,19 +140,18 @@ public class Projectile : MonoBehaviour
 
         if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.Boomerang).GetValue())
         {
-            Boomerang(ref _velocity);
+            Boomerang(ref _controller.velocity);
         }
         
         if(projectileData.projectileFlags.GetFlag(ProjectileFlagType.IsAngled).GetValue())
         {
-            Vector2 dir = _velocity.normalized;
+            Vector2 dir = _controller.velocity.normalized;
             float angle = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
             transform.eulerAngles = new Vector3(0, 0, -angle);
         }
 
-        _controller.move(_velocity * Time.deltaTime);
+        _controller.move();
 
-        _velocity = _controller.velocity;
 
 
         if (_controller.collisionState.hasCollision())
@@ -194,8 +182,8 @@ public class Projectile : MonoBehaviour
 
     public void Boomerang(ref Vector3 vel)
     {
-        _velocity.y = direction.normalized.y * projectileData.projSpeed;
-        _velocity.x = direction.normalized.x * projectileData.projSpeed;
+        _controller.velocity.y = direction.normalized.y * projectileData.projSpeed;
+        _controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
 
         float returnSpeed = projectileData.elasticity * (Time.time - startTime);
         vel = vel - vel * returnSpeed;
@@ -228,6 +216,10 @@ public class Projectile : MonoBehaviour
         {
             _controller.platformMask = baseLayermask;
         }
+
+
+        _controller.ignoreGravity = projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue();
+
     }
 
     public void SetData(ProjectileData data)
@@ -254,5 +246,8 @@ public class Projectile : MonoBehaviour
         {
             _controller.platformMask = baseLayermask;
         }
+
+        _controller.ignoreGravity = projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue();
+
     }
 }

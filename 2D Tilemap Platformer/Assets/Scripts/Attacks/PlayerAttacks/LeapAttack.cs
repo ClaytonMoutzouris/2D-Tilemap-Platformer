@@ -20,19 +20,19 @@ public class LeapAttack : Attack
         float leapTimestamp = Time.time;
 
         entity.movementState = PlayerMovementState.Attacking;
-        entity._velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
         //entity.movementState = PlayerMovementState.Jump;
         
 
         while(Time.time <= leapTimestamp+leapDuration)
         {
-            entity._velocity.x = entity.GetDirection() * entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue();
+            entity._controller.velocity.x = entity.GetDirection() * entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue();
             yield return null;
         }
 
         // Enter the state
-        entity._velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
-        entity._velocity.x = 0;
+        entity._controller.velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
+        entity._controller.velocity.x = 0;
         entity._animator.Play(attackAnimation.name);
         entity._animator.speed = attackSpeed;
 

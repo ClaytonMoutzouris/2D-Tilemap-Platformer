@@ -45,7 +45,7 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
 
         dropped.SetItem(newData);
 
-        dropped._velocity = dir * 4;
+        dropped._controller.velocity = dir * 4;
 
         if(spawner != null)
         {

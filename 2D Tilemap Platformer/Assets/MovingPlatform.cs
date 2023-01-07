@@ -11,9 +11,8 @@ public class MovingPlatform : MonoBehaviour
 
     public MovingPlatformMovement movementType = MovingPlatformMovement.Horizontal;
 
-    Vector3 _velocity = Vector3.zero;
-
     public float MovementSpeed = 2;
+    public Vector3 baseDirection = Vector2.right;
     
     //public GameObject itemTooltip;
 
@@ -23,18 +22,22 @@ public class MovingPlatform : MonoBehaviour
         switch(movementType)
         {
             case MovingPlatformMovement.Horizontal:
-                _velocity.x = MovementSpeed;
+                baseDirection = Vector2.right;
                 break;
             case MovingPlatformMovement.Clockwise:
-                _velocity.x = MovementSpeed;
+                baseDirection = Vector2.right;
                 break;
             case MovingPlatformMovement.Vertical:
-                _velocity.y = MovementSpeed;
+                baseDirection = Vector2.up;
                 break;
             case MovingPlatformMovement.Counterclockwise:
-                _velocity.x = -MovementSpeed;
+                baseDirection = Vector2.left;
+
                 break;
         }
+
+        _controller.velocity = MovementSpeed*baseDirection;
+
 
     }
 
@@ -69,7 +72,7 @@ public class MovingPlatform : MonoBehaviour
                 break;
         }
 
-        _controller.move(_velocity * Time.deltaTime);
+        _controller.move();
 
     }
 
@@ -77,76 +80,75 @@ public class MovingPlatform : MonoBehaviour
     {
         if (_controller.collisionState.groundRight)
         {
-            _velocity.y = 0;
-            _velocity.x = -MovementSpeed;
+            baseDirection = Vector2.left;
         }
         else if (_controller.collisionState.groundLeft)
         {
-            _velocity.y = 0;
-            _velocity.x = MovementSpeed;
+            baseDirection = Vector2.right;
         }
+
+        _controller.velocity = MovementSpeed * baseDirection;
     }
 
     public virtual void MoveVertical()
     {
         if (_controller.collisionState.groundBelow)
         {
-            _velocity.y = MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.up;
         }
         else if (_controller.collisionState.groundAbove)
         {
-            _velocity.y = -MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.down;
         }
+
+        _controller.velocity = MovementSpeed * baseDirection;
+
     }
 
     public void MoveClockwise()
     {
         if (_controller.collisionState.groundRight && !_controller.collisionState.groundBelow)
         {
-            _velocity.y = -MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.down;
         }
         else if (_controller.collisionState.groundBelow && !_controller.collisionState.groundLeft)
         {
-            _velocity.x = -MovementSpeed;
-            _velocity.y = 0;
+            baseDirection = Vector2.left;
         }
         else if (_controller.collisionState.groundLeft && !_controller.collisionState.groundAbove)
         {
-            _velocity.y = MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.up;
         }
         else if (_controller.collisionState.groundAbove && !_controller.collisionState.groundRight)
         {
-            _velocity.x = MovementSpeed;
-            _velocity.y = 0;
+            baseDirection = Vector2.right;
         }
+
+        _controller.velocity = MovementSpeed * baseDirection;
+
     }
 
     public void MoveCounterclockwise()
     {
         if (_controller.collisionState.groundLeft && !_controller.collisionState.groundBelow)
         {
-            _velocity.y = -MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.down;
         }
         else if (_controller.collisionState.groundAbove && !_controller.collisionState.groundLeft)
         {
-            _velocity.x = -MovementSpeed;
-            _velocity.y = 0;
+            baseDirection = Vector2.left;
         }
         else if (_controller.collisionState.groundRight && !_controller.collisionState.groundAbove)
         {
-            _velocity.y = MovementSpeed;
-            _velocity.x = 0;
+            baseDirection = Vector2.up;
         }
         else if (_controller.collisionState.groundBelow && !_controller.collisionState.groundRight)
         {
-            _velocity.x = MovementSpeed;
-            _velocity.y = 0;
+            baseDirection = Vector2.right;
         }
+
+        _controller.velocity = MovementSpeed * baseDirection;
+
     }
 
 }

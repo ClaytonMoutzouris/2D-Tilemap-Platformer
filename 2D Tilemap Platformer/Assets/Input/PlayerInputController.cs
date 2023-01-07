@@ -194,6 +194,15 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Jump] = mGamepadInput.buttonInputs[(int)GamepadButtons.SouthButton];
                 buttonInput[(int)ButtonInput.LightAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
                 buttonInput[(int)ButtonInput.HeavyAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
+                //Attack Input
+                buttonInput[(int)ButtonInput.Attack_Down] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickY] == -1;
+                buttonInput[(int)ButtonInput.Attack_Left] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickX] == -1;
+                buttonInput[(int)ButtonInput.Attack_Right] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickX] == 1;
+                buttonInput[(int)ButtonInput.Attack_Up] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickY] == 1;
+
+                buttonInput[(int)ButtonInput.Attack_Neutral] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
+
+
                 buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
                 buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
                 buttonInput[(int)ButtonInput.Minimap] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadUp];

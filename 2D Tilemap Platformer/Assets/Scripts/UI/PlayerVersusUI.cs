@@ -13,10 +13,12 @@ public class PlayerVersusUI : MonoBehaviour
     public TextMeshProUGUI livesCounter;
     public TextMeshProUGUI killCounter;
     public PlayerMenu playerMenu;
+    public AmmoDisplayUI ammoDisplay;
     //public GameObject
     public WeaponSlotDisplay slot1;
     public WeaponSlotDisplay slot2;
     public ConsumableDisplay consumableSlot;
+    public ItemBeltUI itemBelt;
 
     public bool showItemTooltips = true;
 

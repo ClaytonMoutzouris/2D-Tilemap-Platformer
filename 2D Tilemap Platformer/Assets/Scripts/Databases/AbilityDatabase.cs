@@ -30,13 +30,16 @@ public static class AbilityDatabase
     public static Ability GetRandomAbility()
     {
         CheckDatabase();
+
+        Ability ability = null;
+
         if (abilities.Count > 0)
         {
             int r = Random.Range(0, abilities.Count);
-
-            return ScriptableObject.Instantiate(abilities[r]);
+            ability = ScriptableObject.Instantiate(abilities[r]);
+            ability.RollAbility();
         }
 
-        return null;
+        return ability;
     }
 }

@@ -57,11 +57,23 @@ public class Talent : ScriptableObject
 
         owner.health.UpdateHealth();
 
-        if (player._equipmentManager.equippedWeapon != null)
+        Weapon equippedMelee = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+
+        if (equippedMelee != null)
         {
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
+            equippedMelee.weaponAttributes.AddBonuses(weaponBonuses);
             player._attackManager.meleeWeaponObject.UpdateHitbox();
         }
+
+        Weapon equippedRanged = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+        if (equippedRanged != null)
+        {
+            equippedRanged.weaponAttributes.AddBonuses(weaponBonuses);
+            player._attackManager.rangedWeaponObject.UpdateHitbox();
+        }
+
+
 
         owner.learnedTalents.Add(this);
 
@@ -84,14 +96,22 @@ public class Talent : ScriptableObject
             ability.OnAbilityLost();
         }
 
-        owner.health.UpdateHealth();
+        Weapon equippedMelee = owner._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
 
-        if (owner._equipmentManager.equippedWeapon != null)
+        if (equippedMelee != null)
         {
-            owner._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
+            equippedMelee.weaponAttributes.RemoveBonuses(weaponBonuses);
             owner._attackManager.meleeWeaponObject.UpdateHitbox();
-
         }
+
+        Weapon equippedRanged = owner._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+        if (equippedRanged != null)
+        {
+            equippedRanged.weaponAttributes.RemoveBonuses(weaponBonuses);
+            owner._attackManager.rangedWeaponObject.UpdateHitbox();
+        }
+
         owner = null;
 
         owner.learnedTalents.Remove(this);

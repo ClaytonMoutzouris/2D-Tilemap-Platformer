@@ -13,15 +13,15 @@ public class Hurtbox : MonoBehaviour
     {
         owner = newOwner;
     }
-
-    //public Entity 
-    public void GetHurt(AttackObject attackObject)
+    /*
+    public void GetHurt(AttackHitData attackHitData)
     {
-        if(owner == null)
+        if (owner == null)
         {
             return;
         }
-        owner.GetHurt(attackObject);
-    }
 
+        owner.GetHurt(ref attackHitData);
+    }
+    */
 }

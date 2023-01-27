@@ -10,6 +10,7 @@ public class DamageOverTime : StatusEffect
     public int damagePerTick = 1;
 
 
+
     public override IEnumerator HandleStatusEffect()
     {
         StartUp();

@@ -24,7 +24,8 @@ public class MultiCamera : MonoBehaviour
     public float mBoundingBoxPadding = 1;
 
     private List<PlayerController> players = new List<PlayerController>();
-
+    private Vector3 velocity = Vector3.zero;
+    public float cameraSpeed = 10F;
 
     void Awake()
     {
@@ -39,7 +40,7 @@ public class MultiCamera : MonoBehaviour
 
         Rect boundingBox = CalculateTargetsBoundingBox();
 
-        transform.position = CalculateCameraPosition(boundingBox);
+        transform.position = Vector3.Lerp(transform.position, CalculateCameraPosition(boundingBox), cameraSpeed * Time.deltaTime);
         mCamera.orthographicSize = CalculateOrthographicSize(boundingBox);
         StayWithinBounds();
     }
@@ -70,6 +71,7 @@ public class MultiCamera : MonoBehaviour
         }
 
         transform.position = new Vector3(cameraPos.x, cameraPos.y, transform.position.z);
+        //transform.position = Vector3.SmoothDamp(transform.position, new Vector3(cameraPos.x, cameraPos.y, transform.position.z), ref velocity, smoothTime);
     }
 
     Rect CalculateTargetsBoundingBox()

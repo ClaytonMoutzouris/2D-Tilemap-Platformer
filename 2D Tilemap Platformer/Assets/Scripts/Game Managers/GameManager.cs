@@ -105,6 +105,7 @@ public class GameManager : MonoBehaviour
         newPlayer.playerIndex = index;
         newPlayer.transform.position = spawnPoint.transform.position;
         newPlayer._input.SetGamepadInput(GamepadInputManager.instance.gamepadInputs[index]);
+        PlayerVersusUIController.instance.SetPlayer(newPlayer.playerIndex, newPlayer);
 
         newPlayer.SetData(playerData);
 
@@ -156,7 +157,6 @@ public class GameManager : MonoBehaviour
 
         players[newPlayer.playerIndex] = newPlayer;
 
-        PlayerVersusUIController.instance.SetPlayer(newPlayer.playerIndex, newPlayer);
         CameraController.instance.AddPlayer(newPlayer);
         //CreationPanelsUI.instance.creationPanels[input.playerIndex].NewCharacter(this);
 

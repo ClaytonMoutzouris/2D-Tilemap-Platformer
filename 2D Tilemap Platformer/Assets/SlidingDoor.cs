@@ -22,7 +22,7 @@ public class SlidingDoor : MonoBehaviour, ITriggerable
 
     public void SpawnLever()
     {
-        Vector2Int leverPosition = GameGrid.instance.FindGroundWithinRange((int)transform.position.x, (int)transform.position.y);
+        Vector2Int leverPosition = GameGrid.instance.FindGroundWithinRange((int)transform.position.x, (int)transform.position.y, 1);
         Lever newLever = Instantiate(leverPrefab, (Vector2)leverPosition + new Vector2(0.5f, 0.5f), Quaternion.identity);
         newLever.triggerable = this;
         spawned = true;

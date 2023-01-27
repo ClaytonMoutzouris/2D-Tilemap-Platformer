@@ -39,7 +39,7 @@ public class TalentNodeUI : MonoBehaviour, ISelectHandler, IDeselectHandler
 
         if(learned)
         {
-            button.image.color = Color.yellow;
+            button.image.color = Color.green;
         }
         else
         {
@@ -58,13 +58,13 @@ public class TalentNodeUI : MonoBehaviour, ISelectHandler, IDeselectHandler
 
     public void OnSelect(BaseEventData eventData)
     {
-        branch.talentTreePanel.tooltip.DisplayTooltip(talent.GetTooltip());
+        branch.talentTreePanel.selectScreen.tooltip.DisplayTooltip(talent.GetTooltip());
         branch.SetCurrentNode(this);
     }
 
     public void OnDeselect(BaseEventData eventData)
     {
-        branch.talentTreePanel.tooltip.ClearTooltip();
+        branch.talentTreePanel.selectScreen.tooltip.ClearTooltip();
     }
 
 }

@@ -9,4 +9,15 @@ public class TalentTreeBranch : ScriptableObject
     //a bunch of branches?
     public List<Talent> talents;
 
+    public Sprite branchIcon;
+
+    public string GetTooltip()
+    {
+        string tooltip = "";
+
+        tooltip += name;
+        tooltip += "\n" + description;
+
+        return tooltip;
+    }
 }

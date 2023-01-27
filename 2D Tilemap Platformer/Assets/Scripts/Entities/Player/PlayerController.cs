@@ -9,7 +9,7 @@ public class PlayerController : Entity
 {
 	// movement config
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
-	public float inAirDamping = 5f;
+	public float inAirDamping = 0f;
 
     public PlayerVersusUI playerVersusUI;
 
@@ -20,11 +20,12 @@ public class PlayerController : Entity
 	public float normalizedHorizontalSpeed = 0;
     public float normalizedVerticalSpeed = 0;
 
-    public PhysicsBody2D _controller;
     public PlayerInputController _input;
     public EquipmentManager _equipmentManager;
     public TalentTree talentTree;
     public List<Talent> learnedTalents = new List<Talent>();
+
+    public ClassData classData;
 
     public float rollSpeed = 2;
     public LayerMask rollMask;
@@ -51,12 +52,15 @@ public class PlayerController : Entity
     public ContactFilter2D powerUpFilter;
     public PlayerCreationData playerData;
     public int kills = 0;
+    public CompanionManager _companionManager;
 
     protected override void Awake()
 	{
         base.Awake();
         _controller = GetComponent<PhysicsBody2D>();
         _attackManager = GetComponent<AttackManager>();
+        _companionManager = GetComponent<CompanionManager>();
+
         _input = GetComponent<PlayerInputController>();
         _equipmentManager = GetComponent<EquipmentManager>();
 
@@ -77,13 +81,35 @@ public class PlayerController : Entity
 
         colorSwap.SetBaseColors(playerData.playerColors);
 
+        //starting stats set in player creation data
+        stats.SetStats(data.startingStats);
+
+
+        //starting bonuses set in class data
+        stats.AddPrimaryBonuses(data.classData.statBonuses);
+
+        _equipmentManager.EquipItem(Instantiate(data.classData.startingWeapon));
+
+        foreach (ItemData item in data.classData.startingItems)
+        {
+            if(item is ConsumableItem consumable)
+            {
+                _equipmentManager.AddConsumable(Instantiate(consumable));
+            }
+
+            if(item is Equipment equipment)
+            {
+                _equipmentManager.EquipItem(Instantiate(equipment));
+            }
+        }
+
         foreach (Talent talent in playerData.talents)
         {
             Talent newTalent = Instantiate(talent);
             newTalent.LearnTalent(this);
         }
 
-        stats.SetStats(data.startingStats);
+
         health.UpdateHealth();
     }
 
@@ -122,7 +148,11 @@ public class PlayerController : Entity
     void AttemptLedgeGrab()
     {
 
-        if(!_controller.isGrounded && movementState != PlayerMovementState.Attacking && _controller.collisionState.canGrabLedge && _controller.velocity.y <= 0 && (_controller.collisionState.right || _controller.collisionState.left))
+        if(!_controller.isGrounded
+            && movementState != PlayerMovementState.Attacking
+            && _controller.collisionState.canGrabLedge
+            && _controller.velocity.y <= 0
+            && ((_controller.collisionState.right && _input.GetAxisValue(AxisInput.LeftStickX) > 0) || (_controller.collisionState.left && _input.GetAxisValue(AxisInput.LeftStickX) < 0)))
         {
             movementState = PlayerMovementState.GrabLedge;
             if(_controller.collisionState.right)
@@ -133,6 +163,7 @@ public class PlayerController : Entity
                 ledgeGrabOffset.x = Mathf.Abs(ledgeGrabOffset.x);
             }
             ledgeGrabPosition = _controller.collisionState.ledgeGrabPosition + ledgeGrabOffset;
+            _controller.collisionState.launched = false;
             //Debug.Log(ledgeGrabPosition);
         }
 
@@ -151,7 +182,8 @@ public class PlayerController : Entity
 
             ladderClimbPosition = _controller.collisionState.ladderOffset;
             _controller.ignoreOneWayPlatformsThisFrame = true;
-
+                        _controller.collisionState.launched = false;
+            _controller.velocity = Vector3.zero;
             return true;
         }
 
@@ -229,71 +261,6 @@ public class PlayerController : Entity
         }
 
 
-        //Handle Attacks
-        /*
-        if(movementState != PlayerMovementState.GrabLedge && movementState != PlayerMovementState.Roll
-            && movementState != PlayerMovementState.Dead&& !knockedBack)
-        {
-
-            if (_input.GetButtonDown(ButtonInput.Attack_Down))
-            {
-                _attackManager.ActivateAttack(ButtonInput.Attack_Down);
-            }
-
-            if (_input.GetButtonDown(ButtonInput.Attack_Up))
-            {
-                _attackManager.ActivateAttack(ButtonInput.Attack_Up);
-            }
-
-            if (_input.GetButtonDown(ButtonInput.Attack_Left))
-            {
-                _attackManager.ActivateAttack(ButtonInput.Attack_Left);
-            }
-
-            if (_input.GetButtonDown(ButtonInput.Attack_Right))
-            {
-                _attackManager.ActivateAttack(ButtonInput.Attack_Right);
-            }
-
-            if (_input.GetButtonDown(ButtonInput.Attack_Neutral)) {
-                _attackManager.ActivateAttack(ButtonInput.Attack_Neutral);
-            }
-
-
-        }
-
-
-        if (_input.GetButtonDown(ButtonInput.LightAttack) && movementState != PlayerMovementState.GrabLedge
-            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
-        {
-            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
-            
-            _attackManager.ActivateAttack(ButtonInput.LightAttack);
-
-        }
-
-
-
-        if (_input.GetButtonDown(ButtonInput.HeavyAttack) && movementState != PlayerMovementState.GrabLedge
-            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
-        {
-            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
-
-            _attackManager.ActivateHeavyAttack(ButtonInput.HeavyAttack);
-
-        }
-
-        */
-
-        if (_input.GetButtonDown(ButtonInput.Fire) && movementState != PlayerMovementState.GrabLedge
-            && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead && !knockedBack)
-        {
-            //int randomAttack = Random.Range(0, _attackManager.attacks.Count);
-
-            //_attackManager.ActivateAttack(ButtonInput.Fire);
-
-        }
-
         if (_input.GetButtonDown(ButtonInput.Roll) && movementState != PlayerMovementState.GrabLedge
             && movementState != PlayerMovementState.Attacking && !knockedBack
             && movementState != PlayerMovementState.Roll && movementState != PlayerMovementState.Dead)
@@ -331,10 +298,6 @@ public class PlayerController : Entity
             }
         }
 
-        if (_input.GetButtonDown(ButtonInput.SwapWeapon))
-        {
-            _equipmentManager.SwapWeaponSlots();
-        }
 
         if (_input.GetButtonDown(ButtonInput.Interact))
         {
@@ -409,10 +372,71 @@ public class PlayerController : Entity
 
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        if(!knockedBack && (movementState != PlayerMovementState.Dead || (normalizedHorizontalSpeed == 0 && _controller.isGrounded)))
+
+        if (!knockedBack && (movementState != PlayerMovementState.Dead || (normalizedHorizontalSpeed == 0 && _controller.isGrounded)))
         {
-            _controller.velocity.x = Mathf.Lerp(_controller.velocity.x, normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * smoothedMovementFactor);
+            float velXThisFrame = (normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue() * 10) * Time.deltaTime;
+
+            //_controller.velocity.x = Mathf.Lerp(_controller.velocity.x, normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * smoothedMovementFactor);
+            //_controller.velocity.x += (normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue()*5) * Time.deltaTime;
+
+            //Check Max Speed Positive
+            if (!_controller.collisionState.launched)
+            {
+                if (velXThisFrame > 0 && _controller.velocity.x > 0)
+                {
+                    if (Mathf.Abs(_controller.velocity.x) < stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+                    {
+                        _controller.velocity.x += velXThisFrame;
+                    }
+                    //otherwise do nothing
+
+                }
+                else if (velXThisFrame < 0 && _controller.velocity.x < 0)
+                {
+                    if (Mathf.Abs(_controller.velocity.x) < stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+                    {
+                        _controller.velocity.x += velXThisFrame;
+                    }
+
+                    //otherwise do nothing
+                }
+                else
+                {
+                    _controller.velocity.x += velXThisFrame;
+
+                }
+
+            }
+            else
+            {
+                if (velXThisFrame > 0 && _controller.velocity.x > 0)
+                {
+                    if (Mathf.Abs(_controller.velocity.x) < 25)
+                    {
+                        _controller.velocity.x += velXThisFrame;
+                    }
+                    //otherwise do nothing
+
+                }
+                else if (velXThisFrame < 0 && _controller.velocity.x < 0)
+                {
+                    if (Mathf.Abs(_controller.velocity.x) < 25)
+                    {
+                        _controller.velocity.x += velXThisFrame;
+                    }
+
+                    //otherwise do nothing
+                }
+                else
+                {
+                    _controller.velocity.x += velXThisFrame;
+
+                }
+            }
         }
+
+
 
         if (movementState == PlayerMovementState.GrabLedge)
         {
@@ -436,6 +460,7 @@ public class PlayerController : Entity
 
         normalizedHorizontalSpeed = 0;
         
+        //Can still move while attacking, but a lot slower?
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
         {
@@ -450,10 +475,8 @@ public class PlayerController : Entity
             //SetDirection(EntityDirection.Left);
         }
 
-        if(_controller.isGrounded)
-        {
-            normalizedHorizontalSpeed *= .35f;
-        }
+        normalizedHorizontalSpeed *= .35f;
+
     }
 
     private void Climbing()
@@ -526,6 +549,7 @@ public class PlayerController : Entity
         }
 
         _controller.velocity.y = 0;
+        _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
 
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -675,21 +699,35 @@ public class PlayerController : Entity
             normalizedHorizontalSpeed = 1;
             SetDirection(EntityDirection.Right);
 
+            if (_controller.velocity.x > stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+            {
+                _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+
+            }
 
         }
         else if (_input.GetAxisValue(AxisInput.LeftStickX) < -0.5f)
         {
             normalizedHorizontalSpeed = -1;
             SetDirection(EntityDirection.Left);
+            if(_controller.velocity.x < -stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+            {
+                _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
 
+            }
 
         }
         else
         {
             normalizedHorizontalSpeed = 0;
 
-            movementState = PlayerMovementState.Idle;
+            _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+        
+            if(Mathf.Abs(_controller.velocity.x) < 0.05f)
+            {
+                movementState = PlayerMovementState.Idle;
 
+            }
         }
 
         if (_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f && _controller.collisionState.onLadder)
@@ -749,6 +787,11 @@ public class PlayerController : Entity
             SetDirection(EntityDirection.Left);
 
         }
+        else
+        {
+            _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+
+        }
 
         if (_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f)
         {
@@ -758,6 +801,11 @@ public class PlayerController : Entity
         else if (_input.GetAxisValue(AxisInput.LeftStickY) < -0.5f)
         {
             normalizedVerticalSpeed = -1;
+
+        }
+        else
+        {
+            _controller.velocity.y = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.y;
 
         }
 
@@ -773,7 +821,39 @@ public class PlayerController : Entity
         }
         */
 
-        _controller.velocity.y = Mathf.Lerp(_controller.velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
+        //_controller.velocity.y = Mathf.Lerp(_controller.velocity.y, normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue(), Time.deltaTime * groundDamping);
+        _controller.velocity.y += (normalizedVerticalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue() * 5) * Time.deltaTime;
+        //_controller.velocity.y = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.y;
+
+    }
+
+    void FreeFall()
+    {
+        normalizedHorizontalSpeed = 0;
+
+        if (_controller.isGrounded)
+        {
+            movementState = PlayerMovementState.Idle;
+            _controller.collisionState.launched = false;
+            return;
+        }
+
+        if(stats.abilityFlags[AbilityFlagType.Flight].GetValue() && _input.GetButtonDown(ButtonInput.Jump))
+        {
+            movementState = PlayerMovementState.Flight;
+            _controller.collisionState.launched = false;
+            return;
+        }
+
+        AttemptLedgeGrab();
+
+        if((_input.GetAxisValue(AxisInput.LeftStickY) > 0.5f || _input.GetAxisValue(AxisInput.LeftStickY) < -0.5f) && _controller.collisionState.onLadder)
+        {
+            if (AttemptClimbLadder())
+            {
+                return;
+            }
+        }
 
     }
 
@@ -784,18 +864,22 @@ public class PlayerController : Entity
         if (_controller.isGrounded /*&& (!_controller.collisionState.wasGroundedLastFrame || _velocity.y <= 0)*/)
         {
             movementState = PlayerMovementState.Idle;
+            _controller.collisionState.launched = false;
             return;
         }
+
+
 
         //_animator.Play(Animator.StringToHash("Jump"));
         if(stats.abilityFlags[AbilityFlagType.Flight].GetValue() && _input.GetButtonDown(ButtonInput.Jump))
         {
             movementState = PlayerMovementState.Flight;
+            _controller.collisionState.launched = false;
 
         }
 
-
-        if (!_input.GetButton(ButtonInput.Jump) && _controller.velocity.y > 0.0f)
+        //Check here to see if we were launched, 
+        if (!_controller.collisionState.launched && !_input.GetButton(ButtonInput.Jump) && _controller.velocity.y > 0.0f)
         {
             _controller.velocity.y = Mathf.Min(_controller.velocity.y, Mathf.Sqrt(stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue()*-GambleConstants.GRAVITY));
         }
@@ -838,26 +922,6 @@ public class PlayerController : Entity
     {
         _controller.velocity = Vector3.zero;
         _controller.transform.position = ledgeGrabPosition;
-        /*
-        if (_input.(KeyCode.RightArrow) && !_controller.collisionState.right)
-        {
-            normalizedHorizontalSpeed = 1;
-            if (transform.localScale.x < 0f)
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-
-            movementState = PlayerMovementState.Jumping;
-
-        }
-        else if (_input.(KeyCode.LeftArrow) && !_controller.collisionState.left)
-        {
-            normalizedHorizontalSpeed = -1;
-            if (transform.localScale.x > 0f)
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-
-            movementState = PlayerMovementState.Jumping;
-
-        }
-        */
 
         if (_input.GetButtonDown(ButtonInput.Jump))
         {
@@ -997,7 +1061,7 @@ public class PlayerController : Entity
         movementState = PlayerMovementState.Roll;
         float rollTimestamp = Time.time;
         //float speedMod = rollSpeed;
-        SecondaryStatBonus speedBonus = new SecondaryStatBonus(SecondaryStatType.MoveSpeed, rollSpeed, StatModType.Mult);
+        SecondaryStatBonus speedBonus = new SecondaryStatBonus(SecondaryStatType.MoveSpeed, rollSpeed, StatModType.Multiplier);
         stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).AddBonus(speedBonus);
         //movementSpeed *= speedMod;
         int rollDirection = GetDirection();
@@ -1064,6 +1128,16 @@ public class PlayerController : Entity
         {
             _equipmentManager.AddConsumable(consumable);
 
+        }
+
+        if(item.item is Ammunition ammo)
+        {
+            Weapon rangedWeapon = _equipmentManager.weaponSlots[WeaponSlot.Ranged];
+
+            if(rangedWeapon != null)
+            {
+                rangedWeapon.Reload(ammo.ammoType);
+            }
         }
 
         item.Collect();
@@ -1141,4 +1215,19 @@ public class PlayerController : Entity
         kills++;
         playerVersusUI.SetKills();
     }
+
+    public override bool CheckFriendly(Entity entity)
+    {
+
+        foreach(Companion comp in _companionManager.Companions)
+        {
+            if(entity == comp)
+            {
+                return true;
+            }
+        }
+
+        return entity == this;
+    }
+
 }

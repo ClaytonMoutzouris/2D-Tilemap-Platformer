@@ -10,7 +10,6 @@ public class AttackData
     public int damage;
     public DamageType damageType;
     public float knockbackPower;
-    public float knockbackAngle;
     public float critChance = 5;
 
     [HideInInspector]
@@ -18,50 +17,62 @@ public class AttackData
     //Other goodies
 
     
-    public int GetDamage(Entity hit)
+    public int GetDamage()
     {
-        int r = Random.Range(0, 100);
-        int finalDamage = damage;
-        int damageReduction = 0;
+        float finalDamage = damage;
 
         if (owner != null)
         {
             finalDamage += (int)owner.stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue();
+
+            int r = Random.Range(0, 100);
+
+            crit = false;
+
+            //since the 0 is inclusive, we exclude the ceiling (crit chance)
+            if (r < critChance)
+            {
+                crit = true;
+                finalDamage *= owner.stats.GetSecondaryStat(SecondaryStatType.CritDamage).GetValue() / 100.0f;
+
+            }
         }
 
-        crit = false;
+        return (int)finalDamage;
+    }
 
-        //since the 0 is inclusive, we exclude the ceiling (crit chance)
-        if (r < critChance)
+    public AttackHitData GetHitData(IHurtable hit)
+    {
+        AttackHitData hitData = new AttackHitData(hit);
+        hitData.attackOwner = owner;
+        hitData.knockbackPower = knockbackPower;
+        hitData.damageDealt = GetDamage();
+        hitData.crit = crit;
+        if(crit)
         {
-            crit = true;
-            finalDamage *= 2;
-
+            hitData.hitResult = AttackHitResult.Crit;
         }
-
-        //Before or after crit?
-        if (hit != null)
-        {
-            //This one reduced by 1% per damage reduction
-            //damageReduction = Mathf.FloorToInt((int)(finalDamage * ((hit.stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue()) / 100)));
-
-            //This reduces damage by 1 for every 5 Damage Reduction (which is 1 to 1 with defense atm)
-            damageReduction = Mathf.FloorToInt(hit.stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue() / 5);
-            finalDamage -= damageReduction;
-
-        }
-
-        return finalDamage;
+        return hitData;
     }
     
 }
 
+public enum AttackHitResult { Hit, Crit, Miss, Dodge, Block };
 
 public class AttackHitData
 {
     public Entity attackOwner;
-    public Entity hitEntity;
-
+    public IHurtable hit;
+    public AttackHitResult hitResult = AttackHitResult.Hit;
     public int damageDealt;
     public bool crit;
+    public DamageType damageType;
+    public float knockbackPower;
+    public float knockbackAngle;
+
+    public AttackHitData(IHurtable hit)
+    {
+        this.hit = hit;
+    }
+
 }

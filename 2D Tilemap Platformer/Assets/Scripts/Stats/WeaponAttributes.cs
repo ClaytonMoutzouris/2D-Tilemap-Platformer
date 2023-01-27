@@ -144,10 +144,10 @@ public class WeaponAttribute
         {
             switch (bonus.modType)
             {
-                case StatModType.Add:
+                case StatModType.FlatBonus:
                     fullValue += bonus.bonusValue;
                     break;
-                case StatModType.Mult:
+                case StatModType.Multiplier:
                     multiplier += bonus.bonusValue;
                     break;
                 default:
@@ -169,7 +169,7 @@ public class WeaponAttributeBonus
     public WeaponAttributesType type;
     public float bonusValue;
 
-    public WeaponAttributeBonus(WeaponAttributesType t, float min, StatModType modType = StatModType.Add)
+    public WeaponAttributeBonus(WeaponAttributesType t, float min, StatModType modType = StatModType.FlatBonus)
     {
         type = t;
         bonusValue = min;
@@ -186,10 +186,10 @@ public class WeaponAttributeBonus
 
         switch (modType)
         {
-            case StatModType.Add:
+            case StatModType.FlatBonus:
                 tooltip += bonusValue + " " + type.ToString();
                 break;
-            case StatModType.Mult:
+            case StatModType.Multiplier:
                 tooltip += bonusValue * 100 + "% " + type.ToString();
                 break;
         }

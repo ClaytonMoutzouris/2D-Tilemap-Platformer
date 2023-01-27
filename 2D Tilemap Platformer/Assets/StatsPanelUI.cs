@@ -11,7 +11,13 @@ public class StatsPanelUI : UIScrollMenu
     //This will be tricky, making the child 
     public int statsToSpend = 0;
     public TextMeshProUGUI statPointsText;
-    public List<Stat> stats = new List<Stat>();
+    public List<Stat> stats = new List<Stat> {
+        new Stat(StatType.Attack, 0),
+        new Stat(StatType.Defense, 0),
+        new Stat(StatType.Constitution, 0),
+        new Stat(StatType.Speed, 0),
+        new Stat(StatType.Luck, 0)
+    };
 
     public override void OnEnable()
     {

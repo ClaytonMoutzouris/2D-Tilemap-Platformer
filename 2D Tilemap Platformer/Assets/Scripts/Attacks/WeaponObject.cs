@@ -71,5 +71,20 @@ public class WeaponObject : AttackObject
         transform.eulerAngles = new Vector3(0, 0, -angle);
     }
 
+    public override void HitEnemy(IHurtable hit)
+    {
+        //make sure to refresh this
+        if (!hit.CheckHit(this))
+        {
+            return;
+        }
 
+        attackData = GetAttackData();
+
+        base.HitEnemy(hit);
+
+        weapon.ComboUp();
+
+
+    }
 }

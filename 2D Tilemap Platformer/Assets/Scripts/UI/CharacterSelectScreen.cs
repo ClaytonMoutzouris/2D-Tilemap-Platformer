@@ -20,6 +20,8 @@ public class CharacterSelectScreen : MonoBehaviour
     public bool playerReady = false;
     public float backoutTime = 2;
     public BackoutBar backoutBar;
+    public ClassData selectedClass;
+    public TooltipDisplay tooltip;
 
 
     // Start is called before the first frame update
@@ -94,8 +96,9 @@ public class CharacterSelectScreen : MonoBehaviour
         newData.talents = talentPanel.learnedTalents;
         newData.startingStats = statsPanel.stats;
         newData.playerIndex = playerIndex;
+        newData.classData = Instantiate(selectedClass);
         ArcadeGameRulesMenu.instance.arcadeGameData.playerDatas[playerIndex] = newData;
-        SaveCharacter(newData);
+        //SaveCharacter(newData);
         playerReady = true;
         ChangeTab(4);
     }

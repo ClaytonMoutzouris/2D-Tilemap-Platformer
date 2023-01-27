@@ -12,67 +12,130 @@ public class WeaponSpecialization : Ability
     public List<WeaponAttributeBonus> weaponBonuses;
     public List<AbilityFlagBonus> abilityFlagBonuses;
 
-    public List<Attack> lightAttacks;
-    public Attack heavyAttack;
+    public List<WeaponAttack> lightAttacks;
+    public WeaponAttack heavyAttack;
 
-    List<Attack> oldLightAttacks;
-    Attack oldHeavyAttack;
+    List<WeaponAttack> oldLightAttacks;
+    WeaponAttack oldHeavyAttack;
 
     public override void OnGainedAbility(Entity entity)
     {
         base.OnGainedAbility(entity);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null && player._equipmentManager.equippedWeapon.weaponClass == classType)
+        if(owner is PlayerController player)
         {
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
 
-            player.stats.AddPrimaryBonuses(bonusStats);
-            player.stats.AddSecondaryBonuses(secondaryBonusStats);
-            player.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
-
-            player.health.UpdateHealth();
-
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
-
-            if (lightAttacks.Count > 0)
+            if(meleeEquipped != null && meleeEquipped.weaponClass == classType)
             {
-                oldLightAttacks = player._equipmentManager.equippedWeapon.attacks;
-                player._equipmentManager.equippedWeapon.attacks = lightAttacks;
+                player.stats.AddPrimaryBonuses(bonusStats);
+                player.stats.AddSecondaryBonuses(secondaryBonusStats);
+                player.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
 
+                player.health.UpdateHealth();
+
+                meleeEquipped.weaponAttributes.AddBonuses(weaponBonuses);
+                player._attackManager.meleeWeaponObject.UpdateHitbox();
+
+                if (lightAttacks.Count > 0)
+                {
+                    oldLightAttacks = meleeEquipped.attacks;
+                    meleeEquipped.attacks = lightAttacks;
+
+                }
+
+                if (heavyAttack)
+                {
+                    oldHeavyAttack = meleeEquipped.heavyAttack;
+                    meleeEquipped.heavyAttack = heavyAttack;
+                }
             }
 
-            if (heavyAttack)
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+            if (rangedEquipped != null && rangedEquipped.weaponClass == classType)
             {
-                oldHeavyAttack = player._equipmentManager.equippedWeapon.heavyAttack;
-                player._equipmentManager.equippedWeapon.heavyAttack = heavyAttack;
+                player.stats.AddPrimaryBonuses(bonusStats);
+                player.stats.AddSecondaryBonuses(secondaryBonusStats);
+                player.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
+
+                player.health.UpdateHealth();
+
+                rangedEquipped.weaponAttributes.AddBonuses(weaponBonuses);
+                player._attackManager.rangedWeaponObject.UpdateHitbox();
+
+                if (lightAttacks.Count > 0)
+                {
+                    oldLightAttacks = rangedEquipped.attacks;
+                    rangedEquipped.attacks = lightAttacks;
+
+                }
+
+                if (heavyAttack)
+                {
+                    oldHeavyAttack = rangedEquipped.heavyAttack;
+                    rangedEquipped.heavyAttack = heavyAttack;
+                }
             }
         }
     }
 
     public override void OnAbilityLost()
     {
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null && player._equipmentManager.equippedWeapon.weaponClass == classType)
+        if(owner is PlayerController player)
         {
-            player.stats.RemovePrimaryBonuses(bonusStats);
-            player.stats.RemoveSecondaryBonuses(secondaryBonusStats);
-            player.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
 
-            player.health.UpdateHealth();
-
-            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
-
-            if (lightAttacks.Count > 0)
+            if(meleeEquipped != null && meleeEquipped.weaponClass == classType)
             {
-                player._equipmentManager.equippedWeapon.attacks = oldLightAttacks;
-                oldLightAttacks.Clear();
+                player.stats.RemovePrimaryBonuses(bonusStats);
+                player.stats.RemoveSecondaryBonuses(secondaryBonusStats);
+                player.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
 
+                player.health.UpdateHealth();
+
+                meleeEquipped.weaponAttributes.RemoveBonuses(weaponBonuses);
+                player._attackManager.meleeWeaponObject.UpdateHitbox();
+
+                if (lightAttacks.Count > 0)
+                {
+                    meleeEquipped.attacks = oldLightAttacks;
+                    oldLightAttacks.Clear();
+
+                }
+
+                if (heavyAttack)
+                {
+                    meleeEquipped.heavyAttack = oldHeavyAttack;
+                    oldHeavyAttack = null;
+                }
             }
 
-            if (heavyAttack)
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+            if (rangedEquipped != null && rangedEquipped.weaponClass == classType)
             {
-                player._equipmentManager.equippedWeapon.heavyAttack = oldHeavyAttack;
-                oldHeavyAttack = null;
+                player.stats.RemovePrimaryBonuses(bonusStats);
+                player.stats.RemoveSecondaryBonuses(secondaryBonusStats);
+                player.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
+
+                player.health.UpdateHealth();
+
+                rangedEquipped.weaponAttributes.RemoveBonuses(weaponBonuses);
+                player._attackManager.rangedWeaponObject.UpdateHitbox();
+
+                if (lightAttacks.Count > 0)
+                {
+                    rangedEquipped.attacks = oldLightAttacks;
+                    oldLightAttacks.Clear();
+
+                }
+
+                if (heavyAttack)
+                {
+                    rangedEquipped.heavyAttack = oldHeavyAttack;
+                    oldHeavyAttack = null;
+                }
             }
         }
 
@@ -82,11 +145,11 @@ public class WeaponSpecialization : Ability
 
 
     //These two make sure we apply and remove the weapon bonuses from any equipped weapon
-    public override void OnEquippedWeapon()
+    public override void OnEquippedWeapon(Weapon equipped)
     {
-        base.OnEquippedWeapon();
+        base.OnEquippedWeapon(equipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null && player._equipmentManager.equippedWeapon.weaponClass == classType)
+        if (owner is PlayerController player && equipped.weaponClass == classType)
         {
             player.stats.AddPrimaryBonuses(bonusStats);
             player.stats.AddSecondaryBonuses(secondaryBonusStats);
@@ -94,30 +157,30 @@ public class WeaponSpecialization : Ability
 
             player.health.UpdateHealth();
 
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
+            equipped.weaponAttributes.AddBonuses(weaponBonuses);
             player._attackManager.meleeWeaponObject.UpdateHitbox();
 
             if (lightAttacks.Count > 0)
             {
-                oldLightAttacks = player._equipmentManager.equippedWeapon.attacks;
-                player._equipmentManager.equippedWeapon.attacks = lightAttacks;
+                oldLightAttacks = equipped.attacks;
+                equipped.attacks = lightAttacks;
 
             }
 
             if (heavyAttack)
             {
-                oldHeavyAttack = player._equipmentManager.equippedWeapon.heavyAttack;
-                player._equipmentManager.equippedWeapon.heavyAttack = heavyAttack;
+                oldHeavyAttack = equipped.heavyAttack;
+                equipped.heavyAttack = heavyAttack;
             }
         }
 
     }
 
-    public override void OnUnequippedWeapon()
+    public override void OnUnequippedWeapon(Weapon unequipped)
     {
-        base.OnUnequippedWeapon();
+        base.OnUnequippedWeapon(unequipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null && player._equipmentManager.equippedWeapon.weaponClass == classType)
+        if (owner is PlayerController player && unequipped.weaponClass == classType)
         {
             player.stats.RemovePrimaryBonuses(bonusStats);
             player.stats.RemoveSecondaryBonuses(secondaryBonusStats);
@@ -125,19 +188,19 @@ public class WeaponSpecialization : Ability
 
             player.health.UpdateHealth();
 
-            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
+            unequipped.weaponAttributes.RemoveBonuses(weaponBonuses);
             player._attackManager.meleeWeaponObject.UpdateHitbox();
 
             if (lightAttacks.Count > 0)
             {
-                player._equipmentManager.equippedWeapon.attacks = oldLightAttacks;
+                unequipped.attacks = oldLightAttacks;
                 oldLightAttacks.Clear();
 
             }
 
             if (heavyAttack)
             {
-                player._equipmentManager.equippedWeapon.heavyAttack = oldHeavyAttack;
+                unequipped.heavyAttack = oldHeavyAttack;
                 oldHeavyAttack = null;
             }
         }

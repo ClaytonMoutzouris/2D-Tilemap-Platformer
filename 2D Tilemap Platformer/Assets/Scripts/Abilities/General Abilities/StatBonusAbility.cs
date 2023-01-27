@@ -21,11 +21,27 @@ public class StatBonusAbility : Ability
 
         owner.health.UpdateHealth();
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+
+        if (owner is PlayerController player)
         {
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+            if (meleeEquipped != null)
+            {
+                meleeEquipped.weaponAttributes.AddBonuses(weaponBonuses);
+                player._attackManager.meleeWeaponObject.UpdateHitbox();
+
+            }
+
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+            if (rangedEquipped != null)
+            {
+                rangedEquipped.weaponAttributes.AddBonuses(weaponBonuses);
+                player._attackManager.rangedWeaponObject.UpdateHitbox();
+
+            }
+
         }
+
     }
 
     public override void OnAbilityLost()
@@ -37,10 +53,23 @@ public class StatBonusAbility : Ability
 
         owner.health.UpdateHealth();
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+        if (owner is PlayerController player)
         {
-            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+            if (meleeEquipped != null)
+            {
+                meleeEquipped.weaponAttributes.RemoveBonuses(weaponBonuses);
+                player._attackManager.meleeWeaponObject.UpdateHitbox();
+
+            }
+
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+            if (rangedEquipped != null)
+            {
+                rangedEquipped.weaponAttributes.RemoveBonuses(weaponBonuses);
+                player._attackManager.rangedWeaponObject.UpdateHitbox();
+
+            }
 
         }
 
@@ -50,26 +79,53 @@ public class StatBonusAbility : Ability
 
 
     //These two make sure we apply and remove the weapon bonuses from any equipped weapon
-    public override void OnEquippedWeapon()
+    public override void OnEquippedWeapon(Weapon equipped)
     {
-        base.OnEquippedWeapon();
+        base.OnEquippedWeapon(equipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+
+        equipped.weaponAttributes.AddBonuses(weaponBonuses);
+
+        if (owner is PlayerController player)
         {
-            player._equipmentManager.equippedWeapon.weaponAttributes.AddBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
+            switch (equipped.weaponSlot)
+            {
+                case WeaponSlot.Melee:
+                    player._attackManager.meleeWeaponObject.UpdateHitbox();
+                    break;
+                case WeaponSlot.Ranged:
+                    player._attackManager.rangedWeaponObject.UpdateHitbox();
+                    break;
+                default:
+
+                    break;
+            }
+
         }
 
     }
 
-    public override void OnUnequippedWeapon()
+    public override void OnUnequippedWeapon(Weapon unequipped)
     {
-        base.OnUnequippedWeapon();
+        base.OnUnequippedWeapon(unequipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+        unequipped.weaponAttributes.RemoveBonuses(weaponBonuses);
+
+        if (owner is PlayerController player)
         {
-            player._equipmentManager.equippedWeapon.weaponAttributes.RemoveBonuses(weaponBonuses);
-            player._attackManager.meleeWeaponObject.UpdateHitbox();
+            switch(unequipped.weaponSlot)
+            {
+                case WeaponSlot.Melee:
+                        player._attackManager.meleeWeaponObject.UpdateHitbox();
+                    break;
+                case WeaponSlot.Ranged:
+                        player._attackManager.rangedWeaponObject.UpdateHitbox();
+                    break;
+                default:
+
+                    break;
+            }
+
         }
 
     }

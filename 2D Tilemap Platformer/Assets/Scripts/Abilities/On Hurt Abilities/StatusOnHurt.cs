@@ -7,10 +7,10 @@ public class StatusOnHurt : Ability
 {
     public StatusEffect status;
 
-    public override void OnHurt(AttackData attackData)
+    public override void OnHurt(AttackHitData hitData)
     {
         StatusEffect newStatus = Instantiate(status);
 
-        newStatus.ApplyEffect(attackData.owner, owner);
+        newStatus.ApplyEffect(hitData.attackOwner, owner);
     }
 }

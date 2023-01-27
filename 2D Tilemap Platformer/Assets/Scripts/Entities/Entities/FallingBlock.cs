@@ -42,6 +42,11 @@ public class FallingBlock : MonoBehaviour, ITriggerable
             SpawnTrigger();
         }
 
+        if (_controller.isGrounded)
+        {
+            _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+        }
+
 
         _controller.move();
 

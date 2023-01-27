@@ -111,13 +111,11 @@ public class Health : MonoBehaviour
     }
 
     //Returns true if it kills the enemy
-    public void LoseHealth(AttackData attackData)
+    public void LoseHealth(AttackHitData hitData)
     {
 
-        int fullDamage = attackData.GetDamage(entity);
 
-
-        if (fullDamage <= 0)
+        if (hitData.damageDealt <= 0)
         {
             return;
         }
@@ -128,31 +126,33 @@ public class Health : MonoBehaviour
             textColor = Color.red;
         }
 
-        if (attackData.crit)
+        if (hitData.crit)
         {
             textColor = Color.yellow;
-            entity.ShowFloatingText(fullDamage.ToString(), textColor, 1, 1, 2);
+            entity.ShowFloatingText(hitData.damageDealt.ToString(), textColor, 1, 1, 2);
         }
         else
         {
-            entity.ShowFloatingText(fullDamage.ToString(), textColor);
+            entity.ShowFloatingText(hitData.damageDealt.ToString(), textColor);
         }
 
-        SetHealth(currentHealth - fullDamage);
+        SetHealth(currentHealth - hitData.damageDealt);
 
+        /*
         foreach (Ability ability in entity.abilities)
         {
-            ability.OnHurt(attackData);
+            ability.OnHurt(hitData);
         }
+        */
 
         if (!entity.isDead && currentHealth <= 0)
         {
-            foreach (Ability ability in attackData.owner.abilities)
+            foreach (Ability ability in hitData.attackOwner.abilities)
             {
-                ability.OnKill(attackData, entity);
+                ability.OnKill(hitData);
             }
 
-            attackData.owner.OnKill(entity);
+            hitData.attackOwner.OnKill(entity);
 
 
             entity.Die();

@@ -10,7 +10,7 @@ public class ProjectileData : ScriptableObject
     public Sprite image;
     public RuntimeAnimatorController animator;
     public Vector2 size;
-
+    public ProjectileMovementType movementType;
     [Header("Flags")]
     public bool pierce = false;
     public bool boomerang = false;
@@ -33,6 +33,7 @@ public class ProjectileData : ScriptableObject
     public Projectile projectileBase;
     public List<ParticleSystem> visualEffects;
     //Method for taking a weapon or entities stats into account?
+    public List<TriggeredEffect> OnDestroyTriggers;
 
     [HideInInspector]
     public ProjectileFlags projectileFlags = new ProjectileFlags();

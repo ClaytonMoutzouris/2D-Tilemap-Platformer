@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler
+public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler, IDeselectHandler
 {
     public List<TalentNodeUI> talentNodes = new List<TalentNodeUI>();
     public TalentNodeUI currentNode;
@@ -13,13 +13,22 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler
     public GameObject container;
     public Button button;
     public ScrollRect scrollRect;
-
+    public TalentTreeBranch branch;
     public TalentNodeUI prefab;
+    public Image branchIcon;
 
 
     public void RedirectClick()
     {
         currentNode.button.Select();
+    }
+
+
+    public void SetBranch(TalentTreeBranch branch)
+    {
+        this.branch = branch;
+        branchIcon.sprite = branch.branchIcon;
+        AddNodes(branch.talents);
     }
 
     public void AddNodes(List<Talent> talents)
@@ -108,5 +117,13 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler
     public void OnSelect(BaseEventData eventData)
     {
         talentTreePanel.SetCurrentNode(this);
+        talentTreePanel.selectScreen.tooltip.DisplayTooltip(branch.GetTooltip());
+
+    }
+
+    public void OnDeselect(BaseEventData eventData)
+    {
+        talentTreePanel.selectScreen.tooltip.ClearTooltip();
+
     }
 }

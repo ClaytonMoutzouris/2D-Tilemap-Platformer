@@ -12,17 +12,12 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
     public List<ItemData> lootTable;
     public ItemObject itemPrefab;
     ChestSpawnNode spawner;
+    public int numItemsSpawn = 1;
 
     public void Awake()
     {
         hurtbox = GetComponentInChildren<Hurtbox>();
         hurtbox.SetOwner(this);
-    }
-
-    public void GetHurt(AttackObject attackObject)
-    {
-        //Trigger();
-        Interact(attackObject.owner);
     }
 
     public void Interact(Entity entity)
@@ -36,16 +31,20 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
         isOpened = true;
         animator.Play("Chest_Open");
 
-        Vector2 dir = Random.Range(-0.5f, 0.5f) * Vector2.right + Vector2.up;
+        for(int i = 0; i < numItemsSpawn; i++)
+        {
+            Vector2 dir = Random.Range(-0.5f, 0.5f) * Vector2.right + Vector2.up;
 
-        ItemObject dropped = Instantiate(itemPrefab);
-        dropped.transform.position = transform.position;
-        ItemData newData = Instantiate(lootTable[Random.Range(0, lootTable.Count)]);
-        newData.RandomizeStats();
+            ItemObject dropped = Instantiate(itemPrefab);
+            dropped.transform.position = transform.position;
+            ItemData newData = Instantiate(lootTable[Random.Range(0, lootTable.Count)]);
+            newData.RandomizeStats();
 
-        dropped.SetItem(newData);
+            dropped.SetItem(newData);
 
-        dropped._controller.velocity = dir * 4;
+            dropped._controller.velocity = dir * 4;
+        }
+
 
         if(spawner != null)
         {
@@ -68,5 +67,35 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
     public void SetSpawner(ChestSpawnNode spawnNode)
     {
         spawner = spawnNode;
+    }
+
+    public bool CheckFriendly(Entity entity)
+    {
+        return false;
+    }
+
+    public virtual bool CheckHit(AttackObject attackObject)
+    {
+        return true;
+    }
+
+    public void GetHurt(ref AttackHitData hitData)
+    {
+        Interact(hitData.attackOwner);
+    }
+
+    public Hurtbox GetHurtbox()
+    {
+        return hurtbox;
+    }
+
+    public Health GetHealth()
+    {
+        return null;
+    }
+
+    public Entity GetEntity()
+    {
+        throw new System.NotImplementedException();
     }
 }

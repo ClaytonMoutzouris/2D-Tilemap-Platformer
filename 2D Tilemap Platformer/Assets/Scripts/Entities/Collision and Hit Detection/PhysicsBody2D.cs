@@ -46,8 +46,10 @@ public class PhysicsBody2D : MonoBehaviour
         public Vector3 ladderOffset = Vector3.zero;
         public bool spiked = false;
         public bool hasPassenger = false;
+        public bool launched = false;
+        public Vector3 launchVector;
 
-		public bool hasCollision()
+        public bool hasCollision()
 		{
 			return below || right || left || above;
 		}
@@ -283,7 +285,22 @@ public class PhysicsBody2D : MonoBehaviour
             velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
         }
 
+
+        //velocity.x = velocity.x / (1 + GambleConstants.FRICTION * Time.deltaTime);
+        /*
+        if(isGrounded)
+        {
+            velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * velocity.x;
+        }
+        else
+        {
+            velocity.x = (Mathf.Pow((1 - GambleConstants.AIR_FRICTION), Time.deltaTime)) * velocity.x;
+        }
+        */
+
         Vector3 deltaMovement = (velocity * Time.deltaTime);
+        //if(gameObject.GetComponent<PlayerController>() != null)
+            //Debug.Log("Delta Movement this Frame: " + deltaMovement);
         // save off our current grounded state which we will use for wasGroundedLastFrame and becameGroundedThisFrame
 
         collisionState.wasGroundedLastFrame = collisionState.below;
@@ -303,12 +320,12 @@ public class PhysicsBody2D : MonoBehaviour
 		//	handleVerticalSlope( ref deltaMovement );
 
 		// now we check movement in the horizontal dir
-		if( deltaMovement.x != 0f )
-			moveHorizontally( ref deltaMovement );
+		//if( deltaMovement.x != 0f )
+		moveHorizontally( ref deltaMovement );
 
 		// next, check movement in the vertical dir
-		if( deltaMovement.y != 0f )
-			moveVertically( ref deltaMovement );
+		//if( deltaMovement.y != 0f )
+		moveVertically( ref deltaMovement );
 
 
         checkLadder(deltaMovement);
@@ -408,6 +425,11 @@ public class PhysicsBody2D : MonoBehaviour
     }
         */
 
+        if(collisionState.below)
+        {
+            collisionState.launched = false;
+        }
+
     }
 
 
@@ -435,6 +457,7 @@ public class PhysicsBody2D : MonoBehaviour
             moveVertically(ref deltaMovement);
 
 
+
         checkLadder(deltaMovement);
         // move then update our state
         deltaMovement.z = 0;
@@ -455,6 +478,15 @@ public class PhysicsBody2D : MonoBehaviour
 
 
         
+    }
+
+    public void Launch(Vector3 launchVec)
+    {
+        collisionState.launchVector = launchVec;
+        collisionState.launched = true;
+        collisionState.groundBelow = false;
+        collisionState.below = false;
+        collisionState.pushBelow = false;
     }
 
     /// <summary>
@@ -526,6 +558,8 @@ public class PhysicsBody2D : MonoBehaviour
     void moveHorizontally(ref Vector3 deltaMovement)
     {
         var isGoingRight = deltaMovement.x > 0;
+        var isGoingLeft = deltaMovement.x < 0;
+
         var rayDistance = Mathf.Abs(deltaMovement.x) + _skinWidth;
         var rayDirection = isGoingRight ? Vector2.right : -Vector2.right;
         var initialRayOrigin = isGoingRight ? _raycastOrigins.bottomRight : _raycastOrigins.bottomLeft;
@@ -548,7 +582,7 @@ public class PhysicsBody2D : MonoBehaviour
 			else
             */
 
-        hits = Physics2D.RaycastAll(ray, rayDirection, rayDistance, platformMask & ~oneWayPlatformMask);
+            hits = Physics2D.RaycastAll(ray, rayDirection, rayDistance, platformMask & ~oneWayPlatformMask);
 
             for (int h = 0; h < hits.Length; h++)
             {
@@ -586,6 +620,8 @@ public class PhysicsBody2D : MonoBehaviour
                         // set our new deltaMovement and recalculate the rayDistance taking it into account
                         rayDistance = Mathf.Abs(deltaMovement.x);
 
+
+
                         // remember to remove the skinWidth from our deltaMovement
                         if (isGoingRight)
                         {
@@ -601,6 +637,8 @@ public class PhysicsBody2D : MonoBehaviour
 
                         }
 
+                        
+
                         _raycastHitsThisFrame.Add(hits[h]);
                     }
 
@@ -614,6 +652,8 @@ public class PhysicsBody2D : MonoBehaviour
 
                         if (other.isKinematic || (isGoingRight && other.collisionState.right) || (!isGoingRight && other.collisionState.left))
                         {
+                            //In this case, we can't actually push the other thing so we treat it like a wall
+                            
                             // set our new deltaMovement and recalculate the rayDistance taking it into account
                             deltaMovement.x = hits[h].point.x - ray.x;
                             rayDistance = Mathf.Abs(deltaMovement.x);
@@ -624,23 +664,34 @@ public class PhysicsBody2D : MonoBehaviour
                                 deltaMovement.x -= _skinWidth;
                                 collisionState.right = true;
                                 collisionState.pushRight = true;
+                                other.collisionState.pushLeft = true;
+                                other.collisionState.left = true;
+
                             }
                             else
                             {
                                 deltaMovement.x += _skinWidth;
                                 collisionState.left = true;
                                 collisionState.pushLeft = true;
+                                other.collisionState.pushRight = true;
+                                other.collisionState.right = true;
+
 
                             }
+
+                            Vector3 collisionVelocity = other.velocity*10;
+                            velocity.x += collisionVelocity.x * Time.deltaTime;
 
                         }
                         else
                         {
+                            deltaMovement.x = hits[h].point.x - ray.x;
+                            rayDistance = Mathf.Abs(deltaMovement.x);
 
                             if (isGoingRight)
                             {
 
-                                //deltaMovement.x -= _skinWidth;
+                                deltaMovement.x -= _skinWidth;
                                 collisionState.right = true;
                                 collisionState.pushRight = true;
                                 other.collisionState.left = true;
@@ -649,7 +700,7 @@ public class PhysicsBody2D : MonoBehaviour
                             }
                             else
                             {
-                                //deltaMovement.x += _skinWidth;
+                                deltaMovement.x += _skinWidth;
                                 collisionState.left = true;
                                 collisionState.pushLeft = true;
                                 other.collisionState.right = true;
@@ -659,8 +710,10 @@ public class PhysicsBody2D : MonoBehaviour
                             }
                             //float pushAmount = (velocity.y - other.velocity.y) * Time.deltaTime;
                             //other.transform.Translate(Vector2.right * deltaMovement.x);
-                            other.pushMove(Vector2.right * deltaMovement.x);
-
+                            //other.pushMove(Vector2.right * deltaMovement.x);
+                            Vector3 collisionVelocity = (other.velocity + velocity) * 5;
+                            other.velocity.x += collisionVelocity.x * Time.deltaTime;
+                            velocity.x += collisionVelocity.x * Time.deltaTime;
                         }
 
 
@@ -668,6 +721,8 @@ public class PhysicsBody2D : MonoBehaviour
                         // than the width + fudge bail out because we have a direct impact
                         if (rayDistance < _skinWidth + kSkinWidthFloatFudgeFactor)
                             break;
+
+                        _raycastHitsThisFrame.Add(hits[h]);
 
                     }
 

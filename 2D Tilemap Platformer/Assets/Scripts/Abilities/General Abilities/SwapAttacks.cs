@@ -7,11 +7,11 @@ public class SwapAttacks : Ability
 {
     //This is a general version of the attack swaps, which will work for any weapon type
     //This causes some issues however, and this might be removed at some point
-    public List<Attack> lightAttacks;
-    public Attack heavyAttack;
+    public List<WeaponAttack> lightAttacks;
+    public WeaponAttack heavyAttack;
 
-    List<Attack> oldLightAttacks;
-    Attack oldHeavyAttack;
+    List<WeaponAttack> oldLightAttacks;
+    WeaponAttack oldHeavyAttack;
 
     //This could potentially end up permanently changing the attacks if multiple swaps are made.
 
@@ -19,40 +19,90 @@ public class SwapAttacks : Ability
     {
         base.OnGainedAbility(entity);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+
+        if (owner is PlayerController player)
         {
-            if(lightAttacks.Count > 0)
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+            if (meleeEquipped != null)
             {
-                oldLightAttacks = player._equipmentManager.equippedWeapon.attacks;
-                player._equipmentManager.equippedWeapon.attacks = lightAttacks;
+                if (lightAttacks.Count > 0)
+                {
+                    oldLightAttacks = meleeEquipped.attacks;
+                    meleeEquipped.attacks = lightAttacks;
+
+                }
+
+                if (heavyAttack)
+                {
+                    oldHeavyAttack = meleeEquipped.heavyAttack;
+                    meleeEquipped.heavyAttack = heavyAttack;
+                }
 
             }
 
-            if (heavyAttack)
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+            if (rangedEquipped != null)
             {
-                oldHeavyAttack = player._equipmentManager.equippedWeapon.heavyAttack;
-                player._equipmentManager.equippedWeapon.heavyAttack = heavyAttack;
+                if (lightAttacks.Count > 0)
+                {
+                    oldLightAttacks = rangedEquipped.attacks;
+                    rangedEquipped.attacks = lightAttacks;
+
+                }
+
+                if (heavyAttack)
+                {
+                    oldHeavyAttack = rangedEquipped.heavyAttack;
+                    rangedEquipped.heavyAttack = heavyAttack;
+                }
+
             }
+
         }
     }
 
     public override void OnAbilityLost()
     {
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+        if (owner is PlayerController player)
         {
-            if (lightAttacks.Count > 0)
+            Weapon meleeEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+            if (meleeEquipped != null)
             {
-                player._equipmentManager.equippedWeapon.attacks = oldLightAttacks;
-                oldLightAttacks.Clear();
+                if (lightAttacks.Count > 0)
+                {
+                    meleeEquipped.attacks = oldLightAttacks;
+                    oldLightAttacks.Clear();
+
+
+                }
+
+                if (heavyAttack)
+                {
+                    meleeEquipped.heavyAttack = oldHeavyAttack;
+                    oldHeavyAttack = null;
+                }
 
             }
 
-            if (heavyAttack)
+            Weapon rangedEquipped = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+            if (rangedEquipped != null)
             {
-                player._equipmentManager.equippedWeapon.heavyAttack = oldHeavyAttack;
-                oldHeavyAttack = null;
+                if (lightAttacks.Count > 0)
+                {
+                    rangedEquipped.attacks = oldLightAttacks;
+                    oldLightAttacks.Clear();
+
+                }
+
+                if (heavyAttack)
+                {
+                    rangedEquipped.heavyAttack = oldHeavyAttack;
+                    oldHeavyAttack = null;
+                }
+
             }
+
         }
 
         base.OnAbilityLost();
@@ -61,46 +111,41 @@ public class SwapAttacks : Ability
 
 
     //These two make sure we apply and remove the weapon bonuses from any equipped weapon
-    public override void OnEquippedWeapon()
+    public override void OnEquippedWeapon(Weapon equipped)
     {
-        base.OnEquippedWeapon();
+        base.OnEquippedWeapon(equipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+        if (lightAttacks.Count > 0)
         {
-            if (lightAttacks.Count > 0)
-            {
-                oldLightAttacks = player._equipmentManager.equippedWeapon.attacks;
-                player._equipmentManager.equippedWeapon.attacks = lightAttacks;
+            oldLightAttacks = equipped.attacks;
+            equipped.attacks = lightAttacks;
 
-            }
-
-            if (heavyAttack)
-            {
-                oldHeavyAttack = player._equipmentManager.equippedWeapon.heavyAttack;
-                player._equipmentManager.equippedWeapon.heavyAttack = heavyAttack;
-            }
         }
+
+        if (heavyAttack)
+        {
+            oldHeavyAttack = equipped.heavyAttack;
+            equipped.heavyAttack = heavyAttack;
+        }
+        
 
     }
 
-    public override void OnUnequippedWeapon()
+    public override void OnUnequippedWeapon(Weapon unequipped)
     {
-        base.OnUnequippedWeapon();
+        base.OnUnequippedWeapon(unequipped);
 
-        if (owner is PlayerController player && player._equipmentManager.equippedWeapon != null)
+        if (lightAttacks.Count > 0)
         {
-            if (lightAttacks.Count > 0)
-            {
-                player._equipmentManager.equippedWeapon.attacks = oldLightAttacks;
-                oldLightAttacks.Clear();
+            unequipped.attacks = oldLightAttacks;
+            oldLightAttacks.Clear();
 
-            }
+        }
 
-            if (heavyAttack)
-            {
-                player._equipmentManager.equippedWeapon.heavyAttack = oldHeavyAttack;
-                oldHeavyAttack = null;
-            }
+        if (heavyAttack)
+        {
+            unequipped.heavyAttack = oldHeavyAttack;
+            oldHeavyAttack = null;
         }
 
     }

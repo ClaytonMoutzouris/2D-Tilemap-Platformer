@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "LeapAttack", menuName = "ScriptableObjects/Attacks/LeapAttack")]
-public class LeapAttack : Attack
+[CreateAssetMenu(fileName = "LeapAttack", menuName = "ScriptableObjects/Attacks/PlayerAttacks/WeaponAttacks/LeapAttack")]
+public class LeapAttack : WeaponAttack
 {
     public float leapHeight = 5;
     public float leapDuration = 0.5f;
@@ -11,32 +11,31 @@ public class LeapAttack : Attack
     //public List<AttackObject> activeObjects;
 
     //A basic attack.
-    public override IEnumerator Activate(PlayerController user, ButtonInput button = ButtonInput.LightAttack)
+    public override IEnumerator Activate(ButtonInput button = ButtonInput.LightAttack)
     {
-        entity = user;
         StartUp();
 
-        entity._animator.Play(Animator.StringToHash("Jump"));
+        player._animator.Play(Animator.StringToHash("Jump"));
         float leapTimestamp = Time.time;
 
-        entity.movementState = PlayerMovementState.Attacking;
-        entity._controller.velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
+        player.movementState = PlayerMovementState.Attacking;
+        player._controller.velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
         //entity.movementState = PlayerMovementState.Jump;
         
 
         while(Time.time <= leapTimestamp+leapDuration)
         {
-            entity._controller.velocity.x = entity.GetDirection() * entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue();
+            player._controller.velocity.x = player.GetDirection() * player.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue();
             yield return null;
         }
 
         // Enter the state
-        entity._controller.velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
-        entity._controller.velocity.x = 0;
-        entity._animator.Play(attackAnimation.name);
-        entity._animator.speed = attackSpeed;
+        player._controller.velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
+        player._controller.velocity.x = 0;
+        player._animator.Play(attackAnimation.name);
+        player._animator.speed = attackSpeed;
 
-        while (!entity._controller.collisionState.below)
+        while (!player._controller.collisionState.below)
         {
             yield return null;
         }
@@ -44,9 +43,9 @@ public class LeapAttack : Attack
         //Wait for a bit to recover from the impact
         yield return new WaitForSeconds(0.2f);
 
-        if(entity.movementState != PlayerMovementState.Dead)
+        if(player.movementState != PlayerMovementState.Dead)
         {
-            entity.movementState = PlayerMovementState.Idle;
+            player.movementState = PlayerMovementState.Idle;
         }
         CleanUp();
 

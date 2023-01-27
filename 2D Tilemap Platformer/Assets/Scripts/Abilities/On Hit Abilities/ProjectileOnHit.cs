@@ -15,7 +15,7 @@ public class ProjectileOnHit : Ability
     //Could probably include more stuff here
     //Such as how the projectile is aimed/give it different attack data etc.
 
-    public override void OnHit(AttackData attackData, Entity hitEntity)
+    public override void OnHit(AttackHitData hitData)
     {
         Projectile newProj = Instantiate(proj.projectileBase, owner.transform.position, Quaternion.identity);
         newProj.SetData(proj);

@@ -8,9 +8,12 @@ public class ExtraDamageOnHit : Ability
     public int damage;
 
 
-    public override void OnHit(AttackData attackData, Entity hitEntity)
+    public override void OnHit(AttackHitData hitData)
     {
         //This currently does pure damage, which doesn't proc onHurt/Onhit effects
-        hitEntity.health.LoseHealth(damage);
+        if (hitData.hit is Entity entity)
+        {
+            entity.health.LoseHealth(damage);
+        }
     }
 }

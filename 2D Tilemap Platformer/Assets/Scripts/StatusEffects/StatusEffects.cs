@@ -17,6 +17,8 @@ public static class StatusEffects
         if(body)
         {
             body.velocity = direction * knockbackPower + Vector2.up * Mathf.Sqrt(-GambleConstants.GRAVITY) * Mathf.Clamp01(knockbackPower);
+            body.Launch(body.velocity);
+
         }
 
         entity.knockedBack = true;

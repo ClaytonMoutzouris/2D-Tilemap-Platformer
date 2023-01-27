@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ChestSpawnNode : MonoBehaviour
 {
+    public List<Chest> possibleChests;
     public Chest prefab;
     Chest chestEntity;
     public float spawnTime = 5;
@@ -15,7 +16,7 @@ public class ChestSpawnNode : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //SpawnChest();
+        SpawnChest();
 
     }
 

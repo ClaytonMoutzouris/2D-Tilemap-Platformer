@@ -14,7 +14,10 @@ public class StatusEffect : ScriptableObject
     [HideInInspector]
     public float timeStamp;
 
-    public void ApplyEffect(Entity effected, Entity owner = null)
+    public ParticleSystem effectPrefab;
+    ParticleSystem activeEffect;
+
+    public virtual void ApplyEffect(Entity effected, Entity owner = null)
     {
         //Inverse this later
         if (!stackable)
@@ -31,7 +34,6 @@ public class StatusEffect : ScriptableObject
 
         effectedEntity = effected;
         effectOwner = owner;
-
         //Run the coroutine on the entity
         effectedEntity.StartCoroutine(HandleStatusEffect());
     }
@@ -41,6 +43,7 @@ public class StatusEffect : ScriptableObject
         effectedEntity.statusEffects.Add(this);
         timeStamp = Time.time;
 
+        activeEffect = effectedEntity.AddEffect(effectPrefab);
     }
 
     public virtual void RemoveEffect()
@@ -54,6 +57,7 @@ public class StatusEffect : ScriptableObject
         //effected.StopCoroutine(HandleStatusEffect());
 
         effectedEntity.statusEffects.Remove(this);
+        effectedEntity.RemoveEffect(activeEffect);
         effectedEntity = null;
     }
 

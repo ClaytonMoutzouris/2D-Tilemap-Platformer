@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "RangedAttack", menuName = "ScriptableObjects/Attacks/RangedAttack")]
-public class RangedAttack : Attack
+[CreateAssetMenu(fileName = "RangedAttack", menuName = "ScriptableObjects/Attacks/PlayerAttacks/WeaponAttacks/RangedAttack")]
+public class RangedAttack : WeaponAttack
 {
 
     //A basic attack.
-    public override IEnumerator Activate(PlayerController user, ButtonInput button = ButtonInput.Fire)
+    public override IEnumerator Activate(ButtonInput button = ButtonInput.Fire)
     {
-        entity = user;
         StartUp();
 
         //WeaponObject attackObject = player._attackManager.meleeWeapon.SetWeapon(objectPrototypes[0]);
@@ -18,8 +17,8 @@ public class RangedAttack : Attack
         //Can i just know if attack objects are projectiles or not?
 
         //entity.overrideController["PlayerAttack1"] = ownerAnimation;
-        entity._animator.Play(attackAnimation.name);
-        entity._animator.speed = attackSpeed;
+        //attacker._animator.Play(attackAnimation.name);
+        //attacker._animator.speed = attackSpeed;
 
         /*
         if (!entity._animator.GetCurrentAnimatorStateInfo(0).IsName(attackAnimation.name))
@@ -34,18 +33,26 @@ public class RangedAttack : Attack
         }
         */
 
-        float fireRate = user._equipmentManager.equippedWeapon.fireRate;
-        float timeStamp = Time.time;
+        player._attackManager.rangedWeaponObject.gameObject.SetActive(true);
 
-        while(Time.time < timeStamp + fireRate)
+        while (player._input.GetButton(button))
         {
+            player._animator.Play(attackAnimation.name);
+            //user._attackManager.rangedWeaponObject.
+
+            weapon.FireAimedProjectile();
+
             yield return null;
         }
+
+
         //float waitTime = attackAnimation.length * (1 / entity._animator.speed);
         //yield return new WaitForSeconds(waitTime);
 
-        entity._animator.speed = 1;
-        entity._animator.Play(Animator.StringToHash("Idle"));
+        //attacker._animator.speed = 1;
+        //attacker._animator.Play(Animator.StringToHash("Idle"));
+        player._attackManager.rangedWeaponObject.gameObject.SetActive(false);
+
         CleanUp();
     }
 }

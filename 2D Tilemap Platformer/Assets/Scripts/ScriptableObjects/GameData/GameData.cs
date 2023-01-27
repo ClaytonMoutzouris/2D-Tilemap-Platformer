@@ -31,8 +31,15 @@ public class PlayerCreationData
     public int playerIndex;
     public int lives;
     public List<Talent> talents = new List<Talent>();
-    public List<Stat> startingStats = new List<Stat>();
+    public List<Stat> startingStats = new List<Stat> {
+        new Stat(StatType.Attack, 0),
+        new Stat(StatType.Defense, 0),
+        new Stat(StatType.Constitution, 0),
+        new Stat(StatType.Speed, 0),
+        new Stat(StatType.Luck, 0)
+    };
     public int levelTier;
+    public ClassData classData;
 
 }
 
@@ -51,7 +58,7 @@ public class PlayerSaveData
 
     public PlayerSaveData(PlayerCreationData data)
     {
-        talents = data.talents;
+        //talents = data.talents;
         startingStats = data.startingStats;
         levelTier = data.levelTier;
         playerColors = new List<SaveableColor>();

@@ -26,6 +26,10 @@ public class BoxObject : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(_controller.isGrounded)
+        {
+            _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+        }
 
         _controller.move();
 

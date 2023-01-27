@@ -12,7 +12,7 @@ public class EnemyPathfinding : MonoBehaviour
     public int mCurrentNodeId = -1;
     Vector2 mDestination;
     [SerializeField]
-    public float mFramesOfJumping = 0;
+    public int mFramesOfJumping = 0;
     [SerializeField]
     int mStuckFrames = 0;
     [SerializeField]
@@ -25,8 +25,8 @@ public class EnemyPathfinding : MonoBehaviour
 
 
     public float mWidth = 1;
-    public float mHeight = 3;
-    public float cBotMaxPositionError = 1f;
+    public float mHeight = 1;
+    public float cBotMaxPositionError = 0.1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -70,13 +70,18 @@ public class EnemyPathfinding : MonoBehaviour
         }
         //mInputs[(int)KeyInput.GoDown] = true;
 
-
-
         if (reachedX && reachedY)
         {
             int prevNodeId = mCurrentNodeId;
             mCurrentNodeId++;
+
+            if (mCurrentNodeId >= mPath.Count)
+            {
+                mCurrentNodeId = -1;
+            }
             //MoveTo(target.transform.position);
+            if (entity._controller.isGrounded)
+                mFramesOfJumping = GetJumpFramesForNode(prevNodeId);
         }
         else if (!reachedX)
         {
@@ -105,6 +110,7 @@ public class EnemyPathfinding : MonoBehaviour
                 else
                     checkedX = tileX - 1;
             }
+            
 
             if (checkedX != 0 && !GameGrid.instance.AnySolidBlockInStripe((int)checkedX, tileY, mPath[mCurrentNodeId + 1].y))
             {
@@ -130,20 +136,20 @@ public class EnemyPathfinding : MonoBehaviour
             }
         }
 
-        if (entity._controller.isGrounded)
+        if (mFramesOfJumping > 0 && (!entity._controller.isGrounded || (reachedX && !destOnGround) || (entity._controller.isGrounded && destOnGround)))
         {
-            //Change this to just tell us if we need to jump or not
-            float jumpHeight = GetJumpHeightForNextNode();
+            Jump();
 
-            if (jumpHeight > 0)
-            {
-                Jump(jumpHeight);
-
-            }
+            if (!entity._controller.isGrounded)
+                --mFramesOfJumping;
+        }
+        else if (!entity._controller.isGrounded && mFramesOfJumping <= 0)
+        {
+            entity._controller.velocity.y = Mathf.Min(entity._controller.velocity.y, Mathf.Sqrt(entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY));
 
         }
 
-        if (Vector2.Distance(transform.position, entity.mOldPosition) == 0)
+        if (Vector2.Distance(transform.position, entity.mOldPosition) <= 0.1f)
         {
             ++mStuckFrames;
             if (mStuckFrames > cMaxStuckFrames)
@@ -158,20 +164,11 @@ public class EnemyPathfinding : MonoBehaviour
         }
     }
 
-    public void Jump(float jumpHeight)
+    public void Jump()
     {
-        if (!entity._controller.isGrounded)
-        {
-            //Can't jump while jumping or in the air
-            return;
-        }
 
-        if (jumpHeight > entity.maxJumpHeight)
-        {
-            jumpHeight = entity.maxJumpHeight;
-        }
         //Basically just set the velocity to the jump speed
-        entity._controller.velocity.y = Mathf.Sqrt(2 * (jumpHeight + 0.5f) * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(2*entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
 
     }
 
@@ -257,7 +254,7 @@ public class EnemyPathfinding : MonoBehaviour
                     destination,
                     Mathf.CeilToInt(mHeight),
                     Mathf.CeilToInt(mWidth),
-                    (short)entity.maxJumpHeight);
+                    (short)entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue());
 
         /*
         Debug.Log("Path");
@@ -280,6 +277,8 @@ public class EnemyPathfinding : MonoBehaviour
             mCurrentNodeId = 1;
 
             //ChangeAction(BotAction.MoveTo);
+            mFramesOfJumping = GetJumpFramesForNode(0);
+
         }
         else
         {
@@ -287,21 +286,13 @@ public class EnemyPathfinding : MonoBehaviour
         }
     }
 
-    public float GetJumpHeightForNode(int prevNodeId)
+    public int GetJumpFramesForNode(int prevNodeId)
     {
-        //Calculate the trajectory here?
         int currentNodeId = prevNodeId + 1;
 
-        if (mPath[currentNodeId].y - mPath[prevNodeId].y > 0 && entity._controller.isGrounded)
+        if(mPath[currentNodeId].y - mPath[prevNodeId].y > 0 && entity._controller.isGrounded)
         {
-            int jumpHeight = 1;
-            for (int i = currentNodeId; i < mPath.Count; ++i)
-            {
-                if (mPath[i].y - mPath[prevNodeId].y >= jumpHeight)
-                    jumpHeight = mPath[i].y - mPath[prevNodeId].y;
-                if (mPath[i].y - mPath[prevNodeId].y < jumpHeight || GameGrid.instance.IsGround(mPath[i].x, mPath[i].y - 1))
-                    return GetJumpFrameCount(jumpHeight);
-            }
+            return 15 * (mPath[currentNodeId].y - mPath[prevNodeId].y);
         }
 
         return 0;
@@ -352,9 +343,9 @@ public class EnemyPathfinding : MonoBehaviour
 
     float GetJumpFrameCount(int deltaY)
     {
-        return Mathf.Min((float)deltaY, entity.maxJumpHeight);
+        return Mathf.Min(deltaY, entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue());
     }
-    /*
+    
     private void OnDrawGizmos()
     {
         if (mPath == null || mPath.Count < 1)
@@ -368,5 +359,5 @@ public class EnemyPathfinding : MonoBehaviour
             Gizmos.DrawWireSphere(new Vector3(point.x + 0.5f, point.y + 0.5f), 0.1f);
         }
     }
-    */
+    
 }

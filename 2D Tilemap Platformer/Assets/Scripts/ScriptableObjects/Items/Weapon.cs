@@ -4,25 +4,32 @@ using UnityEngine;
 
 public enum DamageType { Physical, Magical }
 public enum AttackInput { Up, Down, Forward, Backward, Neutral, Shoot }
+public enum WeaponSlot { Melee, Ranged }
+
 [CreateAssetMenu(fileName = "Weapon", menuName = "ScriptableObjects/Items/Equipment/Weapon")]
 public class Weapon : Equipment
 {
     [Header("Weapon Class")]
     public WeaponClassType weaponClass;
+    public WeaponSlot weaponSlot;
+
     public WeaponObject weaponBase;
 
     [Header("Attacks")]
-    public List<Attack> attacks;
-    public Attack heavyAttack;
+    public List<WeaponAttack> attacks;
+    public WeaponAttack rangedAttack;
+    public WeaponAttack heavyAttack;
 
-    public Attack attackUp;
-    public Attack attackDown;
-    public Attack attackForward;
-    public Attack attackBack;
-    public Attack attackNeutral;
+    public WeaponAttack attackUp;
+    public WeaponAttack attackDown;
+    public WeaponAttack attackForward;
+    public WeaponAttack attackBack;
+    public WeaponAttack attackNeutral;
 
-    public ProjectileData projectile;
+    public ProjectileData baseProjectile;
 
+    public AmmoType ammoType;
+    public int currentAmmo = 5;
 
 
     [Header("Stats")]
@@ -56,6 +63,29 @@ public class Weapon : Equipment
     float lastFiredTimestamp = 0;
     private WeaponObject weaponObj;
 
+    float lastComboTimestamp = 0;
+    int combo = 0;
+    public float comboDuration = 3f;
+
+    public void ComboUp()
+    {
+        if(Time.time > lastComboTimestamp + comboDuration)
+        {
+            combo = 0;
+        }
+
+        combo++;
+        lastComboTimestamp = Time.time;
+    }
+
+    public void CheckCombo()
+    {
+        if (Time.time > lastComboTimestamp + comboDuration)
+        {
+            combo = 0;
+        }
+    }
+
     //This is basically an INIT method
     public void SetBaseStats()
     {
@@ -73,6 +103,7 @@ public class Weapon : Equipment
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.NumProjectiles, numberOfProjectiles));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.SpreadAngle, spreadAngle));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.AmmoCapacity, ammoCapacity));
+        currentAmmo = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.ReloadTime, reloadTime));
         weaponAttributes.SetAttribute(new WeaponAttribute(WeaponAttributesType.ProjectileLifeTime, projectileLifeTime));
 
@@ -99,17 +130,19 @@ public class Weapon : Equipment
     public override void OnEquipped(PlayerController entity)
     {
         owner = entity;
-
         //Simple fix, probably never need to change it though
         if (!baseStatsLoaded)
         {
             SetBaseStats();
         }
 
-        
+        int ammoWhenEquipped = currentAmmo;
+        int capacityWhenEquipped = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
+
+
         foreach (Ability ability in owner.abilities)
         {
-            ability.OnEquippedWeapon();
+            ability.OnEquippedWeapon(this);
         }
         
 
@@ -118,8 +151,16 @@ public class Weapon : Equipment
             weaponAttributes.AddBonuses(talent.weaponBonuses);
         }
 
+
+
         base.OnEquipped(entity);
 
+        if (capacityWhenEquipped != (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue())
+        {
+            currentAmmo = Mathf.Max(ammoWhenEquipped, currentAmmo + ((int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue() - capacityWhenEquipped));
+        }
+
+        //Set anything that needs to be set based on our starting stats here
 
         owner._attackManager.SetWeaponObject(this);
 
@@ -127,10 +168,12 @@ public class Weapon : Equipment
 
     public override void OnUnequipped(Entity entity)
     {
-        
+        int ammoWhenEquipped = currentAmmo;
+        int capacityWhenEquipped = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
+
         foreach (Ability ability in entity.abilities)
         {
-            ability.OnUnequippedWeapon();
+            ability.OnUnequippedWeapon(this);
 
         }
         
@@ -142,33 +185,15 @@ public class Weapon : Equipment
 
         base.OnUnequipped(entity);
 
+        if (capacityWhenEquipped != (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue())
+        {
+            currentAmmo = Mathf.Max(ammoWhenEquipped, currentAmmo + ((int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue() - capacityWhenEquipped));
+        }
+        //Set anything that needs to be set based on our startins stats here
+
     }
 
-
-    public Attack GetNextAttack()
-    {
-        if (attacks[attackIndex] == null)
-        {
-            return null;
-        }
-
-        Attack attack = Instantiate(attacks[attackIndex]);
-        attackIndex++;
-        if(attackIndex >= attacks.Count)
-        {
-            attackIndex = 0;
-        }
-
-        attack.attackSpeed = GetStatValue(WeaponAttributesType.AttackSpeed);
-
-        //owner.StartCoroutine(attack.Activate(owner));
-
-
-        
-        return attack;
-    }
-
-    public Attack GetAttack(AttackInput attackDir)
+    public WeaponAttack GetAttack(AttackInput attackDir)
     {
 
 
@@ -185,30 +210,38 @@ public class Weapon : Equipment
             case AttackInput.Neutral:
                 return attackNeutral;
             case AttackInput.Shoot:
-                return attacks[0];
+                return rangedAttack;
         }
 
         return attacks[0];
 
     }
 
-    public Attack GetHeavyAttack()
+    public WeaponAttack GetHeavyAttack()
     {
         if (heavyAttack == null)
         {
             return null;
         }
 
-        Attack attack = Instantiate(heavyAttack);
+
+        return heavyAttack;
+    }
+
+    public WeaponAttack GetRangedAttack()
+    {
+        if (rangedAttack == null)
+        {
+            return null;
+        }
 
 
-
-        return attack;
+        return rangedAttack;
     }
 
     public void FireProjectile(int angle = 0)
     {
-        if(projectile == null)
+        if(baseProjectile == null)
         {
             return;
         }
@@ -221,16 +254,25 @@ public class Weapon : Equipment
         }
 
 
+
         if (Time.time > lastFiredTimestamp + (1 / GetStatValue(WeaponAttributesType.FireRate)))
         {
+            if (currentAmmo <= 0)
+            {
+                owner.ShowFloatingText("Reload", Color.red);
+                return;
+            }
+
 
             lastFiredTimestamp = Time.time;
+            currentAmmo--;
+            owner.playerVersusUI.ammoDisplay.UpdateAmmo();
 
-            Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
+            Projectile proj = Instantiate(baseProjectile.projectileBase, owner.transform.position, Quaternion.identity);
 
             if (proj != null)
             {
-                proj.SetData(projectile);
+                proj.SetData(baseProjectile);
                 proj.SetFromWeapon(this);
 
                 dir.x *= owner.GetDirection();
@@ -239,17 +281,12 @@ public class Weapon : Equipment
             }
         }
 
-
-
-
-
-
     }
 
     public void FireAimedProjectile()
     {
 
-        if (projectile == null)
+        if (baseProjectile == null)
         {
             return;
         }
@@ -260,14 +297,26 @@ public class Weapon : Equipment
 
         if (Time.time > lastFiredTimestamp + (1 / GetStatValue(WeaponAttributesType.FireRate)))
         {
+
+            if (currentAmmo <= 0)
+            {
+                owner.ShowFloatingText("Reload", Color.red);
+                lastFiredTimestamp = Time.time;
+
+                return;
+            }
+
+            currentAmmo--;
+            owner.playerVersusUI.ammoDisplay.UpdateAmmo();
+
             lastFiredTimestamp = Time.time;
 
-            Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
+            Projectile proj = Instantiate(baseProjectile.projectileBase, owner.transform.position, Quaternion.identity);
 
 
             if (proj != null)
             {
-                proj.SetData(projectile);
+                proj.SetData(baseProjectile);
                 proj.SetFromWeapon(this);
 
                 if (dir == Vector2.zero)
@@ -306,13 +355,20 @@ public class Weapon : Equipment
     //Only works for melee weapons with the default thrown object set
     public void ThrowWeapon()
     {
-        Projectile proj = Instantiate(projectile.projectileBase, owner.transform.position, Quaternion.identity);
+        Projectile proj = Instantiate(baseProjectile.projectileBase, owner.transform.position, Quaternion.identity);
+        Debug.Log("Throw Weapon");
 
         if (proj != null)
         {
-            proj.SetData(projectile);
+            Debug.Log("Projectile");
+
+            proj.SetData(baseProjectile);
             proj.SetFromWeapon(this);
-            proj._attackObject.UpdateHitbox(weaponBase.hitbox.size, weaponBase.hitbox.offset);
+            if(weaponSlot == WeaponSlot.Melee)
+            {
+                proj._attackObject.UpdateHitbox(weaponObj.hitbox.size, weaponObj.hitbox.offset);
+            }
+
             proj.spriteRenderer.sprite = sprite;
             Vector2 dir;
 
@@ -341,11 +397,35 @@ public class Weapon : Equipment
             damage = (int)GetStatValue(WeaponAttributesType.Damage),
             knockbackPower = GetStatValue(WeaponAttributesType.KnockbackPower),
             damageType = (DamageType)GetStatValue(WeaponAttributesType.DamageType),
-            knockbackAngle = GetStatValue(WeaponAttributesType.KnockbackAngle),
             critChance = (GetStatValue(WeaponAttributesType.CritChance) + owner.stats.GetSecondaryStat(SecondaryStatType.CritChance).GetValue())
 
         };
 
 
+    }
+
+    public void UpdateAmmoCapacity()
+    {
+        int ammoWhenEquipped = currentAmmo;
+        int capacityWhenEquipped = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
+
+
+
+        if (capacityWhenEquipped != (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue())
+        {
+            currentAmmo = Mathf.Max(ammoWhenEquipped, currentAmmo + ((int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue() - capacityWhenEquipped));
+            owner.playerVersusUI.ammoDisplay.UpdateAmmo();
+
+        }
+    }
+
+    public void Reload(AmmoType ammoType)
+    {
+        if(ammoType == this.ammoType)
+        {
+            currentAmmo = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
+            owner.playerVersusUI.ammoDisplay.UpdateAmmo();
+
+        }
     }
 }

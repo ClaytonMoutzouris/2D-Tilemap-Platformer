@@ -34,6 +34,8 @@ public class Entity : MonoBehaviour, IHurtable
     public Stats stats;
     public bool isDead = false;
 
+    public PhysicsBody2D _controller;
+
 
     // Start is called before the first frame update
     void Start()
@@ -118,41 +120,60 @@ public class Entity : MonoBehaviour, IHurtable
     }
 
 
-    public virtual void GetHurt(AttackObject attackObject)
+    public virtual void GetHurt(ref AttackHitData hitData)
     {
-        AttackData attackData = attackObject.GetAttackData();
-        attackObject.attackData = attackData;
 
+        //This one reduced by 1% per damage reduction
+        //int damageReduction = Mathf.FloorToInt((int)(finalDamage * ((hit.stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue()) / 100)));
+
+        //This reduces damage by 1 for every 5 Damage Reduction (which is 1 to 1 with defense atm)
+        int damageReduction = Mathf.FloorToInt(stats.GetSecondaryStat(SecondaryStatType.DamageReduction).GetValue() / 5);
+
+        //we want to update the hitdata so it knows how much damage was actually dealt in the end
+        hitData.damageDealt -= damageReduction;
+
+        health.LoseHealth(hitData);
+
+        foreach (Ability ability in abilities)
+        {
+            ability.OnHurt(hitData);
+        }
+
+        StartCoroutine(StatusEffects.Knockback(this, (transform.position - hitData.attackOwner.transform.position).normalized, hitData.knockbackPower));
+        
+    }
+
+    public virtual bool CheckFriendly(Entity entity)
+    {
+        return entity == this;
+    }
+
+    public virtual bool CheckHit(AttackObject attackObject)
+    {
         float dodgeChance = stats.GetSecondaryStat(SecondaryStatType.DodgeChance).GetValue();
 
         int dodge = Random.Range(0, 100);
 
         if (dodge < dodgeChance)
         {
-            ShowFloatingText("Dodged", Color.blue);
-            return;
+            return false;
         }
 
-        /*
-        AttackHitData hitData = new AttackHitData()
-        {
-            attackOwner = attackData.owner,
-            hitEntity = this
-        };
-        */
+        return true;
+    }
 
+    public Health GetHealth()
+    {
+        throw new System.NotImplementedException();
+    }
 
-        //At this point, we know we've hit but havent dealt the damage yet
-        foreach (Ability ability in attackObject.owner.abilities)
-        {
-            ability.OnHit(attackData, this);
-        }
+    public Hurtbox GetHurtbox()
+    {
+        throw new System.NotImplementedException();
+    }
 
-        health.LoseHealth(attackData);
-
-        StartCoroutine(StatusEffects.Knockback(this, (transform.position - attackObject.transform.position).normalized, attackData.knockbackPower));
-
-        
-
+    public Entity GetEntity()
+    {
+        return this;
     }
 }

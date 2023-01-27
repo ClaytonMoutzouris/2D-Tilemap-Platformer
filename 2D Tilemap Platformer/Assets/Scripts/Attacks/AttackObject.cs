@@ -85,9 +85,9 @@ public class AttackObject : MonoBehaviour
 
         Hurtbox hurtbox = collider.GetComponent<Hurtbox>();
 
-        if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && hurtbox.owner != owner)
+        if(hurtbox != null && hurtbox.colliderState != ColliderState.Closed && !hurtbox.owner.CheckFriendly(owner))
         {
-            hurtbox.GetHurt(this);
+            HitEnemy(hurtbox.owner);
             //HitEnemy(hurtbox.entity);
             hits.Add(collider);
 
@@ -104,59 +104,29 @@ public class AttackObject : MonoBehaviour
 
     }
 
-    /* HitEnemy deprecated
-    public virtual void HitEnemy(Entity entity)
+    public virtual void HitEnemy(IHurtable hit)
     {
         //make sure to refresh this
-        AttackData attackData = GetAttackData();
-
-        float dodgeChance = entity.stats.GetSecondaryStat(SecondaryStatType.DodgeChance).GetValue();
-
-        int dodge = Random.Range(0, 100);
-
-        if(dodge < dodgeChance)
+        if (!hit.CheckHit(this))
         {
-            entity.ShowFloatingText("Dodged", Color.blue);
             return;
         }
 
-        int fullDamage = attackData.damage;
+        AttackHitData hitData = attackData.GetHitData(hit);
 
-        if(owner != null)
-        {
-            fullDamage += (int)owner.stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue();
-        }
-
-        bool crit = false;
-        int r = Random.Range(0, 100);
-        //since the 0 is inclusive, we exclude the ceiling (crit chance)
-        if (r < attackData.critChance)
-        {
-            crit = true;
-        }
-
-        if(crit)
-        {
-            fullDamage *= 2;
-        }
-
-        entity.health.LoseHealth(fullDamage, owner, crit);
-
-
-        entity.StartCoroutine(StatusEffects.Knockback(entity, this));
+        hit.GetHurt(ref hitData);
 
 
         foreach (Ability ability in owner.abilities)
         {
-            if (ability is EffectOnHit onHit)
-            {
-                onHit.OnHit(entity);
-            }
+            ability.OnHit(hitData);
         }
 
 
+        //if its an entity, we can knock it back
+
+
     }
-    */
 
     public virtual AttackData GetAttackData()
     {

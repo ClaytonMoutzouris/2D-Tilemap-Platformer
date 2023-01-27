@@ -7,9 +7,9 @@ public class DamageReflect : Ability
 {
     public int reflectPercent = 100;
 
-    public override void OnHurt(AttackData attackData)
+    public override void OnHurt(AttackHitData hitData)
     {
         //for now, call lose health with pure damage
-        attackData.owner.health.LoseHealth(attackData.damage * (reflectPercent / 100));
+        hitData.attackOwner.health.LoseHealth(hitData.damageDealt * (reflectPercent / 100));
     }
 }

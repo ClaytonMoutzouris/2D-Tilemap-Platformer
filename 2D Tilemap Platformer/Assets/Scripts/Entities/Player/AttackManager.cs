@@ -113,22 +113,55 @@ public class AttackManager : MonoBehaviour
     }
     */
 
-    public void ActivateAttack(AttackInput direction, ButtonInput buttonInput)
+    public void ActivateAttack(AttackInput attackInput, ButtonInput buttonInput)
     {
-        if (activeAttack != null || player._equipmentManager.equippedWeapon == null)
+        if (activeAttack != null)
         {
             return;
         }
 
-        Attack newAttack = player._equipmentManager.equippedWeapon.GetAttack(direction);
-        if (newAttack == null)
+        if(buttonInput == ButtonInput.Fire)
         {
-            return;
+            Weapon wep = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+            if(!wep)
+            {
+                return;
+            }
+
+            WeaponAttack newAttack = wep.GetAttack(attackInput);
+            if (newAttack == null)
+            {
+                return;
+            }
+
+            newAttack.SetAttacker(player);
+            newAttack.SetWeapon(wep);
+            activeAttack = newAttack;
+
+            StartCoroutine(newAttack.Activate(buttonInput));
+        }
+        else
+        {
+            Weapon wep = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee);
+            if (!wep)
+            {
+                return;
+            }
+
+            WeaponAttack newAttack = wep.GetAttack(attackInput);
+            if (newAttack == null)
+            {
+                return;
+            }
+            newAttack.SetAttacker(player);
+            newAttack.SetWeapon(wep);
+
+            activeAttack = newAttack;
+
+            StartCoroutine(newAttack.Activate(buttonInput));
         }
 
-        activeAttack = newAttack;
-
-        StartCoroutine(newAttack.Activate(player, buttonInput));
 
         
 
@@ -136,32 +169,35 @@ public class AttackManager : MonoBehaviour
 
     public void ActivateHeavyAttack(ButtonInput button = ButtonInput.HeavyAttack)
     {
-        if (activeAttack != null || player._equipmentManager.equippedWeapon == null)
+        if (activeAttack != null || player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee) == null)
         {
             return;
         }
 
-        Attack newAttack = player._equipmentManager.equippedWeapon.GetHeavyAttack();
+        WeaponAttack newAttack = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee).GetHeavyAttack();
         if(newAttack == null)
         {
             return;
         }
+        newAttack.SetAttacker(player);
+        newAttack.SetWeapon(player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee));
+
         activeAttack = newAttack;
 
-        StartCoroutine(newAttack.Activate(player, button));
+        StartCoroutine(newAttack.Activate(button));
     }
 
     //This method fires a projectile at a certain angle (default to straight ahead
     public void FireProjectile(int angle = 90)
     {
-        player._equipmentManager.equippedWeapon.FireProjectile(angle);
+        player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged).FireProjectile(angle);
     }
 
     //This method gets the players aim input
     public void FireAimedProjectile()
     {
 
-        player._equipmentManager.equippedWeapon.FireAimedProjectile();
+        player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged).FireAimedProjectile();
 
     }
 
@@ -170,9 +206,10 @@ public class AttackManager : MonoBehaviour
 
     }
 
-    public void ThrowWeapon()
+    public void ThrowWeapon(WeaponSlot slot)
     {
-        player._equipmentManager.equippedWeapon.ThrowWeapon();
+
+        player._equipmentManager.GetEquippedWeapon(slot).ThrowWeapon();
 
 
     }

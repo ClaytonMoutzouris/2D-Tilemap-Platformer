@@ -7,7 +7,7 @@ public class BuffOnHit : Ability
 {
     public StatusEffect status;
 
-    public override void OnHit(AttackData attackData, Entity hitEntity)
+    public override void OnHit(AttackHitData hitData)
     {
         StatusEffect newStatus = Instantiate(status);
 

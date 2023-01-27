@@ -104,6 +104,7 @@ public class SlimeAI : MonoBehaviour
             }
             movementController.JumperPathFollow();
 
+            /*
             //If we caught up with the path
             if (movementController.mCurrentNodeId >= movementController.mPath.Count && !entity.knockedBack)
             {
@@ -112,9 +113,10 @@ public class SlimeAI : MonoBehaviour
                 states = SLIME_STATE.SLIMEATTACK1;
                 break;
             }
+            */
 
             //If we are in range of target
-            if (Vector3.Distance(entity.target.transform.position, transform.position) < 2.5 && !entity.knockedBack)
+            if (Vector3.Distance(entity.target.transform.position, transform.position) < 1.5 && !entity.knockedBack)
             {
                 movementController.mCurrentNodeId = -1;
                 states = SLIME_STATE.SLIMEATTACK1;
@@ -146,11 +148,11 @@ public class SlimeAI : MonoBehaviour
         //Set this incase the attack speed changes
         //entity._velocity.y = Mathf.Sqrt(entity.maxJumpHeight * -GambleConstants.GRAVITY);
         //entity._velocity.x = entity.GetDirection()*entity.movementSpeed*2;
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(.3f);
         entity.normalizedHorizontalSpeed = entity.GetDirection();
-        float speedMod = attackSpeed;
-
-        entity.movementSpeed *= speedMod *3;
+        float speedMod = attackSpeed*2;
+        SecondaryStatBonus bonusSpeed = new SecondaryStatBonus(SecondaryStatType.MoveSpeed, speedMod, StatModType.Multiplier);
+        entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).AddBonus(bonusSpeed);
 
 
         // EXECUTE ATTACK STATE
@@ -171,7 +173,7 @@ public class SlimeAI : MonoBehaviour
                 yield return null;
             }
 
-            entity.movementSpeed /= (speedMod*3);
+            entity.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).RemoveBonus(bonusSpeed);
             entity._animator.speed = 1;
             entity._animator.Play(Animator.StringToHash("Slime_Idle"));
             states = SLIME_STATE.IDLE;

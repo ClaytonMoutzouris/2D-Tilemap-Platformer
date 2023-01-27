@@ -6,17 +6,26 @@ public class EquipmentManager : MonoBehaviour
 {
     public ItemObject itemPrefab;
 
-    public Weapon equippedWeapon;
-    public Weapon storedWeapon;
-
     public Dictionary<EquipmentSlot, Armor> armorEquipment;
-    public List<ConsumableItem> consumables;
+    public Dictionary<WeaponSlot, Weapon> weaponSlots;
+
+    int consumableSelectionIndex = 0;
+    public int consumableSlots = 5;
+    public ConsumableItem[] consumables;
 
     public PlayerController player;
     // Start is called before the first frame update
     void Awake()
     {
         player = GetComponent<PlayerController>();
+
+        weaponSlots = new Dictionary<WeaponSlot, Weapon>();
+
+        foreach (WeaponSlot slot in System.Enum.GetValues(typeof(WeaponSlot)))
+        {
+            weaponSlots.Add(slot, null);
+        }
+
         armorEquipment = new Dictionary<EquipmentSlot, Armor>();
 
         foreach (EquipmentSlot slot in System.Enum.GetValues(typeof(EquipmentSlot)))
@@ -24,39 +33,61 @@ public class EquipmentManager : MonoBehaviour
             armorEquipment.Add(slot, null);
         }
 
-        consumables = new List<ConsumableItem>();
+        consumables = new ConsumableItem[consumableSlots];
     }
 
     public void AddConsumable(ConsumableItem consumable)
     {
-        consumables.Add(consumable);
-        player.playerVersusUI.consumableSlot.SetItem(consumables[0]);
+        for(int i = 0; i < consumableSlots; i++)
+        {
+            //Check for open slots
+            if(!consumables[i])
+            {
+                consumables[i] = consumable;
+                player.playerVersusUI.itemBelt.SetItem(consumables[i], i);
+                return;
+            }
+        }
+
+        //ok we have no open slots, we will swap with the currently selected consumable
+        if(consumables[consumableSelectionIndex] != null)
+        {
+            DropItem(consumables[consumableSelectionIndex]);
+
+            consumables[consumableSelectionIndex] = consumable;
+            player.playerVersusUI.itemBelt.SetItem(consumables[consumableSelectionIndex], consumableSelectionIndex);
+        }
+        
 
     }
 
     public void UseNextConsumable()
     {
-        if(consumables.Count <= 0)
-        {
-            return;
-        }
 
-        ConsumableItem temp = consumables[0];
-        bool used = temp.Use(player);
-
-        if(used)
+        for (int i = 0; i < consumableSlots; i++)
         {
-            consumables.RemoveAt(0);
-            if (consumables.Count > 0)
+            //Check for open slots
+            if (consumables[i])
             {
-                player.playerVersusUI.consumableSlot.SetItem(consumables[0]);
-            } else
-            {
-                player.playerVersusUI.consumableSlot.ClearSlot();
+                ConsumableItem temp = consumables[i];
+                bool used = temp.Use(player);
+
+                if (used)
+                {
+                    consumables[i] = null;
+
+                    player.playerVersusUI.itemBelt.SetItem(consumables[i], i);
+                    
+
+                }
             }
-
         }
 
+    }
+
+    public bool IsSlotEmpty(WeaponSlot slot)
+    {
+        return weaponSlots[slot] == null;
     }
 
     public bool IsSlotEmpty(EquipmentSlot slot)
@@ -67,6 +98,11 @@ public class EquipmentManager : MonoBehaviour
     public Armor GetEquipment(EquipmentSlot slot)
     {
         return armorEquipment[slot];
+    }
+
+    public Weapon GetEquippedWeapon(WeaponSlot slot)
+    {
+        return weaponSlots[slot];
     }
 
     // Update is called once per frame
@@ -80,24 +116,31 @@ public class EquipmentManager : MonoBehaviour
 
         if(equipment is Weapon weapon)
         {
-            if(equippedWeapon != null)
+            if (!IsSlotEmpty(weapon.weaponSlot))
             {
-                equippedWeapon.OnUnequipped(player);
-                DropItem(equippedWeapon);
-
+                Unequip(weapon.weaponSlot);
             }
 
-            equippedWeapon = weapon;
+            weaponSlots[weapon.weaponSlot] = weapon;
 
             weapon.OnEquipped(player);
-            player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
+            if(weapon.weaponSlot == WeaponSlot.Melee)
+            {
+                player.playerVersusUI.slot1.SetWeapon(weaponSlots[weapon.weaponSlot]);
+
+            }
+            else if(weapon.weaponSlot == WeaponSlot.Ranged) {
+                player.playerVersusUI.slot2.SetWeapon(weaponSlots[weapon.weaponSlot]);
+                player.playerVersusUI.ammoDisplay.UpdateAmmo();
+
+            }
 
         }
         else if(equipment is Armor armor)
         {
             if(!IsSlotEmpty(armor.equipmentSlot))
             {
-                UnequipItem(armor.equipmentSlot);
+                Unequip(armor.equipmentSlot);
             }
 
             Debug.Log("Equipped item " + armor.name);
@@ -106,7 +149,7 @@ public class EquipmentManager : MonoBehaviour
         }
     }
 
-    public void UnequipItem(EquipmentSlot slot)
+    public void Unequip(EquipmentSlot slot)
     {
         Armor temp = armorEquipment[slot];
         if(temp != null)
@@ -119,18 +162,29 @@ public class EquipmentManager : MonoBehaviour
 
     }
 
-    public void EquipWeapon(Weapon wep)
+    public void Unequip(WeaponSlot slot)
     {
-        if (equippedWeapon != null)
+        Weapon currentEquipped = weaponSlots[slot];
+
+        if (currentEquipped != null)
         {
-            equippedWeapon.OnUnequipped(player);
-            DropItem(equippedWeapon);
+            currentEquipped.OnUnequipped(player);
+
+            if (currentEquipped.weaponSlot == WeaponSlot.Melee)
+            {
+                player.playerVersusUI.slot1.ClearSlot();
+            }
+            else if (currentEquipped.weaponSlot == WeaponSlot.Ranged)
+            {
+                player.playerVersusUI.slot2.ClearSlot();
+
+            }
+
+            DropItem(currentEquipped);
 
         }
 
-        equippedWeapon = wep;
-        player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
-        wep.OnEquipped(player);
+
     }
 
     public void DropItem(ItemData item)
@@ -154,27 +208,4 @@ public class EquipmentManager : MonoBehaviour
 
     }
 
-    public void SwapWeaponSlots()
-    {
-        Weapon toEquip = storedWeapon;
-        if(equippedWeapon != null)
-        {
-            equippedWeapon.OnUnequipped(player);
-            storedWeapon = equippedWeapon;
-            equippedWeapon = null;
-
-        }
-
-        if(toEquip != null)
-        {
-            toEquip.OnEquipped(player);
-            equippedWeapon = toEquip;
-
-        }
-
-        player.playerVersusUI.slot2.SetWeapon(storedWeapon);
-        player.playerVersusUI.slot1.SetWeapon(equippedWeapon);
-
-
-    }
 }

@@ -85,7 +85,6 @@ public class ArenaBattleManager : MonoBehaviour
                 continue;
             }
 
-            Debug.LogError("Spawning player " + data.playerIndex);
             data.lives = gameData.lives;
             int r = Random.Range(0, pointsList.Count);
             GameManager.instance.SpawnPlayer(data.playerIndex, pointsList[r], data);

@@ -9,8 +9,9 @@ public class Stats : MonoBehaviour
     public Dictionary<StatType, Stat> primaryStats;
     public Dictionary<SecondaryStatType, SecondaryStat> secondaryStats;
     public List<WeaponAttributeBonus> weaponBonuses;
-    public Stat[] startingStats = new Stat[(int)StatType.Luck+1];
-    public SecondaryStat[] startingSecondaryStats = new SecondaryStat[(int)SecondaryStatType.DamageReduction+1];
+    public BaseStats baseStats;
+    //public Stat[] startingStats = new Stat[(int)StatType.Luck + 1];
+    //public SecondaryStat[] startingSecondaryStats = new SecondaryStat[(int)SecondaryStatType.StatusDurationReduction + 1];
     public Dictionary<AbilityFlagType, AbilityFlag> abilityFlags;
 
 
@@ -36,13 +37,16 @@ public class Stats : MonoBehaviour
     {
 
         primaryStats = new Dictionary<StatType, Stat>();
-        foreach (Stat stat in startingStats)
+
+        baseStats = Instantiate(baseStats);
+
+        foreach (Stat stat in baseStats.startingStats)
         {
             primaryStats.Add(stat.type, stat);
         }
 
         secondaryStats = new Dictionary<SecondaryStatType, SecondaryStat>();
-        foreach (SecondaryStat secondaryStat in startingSecondaryStats)
+        foreach (SecondaryStat secondaryStat in baseStats.startingSecondaryStats)
         {
             secondaryStat.stats = this;
             secondaryStats.Add(secondaryStat.type, secondaryStat);
@@ -172,7 +176,7 @@ public class Stats : MonoBehaviour
 //These should only be INTEGERS
 public enum StatType { Attack, Defense, Constitution, Speed, Luck }
 //These should all be floats, to make sure it covers any kind of number we need
-public enum SecondaryStatType { MoveSpeed, BaseHealth, JumpHeight, CritChance, CritDamage, AttackSpeedBonus, DodgeChance, ExtraJumps, DamageBonus, DamageReduction }
+public enum SecondaryStatType { MoveSpeed, BaseHealth, JumpHeight, CritChance, CritDamage, AttackSpeedBonus, DodgeChance, ExtraJumps, DamageBonus, DamageReduction, StatusDurationReduction }
 
 public static class StatTypeMethods
 {
@@ -231,17 +235,21 @@ public class Stat
     public virtual int GetValue()
     {
         float fullValue = value;
+        float percentBonusMultiplier = 0;
         float multiplier = 0;
 
         foreach (StatBonus bonus in bonuses)
         {
             switch (bonus.modType)
             {
-                case StatModType.Add:
+                case StatModType.FlatBonus:
                     fullValue += bonus.bonusValue;
                     break;
-                case StatModType.Mult:
+                case StatModType.Multiplier:
                     multiplier += bonus.bonusValue;
+                    break;
+                case StatModType.PercentBonus:
+                    percentBonusMultiplier += bonus.bonusValue;
                     break;
                 default:
 
@@ -249,8 +257,12 @@ public class Stat
             }
         }
 
+        //
+        fullValue += fullValue * (percentBonusMultiplier / 100);
+
         return (int)(fullValue + fullValue * multiplier);
     }
+
 }
 
 [System.Serializable]
@@ -363,6 +375,7 @@ public class SecondaryStat
     {
         float fullValue = value;
         float multiplier = 0;
+        float percentBonusMultiplier = 0;
 
         foreach (StatDependancy dependency in statDependancies)
         {
@@ -373,17 +386,23 @@ public class SecondaryStat
         {
             switch (bonus.modType)
             {
-                case StatModType.Add:
+                case StatModType.FlatBonus:
                     fullValue += bonus.bonusValue;
                     break;
-                case StatModType.Mult:
+                case StatModType.Multiplier:
                     multiplier += bonus.bonusValue;
+                    break;
+                case StatModType.PercentBonus:
+                    percentBonusMultiplier += bonus.bonusValue;
                     break;
                 default:
 
                     break;
             }
         }
+
+        //
+        fullValue += fullValue * (percentBonusMultiplier / 100);
 
         return (fullValue + fullValue * multiplier);
 
@@ -407,16 +426,16 @@ public class StatDependancy
 }
 
 //The multiplier mod type is really an additive multiplier. Adding a .5 mod adds 50%, it doesn't halve our value. That would be -.5
-public enum StatModType { Add, Mult }
+public enum StatModType { FlatBonus, Multiplier, PercentBonus }
 
 [System.Serializable]
 public class StatBonus
 {
-    public StatModType modType = StatModType.Add;
+    public StatModType modType = StatModType.FlatBonus;
     public StatType type;
     public float bonusValue;
 
-    public StatBonus(StatType t, float min, StatModType modType = StatModType.Add)
+    public StatBonus(StatType t, float min, StatModType modType = StatModType.FlatBonus)
     {
         type = t;
         bonusValue = min;
@@ -433,10 +452,13 @@ public class StatBonus
 
         switch (modType)
         {
-            case StatModType.Add:
+            case StatModType.FlatBonus:
                 tooltip += bonusValue + " " + type.ToString();
                 break;
-            case StatModType.Mult:
+            case StatModType.Multiplier:
+                tooltip += type.ToString() + " x" + bonusValue;
+                break;
+            case StatModType.PercentBonus:
                 tooltip += bonusValue * 100 + "% " + type.ToString();
                 break;
         }
@@ -448,11 +470,11 @@ public class StatBonus
 [System.Serializable]
 public class SecondaryStatBonus
 {
-    public StatModType modType = StatModType.Add;
+    public StatModType modType = StatModType.FlatBonus;
     public SecondaryStatType type;
     public float bonusValue;
 
-    public SecondaryStatBonus(SecondaryStatType t, float min, StatModType modType = StatModType.Add)
+    public SecondaryStatBonus(SecondaryStatType t, float min, StatModType modType = StatModType.FlatBonus)
     {
         type = t;
         bonusValue = min;
@@ -472,11 +494,14 @@ public class SecondaryStatBonus
 
         switch (modType)
         {
-            case StatModType.Add:
+            case StatModType.FlatBonus:
                 tooltip += bonusValue + " " + type.ToString();
                 break;
-            case StatModType.Mult:
-                tooltip += bonusValue + "% " + type.ToString();
+            case StatModType.Multiplier:
+                tooltip += type.ToString() + " x" + bonusValue;
+                break;
+            case StatModType.PercentBonus:
+                tooltip += bonusValue * 100 + "% " + type.ToString();
                 break;
         }
 

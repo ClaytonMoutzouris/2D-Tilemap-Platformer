@@ -10,7 +10,7 @@ public class SpawnItemOnHurt : Ability
     //Could probably include more stuff here
     //Such as how the projectile is aimed/give it different attack data etc.
 
-    public override void OnHurt(AttackData attackData)
+    public override void OnHurt(AttackHitData hitData)
     {
         ItemObject newItem = Instantiate(prefab, owner.transform.position, Quaternion.identity);
         ItemData newData = Instantiate(itemData);

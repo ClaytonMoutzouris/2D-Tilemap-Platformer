@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public enum GameMode { FreePlay, Versus, Coop }
-public enum MenuOptionIndex { Confirm, Back, Map, Lives, TimeLimit, TalentPoints, StatPoints, Tier, Count }
+public enum MenuOptionIndex { Confirm, Back, Map, Lives, TimeLimit, TalentPoints,  Count }
 public class ArcadeGameRulesMenu : UIScrollMenu
 {
     public static ArcadeGameRulesMenu instance;
@@ -75,28 +75,6 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         talentPointsOptions.SetName("Talent Points");
         AddOption(talentPointsOptions);
 
-        MenuOptionSelector statPointsOptions = Instantiate(optionSelectorPrefab, container.transform);
-
-        foreach (int statPoints in menuOptionsData.statPoints)
-        {
-            statPointsOptions.AddOption(statPoints.ToString());
-        }
-
-        statPointsOptions.Init();
-        statPointsOptions.SetName("Stat Points");
-        AddOption(statPointsOptions);
-
-        //Tier Level
-        MenuOptionSelector levelTierOptions = Instantiate(optionSelectorPrefab, container.transform);
-
-        foreach (int tier in menuOptionsData.levelTier)
-        {
-            levelTierOptions.AddOption(tier.ToString());
-        }
-
-        levelTierOptions.Init();
-        levelTierOptions.SetName("Level Tier");
-        AddOption(levelTierOptions);
 
         SetNavigation();
         SetCurrentNode(0);
@@ -141,9 +119,7 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         nodes[(int)MenuOptionIndex.Confirm].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Back].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Map].gameObject.SetActive(true);
-        nodes[(int)MenuOptionIndex.Tier].gameObject.SetActive(true);
-        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(false);
-        nodes[(int)MenuOptionIndex.StatPoints].gameObject.SetActive(false);
+        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(true);
 
     }
 
@@ -159,9 +135,7 @@ public class ArcadeGameRulesMenu : UIScrollMenu
         nodes[(int)MenuOptionIndex.Map].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.Lives].gameObject.SetActive(true);
         nodes[(int)MenuOptionIndex.TimeLimit].gameObject.SetActive(true);
-        nodes[(int)MenuOptionIndex.Tier].gameObject.SetActive(true);
-        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(false);
-        nodes[(int)MenuOptionIndex.StatPoints].gameObject.SetActive(false);
+        nodes[(int)MenuOptionIndex.TalentPoints].gameObject.SetActive(true);
 
     }
 
@@ -189,12 +163,6 @@ public class ArcadeGameRulesMenu : UIScrollMenu
             case MenuOptionIndex.TalentPoints:
                 arcadeGameData.talentPoints = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
                 break;
-            case MenuOptionIndex.Tier:
-                arcadeGameData.levelTier = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
-                break;
-            case MenuOptionIndex.StatPoints:
-                arcadeGameData.statPoints = int.Parse(((MenuOptionSelector)node).currentNode.text.text);
-                break;
         }
     }
 
@@ -203,35 +171,6 @@ public class ArcadeGameRulesMenu : UIScrollMenu
     {
 
         arcadeGameData.gameMode = gameMode;
-
-        switch(arcadeGameData.levelTier)
-        {
-            case 0:
-                arcadeGameData.statPoints = 0;
-                arcadeGameData.talentPoints = 0;
-                break;
-            case 1:
-                arcadeGameData.statPoints = 2;
-                arcadeGameData.talentPoints = 1;
-                break;
-            case 2:
-                arcadeGameData.statPoints = 4;
-                arcadeGameData.talentPoints = 3;
-                break;
-            case 3:
-                arcadeGameData.statPoints = 7;
-                arcadeGameData.talentPoints = 5;
-                break;
-            case 4:
-                arcadeGameData.statPoints = 10;
-                arcadeGameData.talentPoints = 8;
-                break;
-
-            default:
-                arcadeGameData.statPoints = 0;
-                arcadeGameData.talentPoints = 0;
-                break;
-        }
         //arcadeGameData.lives = int.Parse(menuOptions[(int)MenuOptionIndex.Lives].currentNode.text.text);
         //arcadeGameData.timeLimit = int.Parse(menuOptions[(int)MenuOptionIndex.TimeLimit].currentNode.text.text);
 

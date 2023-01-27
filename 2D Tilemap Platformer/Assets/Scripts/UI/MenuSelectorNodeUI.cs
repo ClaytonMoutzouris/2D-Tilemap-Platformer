@@ -20,12 +20,14 @@ public class MenuSelectorNodeUI : MonoBehaviour, ISelectHandler
     public void OnSelect(BaseEventData eventData)
     {
         parent.SetCurrentNode(this);
+        SoundManager.instance.PlaySingle(selectClip);
+
     }
 
     public void SelectOption()
     {
-        SoundManager.instance.PlaySingle(selectClip);
         parent.SelectNode(this);
+
     }
 
     public void SetNavigation()

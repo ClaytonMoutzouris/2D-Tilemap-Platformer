@@ -30,29 +30,29 @@ public abstract class Ability : ScriptableObject
         owner = null;
     }
 
-    public virtual void OnEquippedWeapon()
+    public virtual void OnEquippedWeapon(Weapon equipped)
     {
 
     }
 
-    public virtual void OnUnequippedWeapon()
+    public virtual void OnUnequippedWeapon(Weapon unequipped)
     {
 
     }
 
     //Do I ever need to keep track of the exact effect that happens onHit?
-    public virtual void OnHit(AttackData attackData, Entity hitEntity)
+    public virtual void OnHit(AttackHitData hitData)
     {
 
     }
 
-    public virtual void OnHurt(AttackData attackData)
+    public virtual void OnHurt(AttackHitData hitData)
     {
 
     }
 
     //We may need killedEntity for some reason
-    public virtual void OnKill(AttackData attackData, Entity killedEntity)
+    public virtual void OnKill(AttackHitData hitData)
     {
 
     }
@@ -68,7 +68,7 @@ public abstract class Ability : ScriptableObject
 
     }
 
-    public string GetTooltip()
+    public virtual string GetTooltip()
     {
         string tooltip = "";
 
@@ -77,4 +77,8 @@ public abstract class Ability : ScriptableObject
         return tooltip;
     }
 
+    public virtual void RollAbility()
+    {
+        //Does nothing for most but is key for some
+    }
 }

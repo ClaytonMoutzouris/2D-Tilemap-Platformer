@@ -4,7 +4,16 @@ using UnityEngine;
 
 public interface IHurtable
 {
+    Hurtbox GetHurtbox();
+    Health GetHealth();
+    Entity GetEntity();
+    void GetHurt(ref AttackHitData hitData);
+    bool CheckHit(AttackObject attackObject);
+    bool CheckFriendly(Entity entity);
 
-    void GetHurt(AttackObject attackObject);
+}
+
+public interface IAttacker
+{
 
 }

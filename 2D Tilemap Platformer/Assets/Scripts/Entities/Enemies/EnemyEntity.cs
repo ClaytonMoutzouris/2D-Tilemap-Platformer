@@ -6,7 +6,6 @@ public class EnemyEntity : Entity
 {
     public float maxJumpHeight = 3f;
 
-    public PhysicsBody2D _controller;
     public Vector3 mOldPosition;
     public Entity target;
     public Sightbox sight;
@@ -43,7 +42,36 @@ public class EnemyEntity : Entity
 
         if (!knockedBack)
         {
-            _controller.velocity.x = normalizedHorizontalSpeed * movementSpeed;
+            float velXThisFrame = (normalizedHorizontalSpeed * stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue() * 10) * Time.deltaTime;
+
+            if (velXThisFrame > 0 && _controller.velocity.x > 0)
+            {
+                if (Mathf.Abs(_controller.velocity.x) < stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+                {
+                    _controller.velocity.x += velXThisFrame;
+                }
+                //otherwise do nothing
+
+            }
+            else if (velXThisFrame < 0 && _controller.velocity.x < 0)
+            {
+                if (Mathf.Abs(_controller.velocity.x) < stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue())
+                {
+                    _controller.velocity.x += velXThisFrame;
+                }
+
+                //otherwise do nothing
+            }
+            else
+            {
+                _controller.velocity.x += velXThisFrame;
+
+            }
+
+            if(_controller.isGrounded && normalizedHorizontalSpeed == 0)
+            {
+                _controller.velocity.x = (Mathf.Pow((1 - GambleConstants.GROUND_FRICTION), Time.deltaTime)) * _controller.velocity.x;
+            }
         }
 
 
@@ -63,12 +91,12 @@ public class EnemyEntity : Entity
     public void SearchForTarget()
     {
 
-        if (sight == null || sight.inSight.Count == 0)
+        if (sight == null || sight.entitiesInSight.Count == 0)
         {
             return;
         }
 
-        target = sight.inSight[Random.Range(0, sight.inSight.Count)];
+        target = sight.entitiesInSight[Random.Range(0, sight.entitiesInSight.Count)];
 
     }
 

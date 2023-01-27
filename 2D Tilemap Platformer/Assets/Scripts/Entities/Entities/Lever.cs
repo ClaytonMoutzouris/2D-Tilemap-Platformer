@@ -16,9 +16,19 @@ public class Lever : MonoBehaviour, IHurtable, IInteractable
         hurtbox.SetOwner(this);
     }
 
-    public void GetHurt(AttackObject attackObject)
+    public bool CheckFriendly(Entity entity)
+    {
+        return false;
+    }
+
+    public void GetHurt(ref AttackHitData hit)
     {
         Trigger();
+    }
+
+    public bool CheckHit(AttackObject attack)
+    {
+        return true;
     }
 
     public void Interact(Entity entity)
@@ -46,4 +56,20 @@ public class Lever : MonoBehaviour, IHurtable, IInteractable
         }
 
     }
+
+    public Health GetHealth()
+    {
+        return null;
+    }
+
+    public Hurtbox GetHurtbox()
+    {
+        return hurtbox;
+    }
+
+    public Entity GetEntity()
+    {
+        return null;
+    }
+
 }

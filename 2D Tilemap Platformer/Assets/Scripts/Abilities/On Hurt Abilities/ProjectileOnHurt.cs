@@ -9,7 +9,7 @@ public class ProjectileOnHurt : Ability
     //Could probably include more stuff here
     //Such as how the projectile is aimed/give it different attack data etc.
 
-    public override void OnHurt(AttackData attackData)
+    public override void OnHurt(AttackHitData hitData)
     {
         Projectile newProj = Instantiate(proj.projectileBase, owner.transform.position, Quaternion.identity);
         newProj.SetData(proj);

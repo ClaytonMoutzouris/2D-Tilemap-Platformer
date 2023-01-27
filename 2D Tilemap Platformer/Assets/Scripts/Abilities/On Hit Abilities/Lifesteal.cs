@@ -7,9 +7,9 @@ public class Lifesteal : Ability
 {
     public int lifestealPercent = 100;
 
-    public override void OnHit(AttackData attackData, Entity hitEntity)
+    public override void OnHit(AttackHitData hitData)
     {
-        int heals = attackData.damage * (lifestealPercent / 100);
+        int heals = hitData.damageDealt * (lifestealPercent / 100);
         owner.health.GainLife(heals);
     }
 }

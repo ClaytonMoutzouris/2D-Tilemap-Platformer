@@ -13,7 +13,6 @@ public class TalentsPanelUI : MonoBehaviour
     public Button backButton;
     public ScrollRect scrollRect;
 
-    public TooltipDisplay tooltip;
     public TalentTreeMenuOption currentBranch;
 
     //Tester
@@ -28,6 +27,7 @@ public class TalentsPanelUI : MonoBehaviour
     public void OnEnable()
     {
         talentPoints = ArcadeGameRulesMenu.instance.arcadeGameData.talentPoints;
+        LoadTalentTree(selectScreen.selectedClass.talents);
 
         talentPoints -= learnedTalents.Count;
         UpdateTalentPointsDisplay();
@@ -36,25 +36,39 @@ public class TalentsPanelUI : MonoBehaviour
 
     public void Start()
     {
-        LoadTalentTree(talentTree);
         menuTab = GetComponent<MenuTabUI>();
         SetNav();
+    }
+
+    public void ClearBranches()
+    {
+        foreach(TalentTreeMenuOption branch in branches)
+        {
+            Destroy(branch.gameObject);
+        }
+
+        branches.Clear();
     }
 
     public void LoadTalentTree(TalentTree talentTree)
     {
         this.talentTree = talentTree;
 
-        foreach(TalentTreeBranch branch in talentTree.talentTreeBranches)
+        ClearBranches();
+
+        foreach (TalentTreeBranch branch in talentTree.talentTreeBranches)
         {
             TalentTreeMenuOption menuBranch = Instantiate(branchPrefab, container.transform);
             menuBranch.talentTreePanel = this;
-            menuBranch.AddNodes(branch.talents);
+            menuBranch.SetBranch(branch);
 
             branches.Add(menuBranch);
 
 
         }
+
+                SetNav();
+
     }
 
     public void TalentNodeSelected(TalentNodeUI talentNode)

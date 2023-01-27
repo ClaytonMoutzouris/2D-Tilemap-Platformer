@@ -7,14 +7,13 @@ public class Sightbox : MonoBehaviour
     public CircleCollider2D sightCollider;
     public ContactFilter2D contactFilter;
     public ColliderState state = ColliderState.Open;
-    public List<Entity> inSight = new List<Entity>();
-    public EnemyEntity owner;
+    public List<Entity> entitiesInSight = new List<Entity>();
+    public List<GameObject> objectsInSight = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
     {
         sightCollider = GetComponent<CircleCollider2D>();
-        owner = GetComponentInParent<EnemyEntity>();
     }
 
     // Update is called once per frame
@@ -23,22 +22,38 @@ public class Sightbox : MonoBehaviour
         if (state == ColliderState.Closed) { return; }
 
         //Collider2D[] colliders = Physics2D.OverlapBoxAll(transform.position + (Vector3)hitbox.offset, hitbox.size, transform.rotation.z, mask);
-        inSight.Clear();
+        entitiesInSight.Clear();
+        objectsInSight.Clear();
 
         List<Collider2D> colliders = new List<Collider2D>();
         Physics2D.OverlapCollider(sightCollider, contactFilter, colliders);
 
         for (int i = 0; i < colliders.Count; i++)
         {
+            GameObject objectInSight = colliders[i].GetComponent<GameObject>();
+
+            objectsInSight.Add(objectInSight);
+
             Entity entity = colliders[i].GetComponent<Entity>();
-            if(!entity.health.IsDead())
+            if (entity)
             {
-                inSight.Add(entity);
+                if(!entity.health.IsDead())
+                {
+                    entitiesInSight.Add(entity);
+                }
             }
+
+
+
         }
 
         state = colliders.Count > 0 ? ColliderState.Colliding : ColliderState.Open;
 
+    }
+
+    public void SetRadius(float radius)
+    {
+        sightCollider.radius = radius;
     }
 
 }

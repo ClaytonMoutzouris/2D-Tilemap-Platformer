@@ -10,19 +10,14 @@ public class Health : MonoBehaviour
 
     public int maxHealth = 20;
     public int currentHealth = 20;
-    public Entity entity;
+    public CharacterEntity entity;
 
     public HealthBarUI healthbar = null;
 
     // Start is called before the first frame update
     void Awake()
     {
-        entity = GetComponent<Entity>();    
-    }
-
-    public bool IsDead()
-    {
-        return currentHealth <= 0;
+        entity = GetComponent<CharacterEntity>();    
     }
 
     public void SetHealthBar(HealthBarUI hBar)
@@ -49,7 +44,7 @@ public class Health : MonoBehaviour
     {
         if(entity == null)
         {
-            entity = GetComponent<Entity>();
+            entity = GetComponent<CharacterEntity>();
         }
         if (entity.stats == null)
         {

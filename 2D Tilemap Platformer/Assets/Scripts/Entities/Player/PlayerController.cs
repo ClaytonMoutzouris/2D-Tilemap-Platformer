@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch, Flight };
 
-public class PlayerController : Entity
+public class PlayerController : CharacterEntity
 {
 	// movement config
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
@@ -54,6 +54,7 @@ public class PlayerController : Entity
     public int kills = 0;
     public CompanionManager _companionManager;
 
+
     protected override void Awake()
 	{
         base.Awake();
@@ -89,6 +90,7 @@ public class PlayerController : Entity
         stats.AddPrimaryBonuses(data.classData.statBonuses);
 
         _equipmentManager.EquipItem(Instantiate(data.classData.startingWeapon));
+        _equipmentManager.EquipItem(Instantiate(data.classData.startingRanged));
 
         foreach (ItemData item in data.classData.startingItems)
         {

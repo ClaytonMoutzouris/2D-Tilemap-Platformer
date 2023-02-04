@@ -11,16 +11,21 @@ public class StatChangeEffect : StatusEffect
     public override void StartUp()
     {
         base.StartUp();
-
-        effectedEntity.stats.AddPrimaryBonuses(statChanges);
-        effectedEntity.stats.AddSecondaryBonuses(secondaryStatChanges);
+        if(effectedEntity is CharacterEntity character)
+        {
+            character.stats.AddPrimaryBonuses(statChanges);
+            character.stats.AddSecondaryBonuses(secondaryStatChanges);
+        }
 
     }
 
     public override void EffectEnd()
     {
-        effectedEntity.stats.RemovePrimaryBonuses(statChanges);
-        effectedEntity.stats.RemoveSecondaryBonuses(secondaryStatChanges);
+        if (effectedEntity is CharacterEntity character)
+        {
+            character.stats.RemovePrimaryBonuses(statChanges);
+            character.stats.RemoveSecondaryBonuses(secondaryStatChanges);
+        }
 
         base.EffectEnd();
     }

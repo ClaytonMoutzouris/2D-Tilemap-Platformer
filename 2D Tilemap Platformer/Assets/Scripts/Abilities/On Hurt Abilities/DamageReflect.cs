@@ -10,6 +10,10 @@ public class DamageReflect : Ability
     public override void OnHurt(AttackHitData hitData)
     {
         //for now, call lose health with pure damage
-        hitData.attackOwner.health.LoseHealth(hitData.damageDealt * (reflectPercent / 100));
+        if(hitData.attackOwner is IHurtable hurtable)
+        {
+            //this is a weird one that needs to be cleaned up after attackdata is fixed
+            hurtable.GetHealth().LoseHealth(hitData.damageDealt * (reflectPercent / 100));
+        }
     }
 }

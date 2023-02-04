@@ -11,6 +11,7 @@ public class Drone : Companion
     public int damage;
     float lastFiredTimestamp = 0;
     public float smoothSpeed = .2f;
+    public float movementSpeed = 0.0f;
 
     public float followRadius = 1;
 
@@ -126,10 +127,10 @@ public class Drone : Companion
         return new AttackData()
         {
             owner = this,
-            damage = (int)stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue(),
+            damage = this.damage,
             knockbackPower = 1,
             damageType = DamageType.Physical,
-            critChance = stats.GetSecondaryStat(SecondaryStatType.CritChance).GetValue()
+            critChance = 5
 
         };
     }

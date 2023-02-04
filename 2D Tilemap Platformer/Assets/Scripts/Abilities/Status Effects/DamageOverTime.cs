@@ -13,23 +13,26 @@ public class DamageOverTime : StatusEffect
 
     public override IEnumerator HandleStatusEffect()
     {
-        StartUp();
-        float tickDuration = 0;
-
-        while (Time.time <= timeStamp + duration + tickInterval)
+        if(effectedEntity is IHurtable hurtable)
         {
+            StartUp();
+            float tickDuration = 0;
 
-            tickDuration += Time.deltaTime;
-
-            if (tickDuration >= tickInterval)
+            while (Time.time <= timeStamp + duration + tickInterval)
             {
-                effectedEntity.health.LoseHealth(damagePerTick);
-                tickDuration = 0;
-            }
-            yield return null;
-        }
 
-        EffectEnd();
+                tickDuration += Time.deltaTime;
+
+                if (tickDuration >= tickInterval)
+                {
+                    hurtable.GetHealth().LoseHealth(damagePerTick);
+                    tickDuration = 0;
+                }
+                yield return null;
+            }
+
+            EffectEnd();
+        } 
 
     }
 }

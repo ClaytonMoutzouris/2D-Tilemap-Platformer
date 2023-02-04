@@ -90,7 +90,11 @@ public class SlimeAI : MonoBehaviour
     IEnumerator MOVETO()
     {
 
-        movementController.MoveToTarget(entity.target);
+        if (entity.target != null)
+        {
+            movementController.MoveToTarget(entity.target);
+        }
+
 
 
         while (states == SLIME_STATE.MOVETO)

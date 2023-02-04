@@ -11,6 +11,27 @@ public class CharacterEntity : Entity, IHurtable
     public Hurtbox hurtbox;
     public Stats stats;
 
+    public AttackManager _attackManager;
+
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        health = GetComponent<Health>();
+        
+
+        hurtbox = GetComponentInChildren<Hurtbox>();
+        hurtbox.SetOwner(this);
+
+        stats = GetComponent<Stats>();
+        if (stats != null)
+        {
+            stats.Initialize();
+        }
+        health.UpdateHealth();
+
+    }
 
     public Hurtbox GetHurtbox()
     {
@@ -20,11 +41,6 @@ public class CharacterEntity : Entity, IHurtable
     public Health GetHealth()
     {
         return health;
-    }
-
-    public Entity GetEntity()
-    {
-        return this;
     }
 
     public virtual void GetHurt(ref AttackHitData hitData)

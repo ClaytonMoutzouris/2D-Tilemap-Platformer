@@ -5,19 +5,38 @@ using UnityEngine;
 public class Effect : ScriptableObject
 {
     [HideInInspector]
-    public Entity effected;
-    //Might not need this one, but will keep it around for now
-    [HideInInspector]
     public Entity effectOwner;
+    [HideInInspector]
+    public Entity effectedEntity;
+    //Might not need this one, but will keep it around for now
     public bool stackable = false;
+    [HideInInspector]
+    public AttackHitData attackHitData;
 
-
-    public virtual void ApplyEffect(Entity effected, Entity owner = null)
+    public virtual void ApplyEffect(Entity effected, AttackHitData data = null)
     {
-        this.effected = effected;
-        effectOwner = owner;
+        this.effectOwner = effected;
+        effectedEntity = effected;
+        attackHitData = data;
         //Run the coroutine on the entity
         //effectedEntity.StartCoroutine(HandleEffect());
+
+        //overriding this should cover any instantaneous effects, right?
     }
 
+    public virtual void ApplyEffect(Entity effected, Entity owner, AttackHitData data = null)
+    {
+        this.effectOwner = owner;
+        effectedEntity = effected;
+        attackHitData = data;
+        //Run the coroutine on the entity
+        //effectedEntity.StartCoroutine(HandleEffect());
+
+        //overriding this should cover any instantaneous effects, right?
+    }
+
+    public virtual void RemoveEffect()
+    {
+        //remove this from the list of effects, if we added it?
+    }
 }

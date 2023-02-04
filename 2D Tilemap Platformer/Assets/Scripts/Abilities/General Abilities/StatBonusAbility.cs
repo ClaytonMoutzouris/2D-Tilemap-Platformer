@@ -15,12 +15,16 @@ public class StatBonusAbility : Ability
     {
         base.OnGainedAbility(entity);
 
-        owner.stats.AddPrimaryBonuses(bonusStats);
-        owner.stats.AddSecondaryBonuses(secondaryBonusStats);
-        owner.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
+        //Only update stats if the entity is a character.
+        //Again, I might rework this
+        if(owner is CharacterEntity character)
+        {
+            character.stats.AddPrimaryBonuses(bonusStats);
+            character.stats.AddSecondaryBonuses(secondaryBonusStats);
+            character.stats.AddAbilityFlagBonuses(abilityFlagBonuses);
 
-        owner.health.UpdateHealth();
-
+            character.health.UpdateHealth();
+        }
 
         if (owner is PlayerController player)
         {
@@ -46,12 +50,14 @@ public class StatBonusAbility : Ability
 
     public override void OnAbilityLost()
     {
+        if (owner is CharacterEntity character)
+        {
+            character.stats.RemovePrimaryBonuses(bonusStats);
+            character.stats.RemoveSecondaryBonuses(secondaryBonusStats);
+            character.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
 
-        owner.stats.RemovePrimaryBonuses(bonusStats);
-        owner.stats.RemoveSecondaryBonuses(secondaryBonusStats);
-        owner.stats.RemoveAbilityFlagBonuses(abilityFlagBonuses);
-
-        owner.health.UpdateHealth();
+            character.health.UpdateHealth();
+        }
 
         if (owner is PlayerController player)
         {

@@ -6,9 +6,5 @@ using UnityEngine;
 public class TriggeredEffect : Effect
 {
 
-    public virtual void Trigger()
-    {
-
-    }
 
 }

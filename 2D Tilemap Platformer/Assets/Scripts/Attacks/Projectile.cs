@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ProjectileMovementType { Straight, Arc, Boomerang, Control, Homing, Laser, Static }
+public enum ProjectileMovementType { Straight, Arc, Returning, Control, Homing, Laser, Static, Boomerang }
 
 [RequireComponent(typeof(PhysicsBody2D))]
 [RequireComponent(typeof(AttackObject))]
-public class Projectile : MonoBehaviour
+public class Projectile : Entity
 {
+    [Header("Projectile Properties")]
     public ProjectileData projectileData;
 
     public Vector2 direction;
@@ -16,23 +17,19 @@ public class Projectile : MonoBehaviour
     public AttackObject _attackObject;
 
     //Physics things
-    protected PhysicsBody2D _controller;
     public LayerMask baseLayermask;
     //Might want to create a seperate projectile class for "boomerangs", but modularity has its merits aswell
     bool returning = false;
-
-    public SpriteRenderer spriteRenderer;
-    public Animator animator;
+    
     public bool bouncedLastFrame = false;
     public ProjectileMovementType movementType;
-    public List<TriggeredEffect> triggeredEffects;
+    public List<Effect> triggeredEffects;
+    public Vector3 boomerangCenter;
 
-    public void Awake()
+    protected override void Awake()
     {
-        _controller = GetComponent<PhysicsBody2D>();
+        base.Awake();
         _attackObject = GetComponent<AttackObject>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
         baseLayermask = _controller.platformMask;
         // Might need this later?
         /*
@@ -80,6 +77,21 @@ public class Projectile : MonoBehaviour
             _controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
         }
 
+        if(movementType == ProjectileMovementType.Boomerang)
+        {
+            if(direction.x > 0)
+            {
+                boomerangCenter = transform.position + Vector3.right *  projectileData.boomerangRadius;
+
+            }
+            else
+            {
+                boomerangCenter = transform.position + Vector3.left * projectileData.boomerangRadius;
+            }
+
+            _controller.velocity = Vector2.Perpendicular(boomerangCenter.normalized)*projectileData.projSpeed;
+        }
+
     }
 
 
@@ -125,8 +137,8 @@ public class Projectile : MonoBehaviour
              case (ProjectileMovementType.Arc):
                 ArcMovement();
                 break;
-            case (ProjectileMovementType.Boomerang):
-                Boomerang();
+            case (ProjectileMovementType.Returning):
+                Returning();
                 break;
             case (ProjectileMovementType.Control):
                 ControlMovement();
@@ -139,6 +151,9 @@ public class Projectile : MonoBehaviour
                 break;
             case (ProjectileMovementType.Static):
                 _controller.velocity = Vector3.zero;
+                break;
+            case (ProjectileMovementType.Boomerang):
+                Boomerang();
                 break;
         }
 
@@ -159,7 +174,7 @@ public class Projectile : MonoBehaviour
             }
         }
 
-        if (startTime + projectileData.lifeTime <= Time.time)
+        if (startTime + projectileData.lifeTime <= Time.time && movementType != ProjectileMovementType.Returning)
         {
             DestroyProjectile();
         }
@@ -206,9 +221,9 @@ public class Projectile : MonoBehaviour
 
     public virtual void DestroyProjectile()
     {
-        foreach(TriggeredEffect effect in triggeredEffects)
+        foreach(Effect effect in triggeredEffects)
         {
-            effect.Trigger();
+            effect.ApplyEffect(this);
         }
 
         Destroy(gameObject);
@@ -216,22 +231,45 @@ public class Projectile : MonoBehaviour
 
     public void Boomerang()
     {
-        Vector2 vel = _controller.velocity;
 
-        //_controller.velocity.y = direction.normalized.y * projectileData.projSpeed;
-        //_controller.velocity.x = direction.normalized.x * projectileData.projSpeed;
+        float timeElapsed = Time.time - startTime;
 
-        float returnSpeed = projectileData.elasticity * (Time.time - startTime);
-        vel = vel - vel * returnSpeed;
+        float forceMag = Mathf.Pow(projectileData.projSpeed, 2.0f) * projectileData.boomerangRadius*0.5f;
+        Vector2 forceVec = (boomerangCenter - transform.position).normalized;
 
-        _controller.velocity = vel;
+        _controller.velocity.x += forceVec.x * forceMag*Time.deltaTime;
+        _controller.velocity.y += forceVec.y * forceMag*Time.deltaTime;
 
-        if (!returning && returnSpeed >= 1)
+    }
+
+    public void Returning()
+    {
+        Vector2 aim = _attackObject.owner.transform.position - transform.position;
+
+        if (!returning && Time.time - startTime > projectileData.lifeTime / 2)
         {
             returning = true;
-            _attackObject.ClearHits();
+            _controller.velocity.y = aim.normalized.y * projectileData.projSpeed;
+            _controller.velocity.x = aim.normalized.x * projectileData.projSpeed;
 
         }
+
+        if (returning)
+        {
+            if (aim != Vector2.zero)
+            {
+                _controller.velocity.y = aim.normalized.y * projectileData.projSpeed;
+                _controller.velocity.x = aim.normalized.x * projectileData.projSpeed;
+            }
+
+            if(aim.magnitude < .1f)
+            {
+                DestroyProjectile();
+            }
+        }
+
+            
+        
     }
 
     public void CheckBounce()
@@ -313,7 +351,7 @@ public class Projectile : MonoBehaviour
         projectileData.SetBaseFlags();
         movementType = data.movementType;
         spriteRenderer.sprite = data.image;
-        animator.runtimeAnimatorController = data.animator;
+        _animator.runtimeAnimatorController = data.animator;
 
         _attackObject.hitbox.size = data.size;
         _attackObject.attackData = data.attackData;
@@ -324,11 +362,10 @@ public class Projectile : MonoBehaviour
             ParticleSystem temp = Instantiate(effect, transform);
         }
 
-        foreach(TriggeredEffect effect in data.OnDestroyTriggers)
+        foreach(Effect effect in data.OnDestroyTriggers)
         {
-            //TriggeredEffect temp = Instantiate(effect);
-            //temp.ApplyEffect(owner);
-            
+            Effect temp = Instantiate(effect);
+            triggeredEffects.Add(temp);
         }
 
         if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGround).GetValue())

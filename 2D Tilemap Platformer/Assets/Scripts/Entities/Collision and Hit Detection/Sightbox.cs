@@ -37,7 +37,7 @@ public class Sightbox : MonoBehaviour
             Entity entity = colliders[i].GetComponent<Entity>();
             if (entity)
             {
-                if(!entity.health.IsDead())
+                if(!entity.isDead)
                 {
                     entitiesInSight.Add(entity);
                 }

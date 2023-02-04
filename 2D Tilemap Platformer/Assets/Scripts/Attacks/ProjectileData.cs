@@ -23,7 +23,7 @@ public class ProjectileData : ScriptableObject
     public bool slippery = false;
 
     public float projSpeed = 5;
-    public float elasticity = -0.5f;
+    public float boomerangRadius = 2f;
 
     public float lifeTime = 1;
 
@@ -33,7 +33,7 @@ public class ProjectileData : ScriptableObject
     public Projectile projectileBase;
     public List<ParticleSystem> visualEffects;
     //Method for taking a weapon or entities stats into account?
-    public List<TriggeredEffect> OnDestroyTriggers;
+    public List<Effect> OnDestroyTriggers;
 
     [HideInInspector]
     public ProjectileFlags projectileFlags = new ProjectileFlags();

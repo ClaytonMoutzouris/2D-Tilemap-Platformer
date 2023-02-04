@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Chest : MonoBehaviour, IHurtable, IInteractable
+public class Chest : ObjectEntity, IHurtable, IInteractable
 {
     public bool isOpened = false;
-    public SpriteRenderer spriteRenderer;
     public Animator animator;
     public Hurtbox hurtbox;
 
@@ -14,8 +13,9 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
     ChestSpawnNode spawner;
     public int numItemsSpawn = 1;
 
-    public void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         hurtbox = GetComponentInChildren<Hurtbox>();
         hurtbox.SetOwner(this);
     }
@@ -92,10 +92,5 @@ public class Chest : MonoBehaviour, IHurtable, IInteractable
     public Health GetHealth()
     {
         return null;
-    }
-
-    public Entity GetEntity()
-    {
-        throw new System.NotImplementedException();
     }
 }

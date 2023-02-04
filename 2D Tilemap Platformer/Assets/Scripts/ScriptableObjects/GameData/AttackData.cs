@@ -21,9 +21,9 @@ public class AttackData
     {
         float finalDamage = damage;
 
-        if (owner != null)
+        if (owner is CharacterEntity character)
         {
-            finalDamage += (int)owner.stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue();
+            finalDamage += (int)character.stats.GetSecondaryStat(SecondaryStatType.DamageBonus).GetValue();
 
             int r = Random.Range(0, 100);
 
@@ -33,7 +33,7 @@ public class AttackData
             if (r < critChance)
             {
                 crit = true;
-                finalDamage *= owner.stats.GetSecondaryStat(SecondaryStatType.CritDamage).GetValue() / 100.0f;
+                finalDamage *= character.stats.GetSecondaryStat(SecondaryStatType.CritDamage).GetValue() / 100.0f;
 
             }
         }

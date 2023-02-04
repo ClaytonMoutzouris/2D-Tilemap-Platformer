@@ -12,23 +12,25 @@ public class HealOverTime : StatusEffect
 
     public override IEnumerator HandleStatusEffect()
     {
-        StartUp();
-        float tickDuration = 0;
-
-        while (Time.time <= timeStamp + duration + tickInterval)
+        if (effectedEntity is IHurtable hurtable)
         {
+            StartUp();
+            float tickDuration = 0;
 
-            tickDuration += Time.deltaTime;
-
-            if (tickDuration >= tickInterval)
+            while (Time.time <= timeStamp + duration + tickInterval)
             {
-                effectedEntity.health.GainLife(healPerTick);
-                tickDuration = 0;
+
+                tickDuration += Time.deltaTime;
+
+                if (tickDuration >= tickInterval)
+                {
+                    hurtable.GetHealth().GainLife(healPerTick);
+                    tickDuration = 0;
+                }
+                yield return null;
             }
-            yield return null;
+
+            EffectEnd();
         }
-
-        EffectEnd();
-
     }
 }

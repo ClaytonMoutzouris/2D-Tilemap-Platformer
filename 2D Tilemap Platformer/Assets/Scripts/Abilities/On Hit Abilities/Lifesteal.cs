@@ -9,7 +9,12 @@ public class Lifesteal : Ability
 
     public override void OnHit(AttackHitData hitData)
     {
-        int heals = hitData.damageDealt * (lifestealPercent / 100);
-        owner.health.GainLife(heals);
+        //This is a bit of a hack, might want to check for health component or maybe do another interface
+        if (hitData.attackOwner is IHurtable hurtable)
+        {
+            int heals = hitData.damageDealt * (lifestealPercent / 100);
+            hurtable.GetHealth().GainLife(heals);
+        }
+
     }
 }

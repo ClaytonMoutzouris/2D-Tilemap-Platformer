@@ -81,6 +81,12 @@ public class GameManager : MonoBehaviour
 
     public bool CheckForGameOver()
     {
+        if(gameData.gameMode == GameMode.FreePlay)
+        {
+            //No game overs in free play mode
+            return false;
+        }
+
         int numAlive = 0;
         foreach(PlayerCreationData data in gameData.playerDatas)
         {

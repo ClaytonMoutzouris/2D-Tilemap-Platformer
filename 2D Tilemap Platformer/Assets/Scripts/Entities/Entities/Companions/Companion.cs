@@ -27,9 +27,4 @@ public class Companion : Entity
         //maybe updating some abilities or some shit
     }
 
-    public override bool CheckFriendly(Entity entity)
-    {
-        return (entity == this || entity == owner);
-    }
-
 }

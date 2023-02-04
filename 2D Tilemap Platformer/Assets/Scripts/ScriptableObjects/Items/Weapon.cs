@@ -166,7 +166,7 @@ public class Weapon : Equipment
 
     }
 
-    public override void OnUnequipped(Entity entity)
+    public override void OnUnequipped(CharacterEntity entity)
     {
         int ammoWhenEquipped = currentAmmo;
         int capacityWhenEquipped = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();

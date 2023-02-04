@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyEntity : Entity
+public class EnemyEntity : CharacterEntity
 {
     public float maxJumpHeight = 3f;
 
@@ -35,7 +35,7 @@ public class EnemyEntity : Entity
     void Update()
     {
 
-        if (target!= null && target.health.IsDead())
+        if (target != null && !target.isDead)
         {
             target = null;
         }

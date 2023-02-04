@@ -6,20 +6,15 @@ public enum EntityDirection { Left = -1, Right = 1 };
 public enum AbilityFlagType { Flight, Stealth }
 
 [RequireComponent(typeof(Animator))]
-public class Entity : MonoBehaviour, IHurtable
+public class Entity : MonoBehaviour
 {
     public SpriteRenderer spriteRenderer;
     public Animator _animator;
     public AnimatorOverrideController overrideController;
-    public AttackManager _attackManager;
 
     //Only used by enemy now, need to remove
-    public float movementSpeed = 0.0f;
 
     //Entity Flags
-
-    public Health health;
-    public Hurtbox hurtbox;
     //Class for organizing entities, which we may or may not need.
     public List<ParticleSystem> particleEffects = new List<ParticleSystem>();
 
@@ -30,8 +25,8 @@ public class Entity : MonoBehaviour, IHurtable
 
     public List<Ability> abilities = new List<Ability>();
     public List<StatusEffect> statusEffects = new List<StatusEffect>();
+    public List<Effect> continuousEffects = new List<Effect>();
 
-    public Stats stats;
     public bool isDead = false;
 
     public PhysicsBody2D _controller;
@@ -47,25 +42,16 @@ public class Entity : MonoBehaviour, IHurtable
 
     protected virtual void Awake()
     {
-        health = GetComponent<Health>();
-        hurtbox = GetComponentInChildren<Hurtbox>();
-        hurtbox.SetOwner(this);
+
         _animator = GetComponent<Animator>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        stats = GetComponent<Stats>();
-        if (stats != null)
-        {
-            stats.Initialize();
-            health.UpdateHealth();
-
-        }
-
+        _controller = GetComponent<PhysicsBody2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public ParticleSystem AddEffect(ParticleSystem effectPrefab)
@@ -119,7 +105,14 @@ public class Entity : MonoBehaviour, IHurtable
 
     }
 
+    /*
+    public virtual void GetHurt(ref AttackHitData hitData)
+    {
 
+    }
+    */
+
+    /*
     public virtual void GetHurt(ref AttackHitData hitData)
     {
 
@@ -142,35 +135,7 @@ public class Entity : MonoBehaviour, IHurtable
         StartCoroutine(StatusEffects.Knockback(this, (transform.position - hitData.attackOwner.transform.position).normalized, hitData.knockbackPower));
         
     }
-
-    public virtual bool CheckFriendly(Entity entity)
-    {
-        return entity == this;
-    }
-
-    public virtual bool CheckHit(AttackObject attackObject)
-    {
-        float dodgeChance = stats.GetSecondaryStat(SecondaryStatType.DodgeChance).GetValue();
-
-        int dodge = Random.Range(0, 100);
-
-        if (dodge < dodgeChance)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public Health GetHealth()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public Hurtbox GetHurtbox()
-    {
-        throw new System.NotImplementedException();
-    }
+    */
 
     public Entity GetEntity()
     {

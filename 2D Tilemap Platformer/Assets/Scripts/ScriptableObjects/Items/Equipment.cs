@@ -41,7 +41,7 @@ public class Equipment : ItemData
         }
     }
 
-    public virtual void OnUnequipped(Entity entity)
+    public virtual void OnUnequipped(CharacterEntity entity)
     {
         //Remove the abilities
 

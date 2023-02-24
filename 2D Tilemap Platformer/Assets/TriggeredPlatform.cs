@@ -70,7 +70,7 @@ public class TriggeredPlatform : MovingPlatform
     public void TriggerMove()
     {
 
-        if(_controller.collisionState.groundRight || _controller.collisionState.groundLeft)
+        if((direction == EntityDirection.Right && _controller.collisionState.groundRight) || (direction == EntityDirection.Left && _controller.collisionState.groundLeft))
         {
             waiting = true;
             waitTimeStamp = Time.time;

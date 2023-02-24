@@ -10,12 +10,13 @@ public class TalentTreeBranch : ScriptableObject
     public List<Talent> talents;
 
     public Sprite branchIcon;
+    public Color branchColor;
 
     public string GetTooltip()
     {
         string tooltip = "";
 
-        tooltip += name;
+        tooltip += "\n<color=#" + ColorUtility.ToHtmlStringRGB(branchColor) + ">" + name + "</color>";
         tooltip += "\n" + description;
 
         return tooltip;

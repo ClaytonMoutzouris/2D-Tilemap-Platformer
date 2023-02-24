@@ -128,7 +128,7 @@ public class CharacterSelectScreen : MonoBehaviour
             File.Delete(path);
         } else
         {
-            //Directory.CreateDirectory(path);
+            Directory.CreateDirectory(path);
         }
         PlayerSaveData saveData = new PlayerSaveData(characterData);
 

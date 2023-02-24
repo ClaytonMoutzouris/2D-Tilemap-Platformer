@@ -35,10 +35,16 @@ public class AttackManager : MonoBehaviour
             && player.movementState != PlayerMovementState.Dead && !player.knockedBack)
         {
 
+            if (player._input.GetButtonDown(ButtonInput.Attack_Down) && player.movementState == PlayerMovementState.Jump)
+            {
+                ActivateAttack(AttackInput.AirDown, ButtonInput.LightAttack);
+            }
+
             if (player._input.GetButtonDown(ButtonInput.Attack_Down))
             {
                 ActivateAttack(AttackInput.Down, ButtonInput.LightAttack);
             }
+
 
             if (player._input.GetButtonDown(ButtonInput.Attack_Up))
             {
@@ -62,9 +68,12 @@ public class AttackManager : MonoBehaviour
                 ActivateAttack(AttackInput.Neutral, ButtonInput.LightAttack);
             }
 
-            if (player._input.GetButtonDown(ButtonInput.HeavyAttack))
+            if (player._input.GetButtonDown(ButtonInput.ActivateGadget))
             {
-                ActivateHeavyAttack();
+                if(!player._equipmentManager.IsGadgetSlotEmpty())
+                {
+                    player._equipmentManager.GetGadget().Activate();
+                }
             }
 
             if (player._input.GetButtonDown(ButtonInput.Fire))
@@ -139,7 +148,13 @@ public class AttackManager : MonoBehaviour
             newAttack.SetWeapon(wep);
             activeAttack = newAttack;
 
-            StartCoroutine(newAttack.Activate(buttonInput));
+            foreach(Effect effect in wep.OnAttackGainEffects)
+            {
+                Effect temp = Instantiate(effect);
+                temp.ApplyEffect(player, player);
+            }
+
+            player.StartCoroutine(newAttack.Activate(buttonInput));
         }
         else
         {
@@ -159,6 +174,12 @@ public class AttackManager : MonoBehaviour
 
             activeAttack = newAttack;
 
+            foreach(Effect effect in wep.OnAttackGainEffects)
+            {
+                Effect temp = Instantiate(effect);
+                temp.ApplyEffect(player, player);
+            }
+
             StartCoroutine(newAttack.Activate(buttonInput));
         }
 
@@ -167,7 +188,7 @@ public class AttackManager : MonoBehaviour
 
     }
 
-    public void ActivateHeavyAttack(ButtonInput button = ButtonInput.HeavyAttack)
+    public void ActivateHeavyAttack(ButtonInput button = ButtonInput.ActivateGadget)
     {
         if (activeAttack != null || player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee) == null)
         {
@@ -184,13 +205,20 @@ public class AttackManager : MonoBehaviour
 
         activeAttack = newAttack;
 
-        StartCoroutine(newAttack.Activate(button));
+        foreach(Effect effect in player._equipmentManager.GetEquippedWeapon(WeaponSlot.Melee).OnAttackGainEffects)
+        {
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(player, player);
+        }
+
+        player.StartCoroutine(newAttack.Activate(button));
     }
 
     //This method fires a projectile at a certain angle (default to straight ahead
     public void FireProjectile(int angle = 90)
     {
         player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged).FireProjectile(angle);
+
     }
 
     //This method gets the players aim input
@@ -198,7 +226,6 @@ public class AttackManager : MonoBehaviour
     {
 
         player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged).FireAimedProjectile();
-
     }
 
     public void FireRangedWeapon()

@@ -17,7 +17,7 @@ public class Companion : Entity
     public virtual void SetOwner(PlayerController player)
     {
         owner = player;
-        player._companionManager.AddCompanion(this);
+        owner._companionManager.AddCompanion(this);
     }
 
     protected virtual void Update()
@@ -25,6 +25,15 @@ public class Companion : Entity
         //what does a companion do?
 
         //maybe updating some abilities or some shit
+    }
+
+    public override void Die()
+    {
+        base.Die();
+
+        owner._companionManager.RemoveCompanion(this);
+
+        Destroy(gameObject);
     }
 
 }

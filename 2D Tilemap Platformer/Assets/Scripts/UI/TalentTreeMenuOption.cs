@@ -16,6 +16,7 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler, IDeselectHand
     public TalentTreeBranch branch;
     public TalentNodeUI prefab;
     public Image branchIcon;
+    public Image branchIconBackground;
 
 
     public void RedirectClick()
@@ -28,6 +29,7 @@ public class TalentTreeMenuOption : MonoBehaviour, ISelectHandler, IDeselectHand
     {
         this.branch = branch;
         branchIcon.sprite = branch.branchIcon;
+        branchIconBackground.color = branch.branchColor;
         AddNodes(branch.talents);
     }
 

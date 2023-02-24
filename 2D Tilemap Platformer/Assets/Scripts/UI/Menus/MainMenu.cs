@@ -62,6 +62,11 @@ public class MainMenu : MonoBehaviour
         Debug.Log(gameObject.name + " button was selected.");
     }
 
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
     /*
     public void OnEnable()
     {

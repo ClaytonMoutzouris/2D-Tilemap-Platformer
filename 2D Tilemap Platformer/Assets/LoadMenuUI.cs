@@ -29,6 +29,15 @@ public class LoadMenuUI : UIScrollMenu
         //menuSelectorNode.ClearOptions();
         string path = Path.Combine(Application.streamingAssetsPath, "GameData", "Characters", "");
 
+        if (File.Exists(path))
+        {
+            //File.Delete(path);
+        }
+        else
+        {
+            Directory.CreateDirectory(path);
+        }
+
         DirectoryInfo dir = new DirectoryInfo(path);
         FileInfo[] info = dir.GetFiles("*.player");
         Debug.Log(path);

@@ -24,19 +24,17 @@ public class Entity : MonoBehaviour
     #endregion
 
     public List<Ability> abilities = new List<Ability>();
-    public List<StatusEffect> statusEffects = new List<StatusEffect>();
-    public List<Effect> continuousEffects = new List<Effect>();
+    public List<TimedEffect> continuousEffects = new List<TimedEffect>();
+    public List<WeaponBonusEffect> weaponEffects = new List<WeaponBonusEffect>();
 
     public bool isDead = false;
 
     public PhysicsBody2D _controller;
 
-
     // Start is called before the first frame update
     void Start()
     {
 
-        
 
     }
 
@@ -86,6 +84,16 @@ public class Entity : MonoBehaviour
     public virtual void Die()
     {
         isDead = true;
+        StopAllCoroutines();
+
+
+        List<Effect> tempList = new List<Effect>();
+        tempList.AddRange(continuousEffects);
+
+        foreach(TimedEffect effect in tempList)
+        {
+            effect.RemoveEffect();
+        }
     }
 
     public virtual void ShowFloatingText(string text, Color color, float dTime = 1, float sSpeed = 1, float sizeMult = 1.0f)

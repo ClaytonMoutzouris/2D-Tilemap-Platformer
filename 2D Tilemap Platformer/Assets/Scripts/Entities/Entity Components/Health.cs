@@ -142,13 +142,14 @@ public class Health : MonoBehaviour
 
         if (!entity.isDead && currentHealth <= 0)
         {
+            hitData.killedEnemy = true;
+
             foreach (Ability ability in hitData.attackOwner.abilities)
             {
                 ability.OnKill(hitData);
             }
 
             hitData.attackOwner.OnKill(entity);
-
 
             entity.Die();
         }

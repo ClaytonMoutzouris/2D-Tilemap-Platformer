@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch, Flight };
+public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch, Flight, GrapplingHooking };
 
 public class PlayerController : CharacterEntity
 {
@@ -53,7 +53,7 @@ public class PlayerController : CharacterEntity
     public PlayerCreationData playerData;
     public int kills = 0;
     public CompanionManager _companionManager;
-
+    public int jumps = 0;
 
     protected override void Awake()
 	{
@@ -81,16 +81,37 @@ public class PlayerController : CharacterEntity
         playerData = data;
 
         colorSwap.SetBaseColors(playerData.playerColors);
-
         //starting stats set in player creation data
         stats.SetStats(data.startingStats);
+        
+        if(data.classData.statBonuses == null)
+        {
+            data.classData.statBonuses = new List<StatBonus>();
+        }
 
-
+        foreach(StatBonus bonus in data.classData.statBonuses)
+        {
+            stats.AddPrimaryBonus(bonus);
+        }
         //starting bonuses set in class data
-        stats.AddPrimaryBonuses(data.classData.statBonuses);
 
-        _equipmentManager.EquipItem(Instantiate(data.classData.startingWeapon));
-        _equipmentManager.EquipItem(Instantiate(data.classData.startingRanged));
+        if (data.classData.startingWeapon)
+        {
+            _equipmentManager.EquipItem(Instantiate(data.classData.startingWeapon));
+
+        }
+
+        if (data.classData.startingRanged)
+        {
+            _equipmentManager.EquipItem(Instantiate(data.classData.startingRanged));
+
+        }
+
+        if (data.classData.startingGadget)
+        {
+            _equipmentManager.EquipItem(Instantiate(data.classData.startingGadget));
+
+        }
 
         foreach (ItemData item in data.classData.startingItems)
         {
@@ -252,6 +273,9 @@ public class PlayerController : CharacterEntity
                 break;
             case PlayerMovementState.Flight:
                 Flight();
+                break;
+            case PlayerMovementState.GrapplingHooking:
+
                 break;
         }
 
@@ -483,6 +507,8 @@ public class PlayerController : CharacterEntity
 
     private void Climbing()
     {
+        jumps = 0;
+
         climbTimeStamp = Time.time;
 
         _controller.transform.position = new Vector2(ladderClimbPosition.x, _controller.transform.position.y);
@@ -541,6 +567,7 @@ public class PlayerController : CharacterEntity
     //process the character movement when Idle
     void Idle()
     {
+        jumps = 0;
 
         normalizedHorizontalSpeed = 0;
 
@@ -611,6 +638,7 @@ public class PlayerController : CharacterEntity
     //process the character movement when Idle
     void Crouch()
     {
+        jumps = 0;
 
         normalizedHorizontalSpeed = 0;
 
@@ -679,6 +707,8 @@ public class PlayerController : CharacterEntity
     //process the character movement when walking
     void Walking()
     {
+        jumps = 0;
+
         normalizedHorizontalSpeed = 0;
 
         if (!_controller.isGrounded)
@@ -759,6 +789,7 @@ public class PlayerController : CharacterEntity
 
     void Flight()
     {
+        jumps = 0;
         normalizedHorizontalSpeed = 0;
         normalizedVerticalSpeed = 0;
         _controller.ignoreGravity = true;
@@ -873,12 +904,16 @@ public class PlayerController : CharacterEntity
 
 
         //_animator.Play(Animator.StringToHash("Jump"));
-        if(stats.abilityFlags[AbilityFlagType.Flight].GetValue() && _input.GetButtonDown(ButtonInput.Jump))
+        if (stats.abilityFlags[AbilityFlagType.Flight].GetValue() && _input.GetButtonDown(ButtonInput.Jump))
         {
             movementState = PlayerMovementState.Flight;
             _controller.collisionState.launched = false;
 
+        } else if (_input.GetButtonDown(ButtonInput.Jump))
+        {
+            Jump();
         }
+
 
         //Check here to see if we were launched, 
         if (!_controller.collisionState.launched && !_input.GetButton(ButtonInput.Jump) && _controller.velocity.y > 0.0f)
@@ -922,6 +957,7 @@ public class PlayerController : CharacterEntity
 
     void GrabLedge()
     {
+        jumps = 0;
         _controller.velocity = Vector3.zero;
         _controller.transform.position = ledgeGrabPosition;
 
@@ -941,7 +977,7 @@ public class PlayerController : CharacterEntity
 
     public void Jump(bool leap = false)
     {
-        if(movementState == PlayerMovementState.Jump || _controller.collisionState.becameGroundedThisFrame)
+        if(jumps >= stats.GetSecondaryStat(SecondaryStatType.ExtraJumps).GetValue() && (movementState == PlayerMovementState.Jump || _controller.collisionState.becameGroundedThisFrame))
         {
             //Can't jump while jumping or in the air
             return;
@@ -955,13 +991,14 @@ public class PlayerController : CharacterEntity
         {
             ability.OnJump();
         }
+
+        jumps++;
     }
 
     public override void Die()
     {
         base.Die();
         StopAllCoroutines();
-        _attackManager.StopAllCoroutines();
         movementState = PlayerMovementState.Dead;
         StartCoroutine(Death());
     }

@@ -18,13 +18,26 @@ public class Projectile : Entity
 
     //Physics things
     public LayerMask baseLayermask;
+    public LayerMask laserLayerMask;
+
     //Might want to create a seperate projectile class for "boomerangs", but modularity has its merits aswell
     bool returning = false;
     
     public bool bouncedLastFrame = false;
     public ProjectileMovementType movementType;
-    public List<Effect> triggeredEffects;
+    public List<Effect> onDestroyedEffects;
     public Vector3 boomerangCenter;
+    public Weapon weapon;
+    public Entity target;
+    public Sightbox sightbox;
+    public int turnSpeed = 3;
+    public Chain activeChain;
+
+    public Vector3 laserOrigin;
+    public float laserSpeed = 0.5f;
+    public float laserLength = 100;
+    float laserRefreshTimeStamp = 0;
+    
 
     protected override void Awake()
     {
@@ -37,6 +50,11 @@ public class Projectile : Entity
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
         */
+
+        if (sightbox && movementType == ProjectileMovementType.Homing)
+        {
+            sightbox.state = ColliderState.Open;
+        }
     }
 
     private void Start()
@@ -79,19 +97,24 @@ public class Projectile : Entity
 
         if(movementType == ProjectileMovementType.Boomerang)
         {
-            if(direction.x > 0)
+            if(direction.x < 0)
             {
-                boomerangCenter = transform.position + Vector3.right *  projectileData.boomerangRadius;
+                spriteRenderer.flipX = true;
+            }
 
-            }
-            else
-            {
-                boomerangCenter = transform.position + Vector3.left * projectileData.boomerangRadius;
-            }
+            boomerangCenter = transform.position + (Vector3)direction.normalized * projectileData.boomerangRadius;
 
             _controller.velocity = Vector2.Perpendicular(boomerangCenter.normalized)*projectileData.projSpeed;
         }
 
+
+        if(projectileData.chainPrefab)
+        {
+            activeChain = Instantiate(projectileData.chainPrefab);
+            activeChain.SetObjects(_attackObject.owner.gameObject, gameObject);
+        }
+
+        laserOrigin = _controller.transform.position;
     }
 
 
@@ -144,10 +167,10 @@ public class Projectile : Entity
                 ControlMovement();
                 break;
             case (ProjectileMovementType.Homing):
-                //Not implemented
+                HomingMovement();
                 break;
             case (ProjectileMovementType.Laser):
-                //Not implemented
+                Laser();
                 break;
             case (ProjectileMovementType.Static):
                 _controller.velocity = Vector3.zero;
@@ -174,7 +197,7 @@ public class Projectile : Entity
             }
         }
 
-        if (startTime + projectileData.lifeTime <= Time.time && movementType != ProjectileMovementType.Returning)
+        if (startTime + projectileData.lifeTime <= Time.time && movementType != ProjectileMovementType.Returning && movementType != ProjectileMovementType.Laser)
         {
             DestroyProjectile();
         }
@@ -184,6 +207,74 @@ public class Projectile : Entity
         {
             DestroyProjectile();
         }
+    }
+
+    public void Laser()
+    {
+        _controller.velocity = Vector3.zero;
+
+        laserOrigin = _attackObject.owner.transform.position;
+
+        if(_attackObject.owner is PlayerController player)
+        {
+            Vector2 newDir = player._input.GetRightStickAim().normalized;
+            if(newDir != Vector2.zero)
+            {
+                direction = newDir;
+            }
+        }
+
+        RaycastHit2D[] hits = Physics2D.RaycastAll(laserOrigin, direction, laserLength, _attackObject.contactFilter.layerMask + laserLayerMask);
+        float distance = laserLength;
+        Vector3 dest = direction.normalized * laserLength;
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            Entity entity = hit.collider.GetComponent<Entity>();
+            if (entity == this || entity == _attackObject.owner)
+            {
+                continue;
+            }
+
+            Entity parEntity = hit.collider.GetComponentInParent<Entity>();
+            if (parEntity == this || parEntity == _attackObject.owner)
+            {
+                continue;
+            }
+            dest = hit.point;
+
+
+            //_attackObject.hitbox.size = spriteRenderer.bounds.size;
+
+            break;
+        }
+
+            distance = Vector3.Distance(laserOrigin, dest);
+
+            spriteRenderer.drawMode = SpriteDrawMode.Tiled;
+            spriteRenderer.tileMode = SpriteTileMode.Continuous;
+            transform.localScale = Vector3.one;
+            spriteRenderer.size = new Vector2(.25f, distance);
+
+            Vector3 middlePoint = (laserOrigin + dest) / 2;
+            transform.position = middlePoint;
+
+            Vector3 rotationDirection = (dest - laserOrigin);
+            transform.up = rotationDirection;
+
+            _attackObject.hitbox.autoTiling = true;
+
+        if(Time.time > laserRefreshTimeStamp + laserSpeed)
+        {
+            laserRefreshTimeStamp = Time.time;
+            _attackObject.ClearHits();
+
+            if(weapon)
+            {
+                weapon.ConsumeAmmo();
+            }
+        }
+
     }
 
     public void StraightMovement()
@@ -198,6 +289,49 @@ public class Projectile : Entity
 
     }
 
+    public void HomingMovement()
+    {
+
+        if (target != null)
+        {
+            direction = (target.transform.position - transform.position).normalized;
+
+
+            _controller.velocity.y += direction.y * projectileData.projSpeed * turnSpeed * Time.deltaTime;
+            _controller.velocity.x += direction.x * projectileData.projSpeed * turnSpeed * Time.deltaTime;
+
+            _controller.velocity = Vector2.ClampMagnitude(_controller.velocity, projectileData.projSpeed);
+        } else
+        {
+            FindTarget();
+
+        }
+
+    }
+
+    public void FindTarget()
+    {
+        if (target != null)
+        {
+            if (!sightbox.entitiesInSight.Contains(target))
+            {
+                target = null;
+            }
+        }
+        else
+        {
+            foreach (Entity entity in sightbox.entitiesInSight)
+            {
+                if (entity != this && entity != _attackObject.owner)
+                {
+                    target = entity;
+                    break;
+                }
+            }
+        }
+
+    }
+
     public void ControlMovement()
     {
         if (_attackObject.owner is PlayerController player)
@@ -206,8 +340,8 @@ public class Projectile : Entity
 
             if (aim != Vector2.zero)
             {
-                _controller.velocity.x += aim.x * projectileData.projSpeed;
-                _controller.velocity.y += aim.y * projectileData.projSpeed;
+                _controller.velocity.x += (aim.x * projectileData.projSpeed) * Time.deltaTime;
+                _controller.velocity.y += (aim.y * projectileData.projSpeed) * Time.deltaTime;
             }
             else
             {
@@ -221,9 +355,15 @@ public class Projectile : Entity
 
     public virtual void DestroyProjectile()
     {
-        foreach(Effect effect in triggeredEffects)
+        foreach(Effect effect in onDestroyedEffects)
         {
-            effect.ApplyEffect(this);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(this);
+        }
+
+        if(activeChain)
+        {
+            Destroy(activeChain.gameObject);
         }
 
         Destroy(gameObject);
@@ -251,6 +391,7 @@ public class Projectile : Entity
             returning = true;
             _controller.velocity.y = aim.normalized.y * projectileData.projSpeed;
             _controller.velocity.x = aim.normalized.x * projectileData.projSpeed;
+            _attackObject.ClearHits();
 
         }
 
@@ -321,7 +462,7 @@ public class Projectile : Entity
     public virtual void SetFromWeapon(Weapon wep)
     {
         _attackObject.SetOwner(wep.owner);
-
+        weapon = wep;
         _attackObject.attackData = wep.GetAttackData();
 
         projectileData.projSpeed = wep.GetStatValue(WeaponAttributesType.ProjectileSpeed);
@@ -340,8 +481,15 @@ public class Projectile : Entity
             _controller.platformMask = baseLayermask;
         }
 
+        foreach(Effect effect in wep.OnDestroyEffects)
+        {
+            onDestroyedEffects.Add(Instantiate(effect));
+        }
+
 
         _controller.ignoreGravity = projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue();
+
+
 
     }
 
@@ -365,7 +513,7 @@ public class Projectile : Entity
         foreach(Effect effect in data.OnDestroyTriggers)
         {
             Effect temp = Instantiate(effect);
-            triggeredEffects.Add(temp);
+            onDestroyedEffects.Add(temp);
         }
 
         if (projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGround).GetValue())
@@ -378,5 +526,10 @@ public class Projectile : Entity
 
         _controller.ignoreGravity = projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue();
 
+
+        if (sightbox && movementType == ProjectileMovementType.Homing)
+        {
+            sightbox.state = ColliderState.Open;
+        }
     }
 }

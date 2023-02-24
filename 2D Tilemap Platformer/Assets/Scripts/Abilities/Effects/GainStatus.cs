@@ -7,16 +7,13 @@ public class GainStatus : Effect
 {
     public StatusEffect status;
 
-    public override void ApplyEffect(Entity effected, AttackHitData data = null)
+    public override void ApplyEffect(Entity owner, Entity effected, AttackHitData data = null)
     {
-        base.ApplyEffect(effected, data);
+        base.ApplyEffect(owner, effected, data);
 
-        if (data != null)
-        {
-            StatusEffect newStatus = Instantiate(status);
-
-            status.ApplyEffect(effectOwner);
-        }
+        StatusEffect newStatus = Instantiate(status);
+        status.ApplyEffect(effectedEntity);
+        
 
     }
 }

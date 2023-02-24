@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DamageOverTime", menuName = "ScriptableObjects/StatusEffects/DamageOverTime")]
+[CreateAssetMenu(fileName = "FearEffect", menuName = "ScriptableObjects/StatusEffects/FearEffect")]
 public class FearEffect : StatusEffect
 {
 
-    public override IEnumerator HandleStatusEffect()
+    public override IEnumerator HandleEffect()
     {
-        StartUp();
 
         Vector2 runVector = effectOwner.transform.position - effectedEntity.transform.position;
 
-        while (Time.time <= timeStamp + duration)
+        while (unlimitedDuration || Time.time <= timeStamp + duration)
         {
             //effectedEntity.normalized;
 
             yield return null;
         }
 
-        EffectEnd();
+        RemoveEffect();
 
     }
 }

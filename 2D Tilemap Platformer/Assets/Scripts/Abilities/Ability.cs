@@ -7,11 +7,13 @@ using UnityEngine;
 public class Ability : ScriptableObject
 {
     protected Entity owner;
-
+    public List<ItemRarity> itemRarities;
     public List<Effect> continuousEffects;
     //public List<Effect> OnGainedEffects;
-    public List<Effect> OnHitEffects;
-    public List<Effect> OnHurtEffects;
+    public List<Effect> OnHitGainedEffects;
+    public List<Effect> OnHitInflictEffects;
+    public List<Effect> OnHurtGainedEffects;
+    public List<Effect> OnHurtInflictEffects;
     public List<Effect> OnKillEffects;
     public List<Effect> OnDieEffects;
     public List<Effect> OnWalkEffects;
@@ -28,11 +30,41 @@ public class Ability : ScriptableObject
         owner.abilities.Add(this);
     }
 
+    public bool CheckRarity(ItemRarity rarity)
+    {
+        return itemRarities.Contains(rarity);
+    }
+
+    public void InitEffects()
+    {
+        List<Effect> contEffects = new List<Effect>();
+
+        foreach(Effect effect in continuousEffects)
+        {
+            contEffects.Add(Instantiate(effect));
+        }
+
+        continuousEffects.Clear();
+
+        continuousEffects.AddRange(contEffects);
+    }
+
     public virtual void OnGainedAbility(Entity entity)
     {
         SetOwner(entity);
 
-        foreach(Effect effect in continuousEffects)
+        List<Effect> contEffects = new List<Effect>();
+
+        foreach (Effect effect in continuousEffects)
+        {
+            contEffects.Add(Instantiate(effect));
+        }
+
+        continuousEffects.Clear();
+        continuousEffects.AddRange(contEffects);
+
+        //Apply all the continuous effects
+        foreach (Effect effect in continuousEffects)
         {
             effect.ApplyEffect(owner);
         }
@@ -52,28 +84,48 @@ public class Ability : ScriptableObject
 
     public virtual void OnEquippedWeapon(Weapon equipped)
     {
-
+        foreach(Effect effect in continuousEffects)
+        {
+            effect.OnWeaponEquipped(equipped);
+        }
     }
 
     public virtual void OnUnequippedWeapon(Weapon unequipped)
     {
-
+        foreach (Effect effect in continuousEffects)
+        {
+            effect.OnWeaponUnequipped(unequipped);
+        }
     }
 
     //Do I ever need to keep track of the exact effect that happens onHit?
     public virtual void OnHit(AttackHitData hitData)
     {
-        foreach (Effect effect in OnHitEffects)
+        foreach (Effect effect in OnHitGainedEffects)
         {
-            effect.ApplyEffect(owner, hitData);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, owner, hitData);
+        }
+
+        foreach (Effect effect in OnHitInflictEffects)
+        {
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, hitData.hit.GetEntity(), hitData);
         }
     }
 
     public virtual void OnHurt(AttackHitData hitData)
     {
-        foreach (Effect effect in OnHurtEffects)
+        foreach (Effect effect in OnHurtGainedEffects)
         {
-            effect.ApplyEffect(owner, hitData);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, owner, hitData);
+        }
+
+        foreach (Effect effect in OnHurtInflictEffects)
+        {
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, hitData.attackOwner, hitData);
         }
     }
 
@@ -82,7 +134,8 @@ public class Ability : ScriptableObject
     {
         foreach (Effect effect in OnKillEffects)
         {
-            effect.ApplyEffect(owner, hitData);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, hitData);
         }
     }
 
@@ -90,7 +143,8 @@ public class Ability : ScriptableObject
     {
         foreach (Effect effect in OnDieEffects)
         {
-            effect.ApplyEffect(owner, hitData);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner, hitData);
         }
     }
 
@@ -98,7 +152,8 @@ public class Ability : ScriptableObject
     {
         foreach (Effect effect in OnJumpEffects)
         {
-            effect.ApplyEffect(owner);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner);
         }
 
     }
@@ -108,7 +163,8 @@ public class Ability : ScriptableObject
     {
         foreach (Effect effect in OnWalkEffects)
         {
-            effect.ApplyEffect(owner);
+            Effect temp = Instantiate(effect);
+            temp.ApplyEffect(owner);
         }
     }
 

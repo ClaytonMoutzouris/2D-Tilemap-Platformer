@@ -24,6 +24,8 @@ public class CharacterEntity : Entity, IHurtable
         hurtbox = GetComponentInChildren<Hurtbox>();
         hurtbox.SetOwner(this);
 
+        sight = GetComponentInChildren<Sightbox>();
+
         stats = GetComponent<Stats>();
         if (stats != null)
         {
@@ -62,7 +64,7 @@ public class CharacterEntity : Entity, IHurtable
             ability.OnHurt(hitData);
         }
 
-        StartCoroutine(StatusEffects.Knockback(this, (transform.position - hitData.attackOwner.transform.position).normalized, hitData.knockbackPower));
+        StartCoroutine(StatusEffects.Knockback(this, hitData.hitVector.normalized, hitData.knockbackPower));
 
     }
 
@@ -79,6 +81,7 @@ public class CharacterEntity : Entity, IHurtable
 
         if (dodge < dodgeChance)
         {
+            ShowFloatingText("Dodge", Color.blue);
             return false;
         }
 

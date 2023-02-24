@@ -16,7 +16,7 @@ public enum ButtonInput
     DPad_Up,
     Jump,
     LightAttack,
-    HeavyAttack,
+    ActivateGadget,
     PlayerMenu,
     Pause,
     Minimap,

@@ -11,14 +11,13 @@ public class DamageOverTime : StatusEffect
 
 
 
-    public override IEnumerator HandleStatusEffect()
+    public override IEnumerator HandleEffect()
     {
         if(effectedEntity is IHurtable hurtable)
         {
-            StartUp();
             float tickDuration = 0;
 
-            while (Time.time <= timeStamp + duration + tickInterval)
+            while (unlimitedDuration || Time.time <= timeStamp + duration + tickInterval)
             {
 
                 tickDuration += Time.deltaTime;
@@ -31,7 +30,7 @@ public class DamageOverTime : StatusEffect
                 yield return null;
             }
 
-            EffectEnd();
+            RemoveEffect();
         } 
 
     }

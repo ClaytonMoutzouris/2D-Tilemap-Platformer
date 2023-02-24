@@ -19,8 +19,9 @@ public class ClassData : ScriptableObject
     [Header("Starting Equipment")]
     public Weapon startingWeapon;
     public RangedWeapon startingRanged;
+    public Gadget startingGadget;
     //public List<Equipment> startingEquipment;
-    public List<ItemData> startingItems;
+    public List<ItemData> startingItems = new List<ItemData>();
 
 
     public string GetTooltip()
@@ -35,6 +36,11 @@ public class ClassData : ScriptableObject
         if (startingRanged != null)
         {
             tooltip += "\n" + "<color=#" + ColorUtility.ToHtmlStringRGB(Color.red) + ">" + startingRanged.name + "</color>";
+        }
+
+        if (startingGadget != null)
+        {
+            tooltip += "\n" + "<color=#" + ColorUtility.ToHtmlStringRGB(Color.magenta) + ">" + startingGadget.name + "</color>";
         }
 
         foreach (StatBonus bonus in statBonuses)

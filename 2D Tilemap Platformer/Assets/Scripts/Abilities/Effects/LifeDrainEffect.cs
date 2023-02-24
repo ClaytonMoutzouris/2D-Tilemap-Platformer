@@ -7,11 +7,11 @@ public class LifeDrainEffect : Effect
 {
     public int percentDrained = 100;
 
-    public override void ApplyEffect(Entity effected, AttackHitData data = null)
+    public override void ApplyEffect(Entity owner, Entity effected, AttackHitData data = null)
     {
-        base.ApplyEffect(effected, data);
+        base.ApplyEffect(owner, effected, data);
 
-        if(effected is CharacterEntity character && data != null)
+        if(effectedEntity is CharacterEntity character && data != null)
         {
             character.GetHealth().GainLife(data.damageDealt);
         }

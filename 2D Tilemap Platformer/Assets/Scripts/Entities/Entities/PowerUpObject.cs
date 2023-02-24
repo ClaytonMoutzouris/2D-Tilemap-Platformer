@@ -2,24 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PowerUpObject : MonoBehaviour
+public class PowerUpObject : Entity
 {
-    public SpriteRenderer spriteRenderer;
-    public Animator animator;
-
     public PowerUp powerUp;
     PowerUpSpawnNode spawner;
-
-    public PhysicsBody2D _controller;
-
-    void Awake()
-    {
-        _controller = GetComponent<PhysicsBody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
-
-    }
-
 
     public void SetSpawner(PowerUpSpawnNode spawnNode)
     {
@@ -30,7 +16,7 @@ public class PowerUpObject : MonoBehaviour
     {
         if (entity != null && powerUp.powerUpEffect != null)
         {
-            StatusEffect effect = Instantiate(powerUp.powerUpEffect);
+            Effect effect = Instantiate(powerUp.powerUpEffect);
             effect.ApplyEffect(entity);
 
             if (spawner != null)
@@ -40,11 +26,6 @@ public class PowerUpObject : MonoBehaviour
             Destroy(gameObject);
 
         }
-    }
-
-    public void CheckCollisions()
-    {
-
     }
 
     public void Update()

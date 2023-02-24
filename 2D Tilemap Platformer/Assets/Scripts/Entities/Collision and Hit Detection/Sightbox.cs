@@ -42,9 +42,6 @@ public class Sightbox : MonoBehaviour
                     entitiesInSight.Add(entity);
                 }
             }
-
-
-
         }
 
         state = colliders.Count > 0 ? ColliderState.Colliding : ColliderState.Open;

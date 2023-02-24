@@ -193,7 +193,7 @@ public class PlayerInputController : MonoBehaviour
 
                 buttonInput[(int)ButtonInput.Jump] = mGamepadInput.buttonInputs[(int)GamepadButtons.SouthButton];
                 buttonInput[(int)ButtonInput.LightAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
-                buttonInput[(int)ButtonInput.HeavyAttack] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
+                buttonInput[(int)ButtonInput.ActivateGadget] = mGamepadInput.buttonInputs[(int)GamepadButtons.NorthButton];
                 //Attack Input
                 buttonInput[(int)ButtonInput.Attack_Down] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickY] == -1;
                 buttonInput[(int)ButtonInput.Attack_Left] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton] && mGamepadInput.axisInputs[(int)GamepadAxis.LeftStickX] == -1;
@@ -245,7 +245,7 @@ public class PlayerInputController : MonoBehaviour
 
                 buttonInput[(int)ButtonInput.Jump] = false;
                 buttonInput[(int)ButtonInput.LightAttack] = false;
-                buttonInput[(int)ButtonInput.HeavyAttack] = false;
+                buttonInput[(int)ButtonInput.ActivateGadget] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -290,7 +290,7 @@ public class PlayerInputController : MonoBehaviour
 
                 buttonInput[(int)ButtonInput.Jump] = false;
                 buttonInput[(int)ButtonInput.LightAttack] = false;
-                buttonInput[(int)ButtonInput.HeavyAttack] = false;
+                buttonInput[(int)ButtonInput.ActivateGadget] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -333,7 +333,7 @@ public class PlayerInputController : MonoBehaviour
 
                 buttonInput[(int)ButtonInput.Jump] = false;
                 buttonInput[(int)ButtonInput.LightAttack] = false;
-                buttonInput[(int)ButtonInput.HeavyAttack] = false;
+                buttonInput[(int)ButtonInput.ActivateGadget] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = false;
                 buttonInput[(int)ButtonInput.Minimap] = false;
@@ -377,7 +377,7 @@ public class PlayerInputController : MonoBehaviour
 
                 buttonInput[(int)ButtonInput.Jump] = false;
                 buttonInput[(int)ButtonInput.LightAttack] = false;
-                buttonInput[(int)ButtonInput.HeavyAttack] = false;
+                buttonInput[(int)ButtonInput.ActivateGadget] = false;
                 buttonInput[(int)ButtonInput.PlayerMenu] = false;
                 buttonInput[(int)ButtonInput.Pause] = mGamepadInput.buttonInputs[(int)GamepadButtons.StartButton];
                 buttonInput[(int)ButtonInput.Minimap] = false;

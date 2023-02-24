@@ -12,9 +12,10 @@ public class SpawnProjectileEffect : Effect
 
     public Vector2 direction = Vector2.right;
 
-    public override void ApplyEffect(Entity effected, AttackHitData data = null)
+    //Effected is where the projectile is spawning, the owner is who owns it
+    public override void ApplyEffect(Entity owner, Entity effected, AttackHitData data = null)
     {
-        base.ApplyEffect(effected, data);
+        base.ApplyEffect(owner, effected, data);
 
 
         Projectile proj = Instantiate(projectile.projectileBase, effected.transform.position, Quaternion.identity);
@@ -29,14 +30,8 @@ public class SpawnProjectileEffect : Effect
             proj.SetData(projectile);
             proj._attackObject.attackData = projectileAttackData;
 
-            if(effected is Projectile projEntity)
-            {
-                proj._attackObject.SetOwner(projEntity._attackObject.owner);
-            }
-            else
-            {
-                proj._attackObject.SetOwner(effected);
-            }
+            proj._attackObject.SetOwner(owner);
+            
 
             proj.SetDirection(direction);
         }

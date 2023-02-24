@@ -8,7 +8,6 @@ public class EnemyEntity : CharacterEntity
 
     public Vector3 mOldPosition;
     public Entity target;
-    public Sightbox sight;
     public List<AttackObject> attackObjects;
 
     public int normalizedHorizontalSpeed = 0;
@@ -19,7 +18,6 @@ public class EnemyEntity : CharacterEntity
         base.Awake();
 
         _controller = GetComponent<PhysicsBody2D>();
-        sight = GetComponentInChildren<Sightbox>();
 
         //_controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
@@ -84,7 +82,7 @@ public class EnemyEntity : CharacterEntity
     public override void Die()
     {
         base.Die();
-            Destroy(gameObject, 0.5f);
+        Destroy(gameObject, 0.2f);
             //movementState = PlayerMovementState.Dead;
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum DamageType { Physical, Magical }
-public enum AttackInput { Up, Down, Forward, Backward, Neutral, Shoot }
+public enum AttackInput { Up, Down, Forward, Backward, Neutral, Shoot, AirDown }
 public enum WeaponSlot { Melee, Ranged }
 
 [CreateAssetMenu(fileName = "Weapon", menuName = "ScriptableObjects/Items/Equipment/Weapon")]
@@ -25,6 +25,7 @@ public class Weapon : Equipment
     public WeaponAttack attackForward;
     public WeaponAttack attackBack;
     public WeaponAttack attackNeutral;
+    public WeaponAttack airDownAttack;
 
     public ProjectileData baseProjectile;
 
@@ -58,6 +59,17 @@ public class Weapon : Equipment
     public float spreadAngle;
     public int ammoCapacity;
     public float reloadTime;
+
+    [Header("Effects")]
+    public List<Effect> OnHitGainEffects;
+    public List<Effect> OnHitInflictEffects;
+
+    //This is for projectiles only?
+    public List<Effect> OnDestroyEffects;
+    public List<Effect> OnAttackGainEffects;
+    public List<Effect> OnAttackInflictEffects;
+    public List<Effect> OnKillEffects;
+
 
     int attackIndex = 0;
     float lastFiredTimestamp = 0;
@@ -211,6 +223,8 @@ public class Weapon : Equipment
                 return attackNeutral;
             case AttackInput.Shoot:
                 return rangedAttack;
+            case AttackInput.AirDown:
+                return airDownAttack;
         }
 
         return attacks[0];
@@ -352,15 +366,90 @@ public class Weapon : Equipment
         }
     }
 
+    public void ConsumeAmmo(int amount = 1)
+    {
+        currentAmmo -= amount;
+        owner.playerVersusUI.ammoDisplay.UpdateAmmo();
+    }
+
+    public Projectile FireLaserProjectile()
+    {
+
+        if (baseProjectile == null)
+        {
+            return null;
+        }
+
+        Vector2 dir = owner._input.GetRightStickAim().normalized;
+
+        //If there is no input, default the direction to forward
+
+        if (Time.time > lastFiredTimestamp + (1 / GetStatValue(WeaponAttributesType.FireRate)))
+        {
+
+            if (currentAmmo <= 0)
+            {
+                owner.ShowFloatingText("Reload", Color.red);
+                lastFiredTimestamp = Time.time;
+
+                return null;
+            }
+
+            lastFiredTimestamp = Time.time;
+
+            Projectile proj = Instantiate(baseProjectile.projectileBase, owner.transform.position, Quaternion.identity);
+
+
+            if (proj != null)
+            {
+                proj.SetData(baseProjectile);
+                proj.SetFromWeapon(this);
+
+                if (dir == Vector2.zero)
+                {
+                    if (!proj.projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
+                    {
+                        dir = owner.GetDirection() * Vector2.right + Vector2.up / 2;
+
+                    } else
+                    {
+                        dir = owner.GetDirection() * Vector2.right;
+
+                    }
+
+
+                }
+
+                
+                proj.SetDirection(dir);
+
+                return proj;
+
+            }
+        }
+
+
+        if (weaponObj != null)
+        {
+            if (dir == Vector2.zero)
+            {
+
+                dir = owner.GetDirection() * Vector2.right;
+
+            }
+            owner._attackManager.rangedWeaponObject.AimWeapon(dir);
+        }
+
+        return null;
+    }
+
     //Only works for melee weapons with the default thrown object set
     public void ThrowWeapon()
     {
         Projectile proj = Instantiate(baseProjectile.projectileBase, owner.transform.position, Quaternion.identity);
-        Debug.Log("Throw Weapon");
 
         if (proj != null)
         {
-            Debug.Log("Projectile");
 
             proj.SetData(baseProjectile);
             proj.SetFromWeapon(this);
@@ -421,7 +510,7 @@ public class Weapon : Equipment
 
     public void Reload(AmmoType ammoType)
     {
-        if(ammoType == this.ammoType)
+        if(ammoType == this.ammoType || ammoType == AmmoType.None)
         {
             currentAmmo = (int)weaponAttributes.GetAttribute(WeaponAttributesType.AmmoCapacity).GetValue();
             owner.playerVersusUI.ammoDisplay.UpdateAmmo();

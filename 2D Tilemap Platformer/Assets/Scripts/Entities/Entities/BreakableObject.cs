@@ -41,7 +41,9 @@ public class BreakableObject : Entity, IHurtable
 
     public void GetHurt(ref AttackHitData hitData)
     {
+        hitData.killedEnemy = true;
         BreakObject();
+
     }
 
     public Hurtbox GetHurtbox()

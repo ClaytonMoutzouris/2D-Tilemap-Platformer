@@ -8,18 +8,8 @@ public class StatChangeEffect : StatusEffect
     public List<StatBonus> statChanges;
     public List<SecondaryStatBonus> secondaryStatChanges;
 
-    public override void StartUp()
-    {
-        base.StartUp();
-        if(effectedEntity is CharacterEntity character)
-        {
-            character.stats.AddPrimaryBonuses(statChanges);
-            character.stats.AddSecondaryBonuses(secondaryStatChanges);
-        }
 
-    }
-
-    public override void EffectEnd()
+    public override void RemoveEffect()
     {
         if (effectedEntity is CharacterEntity character)
         {
@@ -27,7 +17,29 @@ public class StatChangeEffect : StatusEffect
             character.stats.RemoveSecondaryBonuses(secondaryStatChanges);
         }
 
-        base.EffectEnd();
+        base.RemoveEffect();
     }
 
+    public override IEnumerator HandleEffect()
+    {
+        if (effectedEntity is CharacterEntity character)
+        {
+            character.stats.AddPrimaryBonuses(statChanges);
+            character.stats.AddSecondaryBonuses(secondaryStatChanges);
+        }
+
+        timeStamp = Time.time;
+
+        while (unlimitedDuration || Time.time < timeStamp + duration)
+        {
+            if (!effectedEntity)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+        RemoveEffect();
+    }
 }

@@ -9,6 +9,8 @@ public class EquipmentManager : MonoBehaviour
     public Dictionary<EquipmentSlot, Armor> armorEquipment;
     public Dictionary<WeaponSlot, Weapon> weaponSlots;
 
+    public Gadget gadgetSlot;
+
     int consumableSelectionIndex = 0;
     public int consumableSlots = 5;
     public ConsumableItem[] consumables;
@@ -77,22 +79,32 @@ public class EquipmentManager : MonoBehaviour
                     consumables[i] = null;
 
                     player.playerVersusUI.itemBelt.SetItem(consumables[i], i);
-                    
 
+                    return;
                 }
             }
         }
 
     }
 
+    public bool IsGadgetSlotEmpty()
+    {
+        return !gadgetSlot;
+    }
+
+    public Gadget GetGadget()
+    {
+        return gadgetSlot;
+    }
+
     public bool IsSlotEmpty(WeaponSlot slot)
     {
-        return weaponSlots[slot] == null;
+        return !weaponSlots[slot];
     }
 
     public bool IsSlotEmpty(EquipmentSlot slot)
     {
-        return armorEquipment[slot] == null;
+        return !armorEquipment[slot];
     }
 
     public Armor GetEquipment(EquipmentSlot slot)
@@ -146,6 +158,25 @@ public class EquipmentManager : MonoBehaviour
             Debug.Log("Equipped item " + armor.name);
             armorEquipment[armor.equipmentSlot] = armor;
             armorEquipment[armor.equipmentSlot].OnEquipped(player);
+        } else if (equipment is Gadget gadget){
+            if(!IsGadgetSlotEmpty())
+            {
+                UnequipGadget();
+            }
+
+            gadgetSlot = gadget;
+            gadgetSlot.OnEquipped(player);
+        }
+    }
+
+    public void UnequipGadget()
+    {
+        if(gadgetSlot)
+        {
+            Gadget temp = gadgetSlot;
+            temp.OnUnequipped(player);
+            DropItem(temp);
+            gadgetSlot = null;
         }
     }
 

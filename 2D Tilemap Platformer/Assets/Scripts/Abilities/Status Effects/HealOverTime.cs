@@ -10,14 +10,13 @@ public class HealOverTime : StatusEffect
     public int healPerTick = 1;
 
 
-    public override IEnumerator HandleStatusEffect()
+    public override IEnumerator HandleEffect()
     {
         if (effectedEntity is IHurtable hurtable)
         {
-            StartUp();
             float tickDuration = 0;
 
-            while (Time.time <= timeStamp + duration + tickInterval)
+            while (unlimitedDuration || Time.time <= timeStamp + duration + tickInterval)
             {
 
                 tickDuration += Time.deltaTime;
@@ -30,7 +29,7 @@ public class HealOverTime : StatusEffect
                 yield return null;
             }
 
-            EffectEnd();
+            RemoveEffect();
         }
     }
 }

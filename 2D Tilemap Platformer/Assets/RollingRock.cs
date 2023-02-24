@@ -38,16 +38,18 @@ public class RollingRock : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
+        _controller.velocity.x = MovementSpeed * (int)direction;
+
+        _controller.move();
+
         if (_controller.collisionState.groundRight || _controller.collisionState.groundLeft || _controller.velocity == Vector3.zero)
         {
             //Animation.play Destroy animation
             spawner.RockDestroyed();
             Destroy(gameObject);
         }
-
-        _controller.velocity.x = MovementSpeed * (int)direction;
-
-        _controller.move();
 
     }
 

@@ -31,7 +31,6 @@ public class WorldTile
 [System.Serializable]
 public class WorldObjectTile : WorldTile
 {
-    public string SpawnObject { get; set; }
 
     public static WorldObjectTile DeepCopy(WorldObjectTile original)
     {

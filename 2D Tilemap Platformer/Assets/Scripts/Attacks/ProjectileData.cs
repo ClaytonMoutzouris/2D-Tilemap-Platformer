@@ -39,6 +39,8 @@ public class ProjectileData : ScriptableObject
     public ProjectileFlags projectileFlags = new ProjectileFlags();
     private bool baseFlagsLoaded = false;
 
+    public Chain chainPrefab;
+
     //This is like a sort of init method
     public void SetBaseFlags()
     {

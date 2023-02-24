@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "StatBonusAbility", menuName = "ScriptableObjects/Abilities/StatBonusAbility")]
 public class StatBonusAbility : Ability
 {
+    [Header("Stat Bonuses")]
     public List<StatBonus> bonusStats;
     public List<SecondaryStatBonus> secondaryBonusStats;
     //In the general version, these are applied to any equipped weapon

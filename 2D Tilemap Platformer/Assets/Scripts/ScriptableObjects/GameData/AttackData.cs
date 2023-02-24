@@ -48,7 +48,16 @@ public class AttackData
         hitData.knockbackPower = knockbackPower;
         hitData.damageDealt = GetDamage();
         hitData.crit = crit;
-        if(crit)
+
+        if (hitData.attackOwner)
+        {
+            hitData.hitVector = (hit.GetEntity().transform.position - hitData.attackOwner.transform.position);
+        } else
+        {
+            hitData.hitVector = hit.GetEntity().GetDirection() * Vector2.left;
+        }
+
+        if (crit)
         {
             hitData.hitResult = AttackHitResult.Crit;
         }
@@ -69,6 +78,9 @@ public class AttackHitData
     public DamageType damageType;
     public float knockbackPower;
     public float knockbackAngle;
+    public Vector2 hitVector;
+    //Other things
+    public bool killedEnemy = false;
 
     public AttackHitData(IHurtable hit)
     {

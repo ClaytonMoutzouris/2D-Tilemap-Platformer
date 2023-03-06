@@ -36,7 +36,7 @@ public class GravitySpring : MonoBehaviour
                 {
                     body.velocity.y = -2.0f;
                 }
-                body.velocity.y += -GambleConstants.GRAVITY * 1.5f * Time.deltaTime;
+                body.velocity.y += -GambleUtilities.GetGravityModifier(body) * 1.5f * Time.deltaTime;
                 //body.transform.Translate(deltaMovement, Space.World);
 
             }

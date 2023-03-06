@@ -24,7 +24,7 @@ public class LaunchEffect : Effect
                 launchDirection = diff.normalized;
             }
 
-            Vector2 launchVector = new Vector2(launchPower * launchDirection.normalized.x, Mathf.Sqrt(launchPower * launchDirection.normalized.y * -GambleConstants.GRAVITY));
+            Vector2 launchVector = new Vector2(launchPower * launchDirection.normalized.x, Mathf.Sqrt(launchPower * launchDirection.normalized.y * -GambleUtilities.GetGravityModifier(effectedEntity._controller)));
 
             effectedEntity._controller.velocity = launchVector;
             effectedEntity._controller.Launch(launchVector);

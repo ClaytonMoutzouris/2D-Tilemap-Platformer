@@ -17,6 +17,7 @@ public class PhysicsBody2D : MonoBehaviour
         public Vector3 topRight;
         public Vector3 ledgeGrabOffset;
 	}
+
     [System.Serializable]
 	public class CharacterCollisionState2D
 	{
@@ -90,6 +91,7 @@ public class PhysicsBody2D : MonoBehaviour
 	/// </summary>
 	public bool ignoreOneWayPlatformsThisFrame;
     public bool ignoreGravity;
+    public float gravityMod = 1;
 
 	[SerializeField]
 	[Range( 0.001f, 0.3f )]
@@ -282,7 +284,7 @@ public class PhysicsBody2D : MonoBehaviour
         //Apply Gravity
         if (!ignoreGravity)
         {
-            velocity.y += GambleConstants.GRAVITY * Time.deltaTime;
+            velocity.y += GambleUtilities.GetGravityModifier(this) * Time.deltaTime;
         }
 
 

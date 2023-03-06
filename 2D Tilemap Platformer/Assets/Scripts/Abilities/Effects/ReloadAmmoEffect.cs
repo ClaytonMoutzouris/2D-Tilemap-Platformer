@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ReloadAmmoEffect", menuName = "ScriptableObjects/Effects/TriggeredEffects/ReloadAmmoEffect")]
-public class ReloadAmmoEffect : Effect
+public class ReloadAmmoEffect : TriggeredEffect
 {
     [Header("Reload Effect")] 
     public AmmoType ammoType = AmmoType.None;
@@ -18,6 +18,19 @@ public class ReloadAmmoEffect : Effect
             Weapon weapon = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
 
             if(weapon)
+            {
+                weapon.Reload(ammoType);
+            }
+        }
+    }
+
+    public override void Trigger(Entity owner, AttackHitData data = null)
+    {
+        if (owner && owner is PlayerController player)
+        {
+            Weapon weapon = player._equipmentManager.GetEquippedWeapon(WeaponSlot.Ranged);
+
+            if (weapon)
             {
                 weapon.Reload(ammoType);
             }

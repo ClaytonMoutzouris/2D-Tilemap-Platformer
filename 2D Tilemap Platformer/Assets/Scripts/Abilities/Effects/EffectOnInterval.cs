@@ -28,16 +28,17 @@ public class EffectOnInterval : StatusEffect
     public override IEnumerator HandleEffect()
     {
         timeStamp = Time.time;
-
+        float intervalTimestamp = Time.time;
+        
         while (unlimitedDuration || Time.time < timeStamp + duration)
         {
-            if(Time.time > timeStamp + interval)
+            if(Time.time > intervalTimestamp + interval)
             {
 
                 Effect temp = Instantiate(triggeredEffect);
                 temp.ApplyEffect(effectOwner, effectedEntity, attackHitData);
                 activeEffects.Add(temp);
-                timeStamp = Time.time;
+                intervalTimestamp = Time.time;
             }
             yield return null;
         }

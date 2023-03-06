@@ -39,7 +39,7 @@ public class GravityLauncher : MonoBehaviour
             {
                 //body.StartCoroutine(StatusEffects.Knockback(body.GetComponent<Entity>(), launchDirection, launchValue));
                 //body.transform.Translate(deltaMovement, Space.World);
-                Vector2 launchVector = new Vector2(launchValue * launchDirection.normalized.x, Mathf.Sqrt(launchValue * launchDirection.normalized.y * -GambleConstants.GRAVITY));
+                Vector2 launchVector = new Vector2(launchValue * launchDirection.normalized.x, Mathf.Sqrt(launchValue * launchDirection.normalized.y * -GambleUtilities.GetGravityModifier(body)));
                 Debug.Log("Launch Velocity: " + launchVector);
                 body.velocity = launchVector;
                 body.Launch(launchVector);

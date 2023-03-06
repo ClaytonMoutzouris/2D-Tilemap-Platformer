@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CharacterSelectPortrait : MonoBehaviour
 {
-    public ColorSwap colorSwap;
+    //public ColorSwap colorSwap;
     public Image image;
 
     // Start is called before the first frame update
@@ -17,7 +17,7 @@ public class CharacterSelectPortrait : MonoBehaviour
     public void LoadPortrait()
     {
         image.material = new Material(image.material);
-        colorSwap = new ColorSwap(image.material);
+        //colorSwap = new ColorSwap(image.material);
     }
 
     // Update is called once per frame

@@ -113,7 +113,7 @@ public class EnemyAI : MonoBehaviour
     {
         // ENTER THE ATTACK STATE
         //entity.normalizedHorizontalSpeed = entity.GetDirection();
-        entity._controller.velocity.y = Mathf.Sqrt(entity.maxJumpHeight/2 * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(entity.maxJumpHeight/2 * -GambleUtilities.GetGravityModifier(entity._controller));
         //entity._velocity.x = entity.GetDirection();
 
         // EXECUTE ATTACK STATE
@@ -196,7 +196,7 @@ public class EnemyAI : MonoBehaviour
             jumpHeight = entity.maxJumpHeight;
         }
 
-        entity._controller.velocity.y = Mathf.Sqrt(2 * jumpHeight * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(2 * jumpHeight * -GambleUtilities.GetGravityModifier(entity._controller));
 
     }
 

@@ -16,7 +16,7 @@ public class AirDownAttack : WeaponAttack
         //entity.movementState = PlayerMovementState.Jump;
 
         // Enter the state
-        player._controller.velocity.y = -Mathf.Sqrt(2 * fallSpeedMod * -GambleConstants.GRAVITY);
+        player._controller.velocity.y = -Mathf.Sqrt(2 * fallSpeedMod * -GambleUtilities.GetGravityModifier(player._controller));
         player._controller.velocity.x = player.GetDirection() * player.stats.GetSecondaryStat(SecondaryStatType.MoveSpeed).GetValue()*.075f;
         player._animator.Play(attackAnimation.name);
         player._animator.speed = attackSpeed;

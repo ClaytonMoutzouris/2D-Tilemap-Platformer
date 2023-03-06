@@ -34,8 +34,7 @@ public class AppearancePanelUI : UIScrollMenu
         colors.Add(appearanceMenuOptions.shoesColors[0]);
         colors.Add(appearanceMenuOptions.pantsColors[0]);
 
-        characterScreen.portrait.colorSwap.SetBaseColors(colors);
-
+        ColorSwapper.SwapPlayerColors(characterScreen.portrait.image.material, colors);
     }
 
     public override void SetCurrentNode(MenuOption node)
@@ -46,7 +45,10 @@ public class AppearancePanelUI : UIScrollMenu
         {
             //This hard coding is because the back and confirm buttons are there
             colors[node.optionIndex-2] = colorSelector.GetColorNode().color;
-            characterScreen.portrait.colorSwap.SetBaseColors(colors);
+            //characterScreen.portrait.colorSwap.SetBaseColors(colors);
+            //ColorSwapper.SwapPlayerColors(characterScreen.portrait.image.material, colors);
+            ColorSwapper.SwapPlayerColors(characterScreen.portrait.image.material, colors);
+
         }
     }
 

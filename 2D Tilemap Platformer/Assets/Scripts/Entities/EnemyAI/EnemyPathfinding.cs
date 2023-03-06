@@ -145,7 +145,7 @@ public class EnemyPathfinding : MonoBehaviour
         }
         else if (!entity._controller.isGrounded && mFramesOfJumping <= 0)
         {
-            entity._controller.velocity.y = Mathf.Min(entity._controller.velocity.y, Mathf.Sqrt(entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY));
+            entity._controller.velocity.y = Mathf.Min(entity._controller.velocity.y, Mathf.Sqrt(entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleUtilities.GetGravityModifier(entity._controller)));
 
         }
 
@@ -168,7 +168,7 @@ public class EnemyPathfinding : MonoBehaviour
     {
 
         //Basically just set the velocity to the jump speed
-        entity._controller.velocity.y = Mathf.Sqrt(2*entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
+        entity._controller.velocity.y = Mathf.Sqrt(2*entity.stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleUtilities.GetGravityModifier(entity._controller));
 
     }
 

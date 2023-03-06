@@ -25,7 +25,7 @@ public enum ButtonInput
     BeamUp,
     Fire,
     SwapWeapon,
-    Gadget2,
+    Consumable,
     InventoryDrop,
     InventoryMove,
     InventorySort,

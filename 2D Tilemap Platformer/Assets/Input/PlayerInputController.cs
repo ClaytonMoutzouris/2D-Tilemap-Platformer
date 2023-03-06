@@ -211,7 +211,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.SwapWeapon] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadLeft]
                     || mGamepadInput.buttonInputs[(int)GamepadButtons.DpadRight];
                 buttonInput[(int)ButtonInput.BeamUp] = mGamepadInput.buttonInputs[(int)GamepadButtons.DpadDown];
-                buttonInput[(int)ButtonInput.Gadget2] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
+                buttonInput[(int)ButtonInput.Consumable] = mGamepadInput.buttonInputs[(int)GamepadButtons.RightBumper];
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
                 buttonInput[(int)ButtonInput.InventorySort] = false;
@@ -255,7 +255,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.BeamUp] = false;
                 buttonInput[(int)ButtonInput.SwapWeapon] = false;
 
-                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.Consumable] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = mGamepadInput.buttonInputs[(int)GamepadButtons.EastButton];
                 buttonInput[(int)ButtonInput.InventoryMove] = mGamepadInput.buttonInputs[(int)GamepadButtons.WestButton];
                 buttonInput[(int)ButtonInput.InventorySort] = mGamepadInput.buttonInputs[(int)GamepadButtons.SelectButton];
@@ -299,7 +299,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Fire] = false;
                 buttonInput[(int)ButtonInput.SwapWeapon] = false;
 
-                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.Consumable] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
                 buttonInput[(int)ButtonInput.InventorySort] = false;
@@ -342,7 +342,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Fire] = false;
                 buttonInput[(int)ButtonInput.SwapWeapon] = false;
 
-                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.Consumable] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
                 buttonInput[(int)ButtonInput.InventorySort] = false;
@@ -386,7 +386,7 @@ public class PlayerInputController : MonoBehaviour
                 buttonInput[(int)ButtonInput.Fire] = false;
                 buttonInput[(int)ButtonInput.SwapWeapon] = false;
 
-                buttonInput[(int)ButtonInput.Gadget2] = false;
+                buttonInput[(int)ButtonInput.Consumable] = false;
                 buttonInput[(int)ButtonInput.InventoryDrop] = false;
                 buttonInput[(int)ButtonInput.InventoryMove] = false;
                 buttonInput[(int)ButtonInput.InventorySort] = false;

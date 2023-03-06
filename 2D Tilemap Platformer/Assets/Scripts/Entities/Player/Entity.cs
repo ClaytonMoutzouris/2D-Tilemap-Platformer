@@ -149,4 +149,9 @@ public class Entity : MonoBehaviour
     {
         return this;
     }
+
+    public virtual float GetGravityModifier()
+    {
+        return GambleConstants.GRAVITY*_controller.gravityMod;
+    }
 }

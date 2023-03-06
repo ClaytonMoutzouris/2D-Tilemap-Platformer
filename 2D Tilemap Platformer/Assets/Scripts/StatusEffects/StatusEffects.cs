@@ -16,7 +16,7 @@ public static class StatusEffects
         PhysicsBody2D body = entity.GetComponent<PhysicsBody2D>();
         if(body)
         {
-            body.velocity = direction * knockbackPower + Vector2.up * Mathf.Sqrt(-GambleConstants.GRAVITY) * Mathf.Clamp01(knockbackPower);
+            body.velocity = direction * knockbackPower + Vector2.up * Mathf.Sqrt(-GambleUtilities.GetGravityModifier(body)) * Mathf.Clamp01(knockbackPower);
             body.Launch(body.velocity);
 
         }

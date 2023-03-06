@@ -207,27 +207,34 @@ public class Weapon : Equipment
 
     public WeaponAttack GetAttack(AttackInput attackDir)
     {
+        WeaponAttack wepAttack = attackNeutral;
 
-
-        switch(attackDir)
+        switch (attackDir)
         {
             case AttackInput.Down:
-                return attackDown;
+                wepAttack = attackDown;
+                break;
             case AttackInput.Up:
-                return attackUp;
+                wepAttack = attackUp;
+                break;
             case AttackInput.Forward:
-                return attackForward;
+                wepAttack = attackForward;
+                break;
             case AttackInput.Backward:
-                return attackBack;
+                wepAttack = attackBack;
+                break;
             case AttackInput.Neutral:
-                return attackNeutral;
+                wepAttack = attackNeutral;
+                break;
             case AttackInput.Shoot:
-                return rangedAttack;
+                wepAttack = rangedAttack;
+                break;
             case AttackInput.AirDown:
-                return airDownAttack;
+                wepAttack = airDownAttack;
+                break;
         }
 
-        return attacks[0];
+        return Instantiate(wepAttack);
 
     }
 
@@ -239,7 +246,7 @@ public class Weapon : Equipment
         }
 
 
-        return heavyAttack;
+        return Instantiate(heavyAttack);
     }
 
     public WeaponAttack GetRangedAttack()
@@ -250,7 +257,7 @@ public class Weapon : Equipment
         }
 
 
-        return rangedAttack;
+        return Instantiate(rangedAttack);
     }
 
     public void FireProjectile(int angle = 0)

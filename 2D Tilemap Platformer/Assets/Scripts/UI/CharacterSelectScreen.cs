@@ -111,7 +111,7 @@ public class CharacterSelectScreen : MonoBehaviour
         newData.startingStats = saveData.startingStats;
         newData.levelTier = saveData.levelTier;
         newData.playerIndex = playerIndex;
-        portrait.colorSwap.SetBaseColors(newData.playerColors);
+        //portrait.colorSwap.SetBaseColors(newData.playerColors);
 
         ArcadeGameRulesMenu.instance.arcadeGameData.playerDatas[playerIndex] = newData;
         playerReady = true;

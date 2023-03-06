@@ -78,7 +78,7 @@ public class Projectile : Entity
 
             if(direction.normalized.y > 0)
             {
-                _controller.velocity.y = Mathf.Sqrt(direction.normalized.y * projectileData.projSpeed * -GambleConstants.GRAVITY);
+                _controller.velocity.y = Mathf.Sqrt(direction.normalized.y * projectileData.projSpeed * -GambleUtilities.GetGravityModifier(_controller));
 
             }
             else
@@ -437,7 +437,7 @@ public class Projectile : Entity
 
                 if (!projectileData.projectileFlags.GetFlag(ProjectileFlagType.IgnoreGravity).GetValue())
                 {
-                    _controller.velocity.y = Mathf.Sqrt(_controller.velocity.y * -GambleConstants.GRAVITY);
+                    _controller.velocity.y = Mathf.Sqrt(_controller.velocity.y * -GambleUtilities.GetGravityModifier(_controller));
                 }
 
             }

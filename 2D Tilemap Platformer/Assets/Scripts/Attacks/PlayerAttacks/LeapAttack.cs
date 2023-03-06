@@ -19,7 +19,7 @@ public class LeapAttack : WeaponAttack
         float leapTimestamp = Time.time;
 
         player.movementState = PlayerMovementState.Attacking;
-        player._controller.velocity.y = Mathf.Sqrt(2*leapHeight * -GambleConstants.GRAVITY);
+        player._controller.velocity.y = Mathf.Sqrt(2*leapHeight * -GambleUtilities.GetGravityModifier(player._controller));
         //entity.movementState = PlayerMovementState.Jump;
         
 
@@ -30,7 +30,7 @@ public class LeapAttack : WeaponAttack
         }
 
         // Enter the state
-        player._controller.velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleConstants.GRAVITY);
+        player._controller.velocity.y = -Mathf.Sqrt(2*leapWeight * -GambleUtilities.GetGravityModifier(player._controller));
         player._controller.velocity.x = 0;
         player._animator.Play(attackAnimation.name);
         player._animator.speed = attackSpeed;

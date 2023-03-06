@@ -8,14 +8,23 @@ public class Ability : ScriptableObject
 {
     protected Entity owner;
     public List<ItemRarity> itemRarities;
+
+    //Static Effects
     public List<Effect> continuousEffects;
     //public List<Effect> OnGainedEffects;
+
+    //Attack Effects
+    //public List<Effect> OnAttackEffects;
+
+    //Hit Effects
     public List<Effect> OnHitGainedEffects;
     public List<Effect> OnHitInflictEffects;
     public List<Effect> OnHurtGainedEffects;
     public List<Effect> OnHurtInflictEffects;
     public List<Effect> OnKillEffects;
-    public List<Effect> OnDieEffects;
+    public List<Effect> OnDieEffects; //Want to know who killed us maybe
+
+    //Self Effects
     public List<Effect> OnWalkEffects;
     public List<Effect> OnJumpEffects;
 

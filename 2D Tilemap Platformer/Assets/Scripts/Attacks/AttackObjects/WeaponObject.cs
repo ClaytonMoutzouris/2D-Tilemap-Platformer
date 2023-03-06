@@ -95,7 +95,8 @@ public class WeaponObject : AttackObject
         {
             foreach (Effect effect in weapon.OnKillEffects)
             {
-                effect.ApplyEffect(owner, owner, hitData);
+                Effect temp = Instantiate(effect);
+                temp.ApplyEffect(owner, owner, hitData);
             }
         }
 

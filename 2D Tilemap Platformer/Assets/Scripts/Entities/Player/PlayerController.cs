@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Rendering.Universal;
 
 public enum PlayerMovementState { Idle, Run, Jump, Falling, GrabLedge, Attacking, ClimbingLadder, Dead, Roll, Crouch, Flight, GrapplingHooking };
 
@@ -41,15 +42,14 @@ public class PlayerController : CharacterEntity
     public int playerIndex = 0;
 
     public PlayerMovementState movementState = PlayerMovementState.Idle;
-    public Light playerLight;
+    public Light2D playerLight;
 
     //Combine these
-    public ColorSwap colorSwap;
-    public ColorSwapper colorSwapper;
     public ParticleSystem deathEffect;
 
     public ContactFilter2D itemFilter;
     public ContactFilter2D powerUpFilter;
+    public ContactFilter2D interactablesFilter;
     public PlayerCreationData playerData;
     public int kills = 0;
     public CompanionManager _companionManager;
@@ -71,16 +71,17 @@ public class PlayerController : CharacterEntity
         _controller.onControllerCollidedEvent += onControllerCollider;
 		_controller.onTriggerEnterEvent += onTriggerEnterEvent;
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
-        colorSwap = new ColorSwap(spriteRenderer.material);
-        colorSwapper = new ColorSwapper(spriteRenderer.material);
+        //colorSwap = new ColorSwap(spriteRenderer.material);
+        //colorSwapper = new ColorSwapper(spriteRenderer.material);
 
     }
 
     public void SetData(PlayerCreationData data)
     {
         playerData = data;
+        ColorSwapper.SwapPlayerColors(spriteRenderer.material, playerData.playerColors);
 
-        colorSwap.SetBaseColors(playerData.playerColors);
+        //colorSwap.SetBaseColors(playerData.playerColors);
         //starting stats set in player creation data
         stats.SetStats(data.startingStats);
         
@@ -327,7 +328,22 @@ public class PlayerController : CharacterEntity
 
         if (_input.GetButtonDown(ButtonInput.Interact))
         {
+            //_equipmentManager.UseNextConsumable();
+
+            List<IInteractable> interactables = GetInteractables();
+
+            //Possibly display some tooltip here
+
+            if(interactables.Count > 0)
+            {
+                interactables[0].Interact(this);
+            }
+        }
+
+        if (_input.GetButtonDown(ButtonInput.Consumable))
+        {
             _equipmentManager.UseNextConsumable();
+
         }
 
 
@@ -918,7 +934,7 @@ public class PlayerController : CharacterEntity
         //Check here to see if we were launched, 
         if (!_controller.collisionState.launched && !_input.GetButton(ButtonInput.Jump) && _controller.velocity.y > 0.0f)
         {
-            _controller.velocity.y = Mathf.Min(_controller.velocity.y, Mathf.Sqrt(stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue()*-GambleConstants.GRAVITY));
+            _controller.velocity.y = Mathf.Min(_controller.velocity.y, Mathf.Sqrt(stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue()*-GambleUtilities.GetGravityModifier(_controller)));
         }
 
         if (_input.GetAxisValue(AxisInput.LeftStickX) > 0.5f)
@@ -977,7 +993,7 @@ public class PlayerController : CharacterEntity
 
     public void Jump(bool leap = false)
     {
-        if(jumps >= stats.GetSecondaryStat(SecondaryStatType.ExtraJumps).GetValue() && (movementState == PlayerMovementState.Jump || _controller.collisionState.becameGroundedThisFrame))
+        if(jumps >= stats.GetSecondaryStat(SecondaryStatType.ExtraJumps).GetValue() && (movementState == PlayerMovementState.Jump || !_controller.isGrounded || _controller.collisionState.becameGroundedThisFrame))
         {
             //Can't jump while jumping or in the air
             return;
@@ -985,7 +1001,7 @@ public class PlayerController : CharacterEntity
 
 
 
-        _controller.velocity.y = Mathf.Sqrt(2* stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleConstants.GRAVITY);
+        _controller.velocity.y = Mathf.Sqrt(2* stats.GetSecondaryStat(SecondaryStatType.JumpHeight).GetValue() * -GambleUtilities.GetGravityModifier(_controller));
         movementState = PlayerMovementState.Jump;
         foreach(Ability ability in abilities)
         {
@@ -1188,7 +1204,6 @@ public class PlayerController : CharacterEntity
         List<ItemObject> itemsFound = new List<ItemObject>();
 
         List<Collider2D> colliders = new List<Collider2D>();
-        BoxCollider2D box = _controller.boxCollider;
         //box.size *= 2;
         Physics2D.OverlapCollider(_controller.boxCollider, itemFilter, colliders);
         //box.size /= 2;
@@ -1211,7 +1226,6 @@ public class PlayerController : CharacterEntity
     {
 
         List<Collider2D> colliders = new List<Collider2D>();
-        BoxCollider2D box = _controller.boxCollider;
         //box.size *= 2;
         Physics2D.OverlapCollider(_controller.boxCollider, powerUpFilter, colliders);
         //box.size /= 2;
@@ -1227,6 +1241,29 @@ public class PlayerController : CharacterEntity
 
         }
 
+    }
+
+    public List<IInteractable> GetInteractables()
+    {
+        List<IInteractable> interactables = new List<IInteractable>();
+        List<Collider2D> colliders = new List<Collider2D>();
+        //box.size *= 2;
+        Physics2D.OverlapCollider(_controller.boxCollider, interactablesFilter, colliders);
+        //box.size /= 2;
+
+        for (int i = 0; i < colliders.Count; i++)
+        {
+            IInteractable interactable = colliders[i].GetComponent<IInteractable>();
+
+            if (interactable != null)
+            {
+                interactables.Add(interactable);
+            }
+
+        }
+
+
+        return interactables;
     }
 
     public void CheckForContacts()
